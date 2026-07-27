@@ -4,6 +4,11 @@ Protocol: after each lesson the student answers ① "Could you follow it alone? 
 
 ## 1-1 How the Web Works
 
+**2026-07-14** — verbatim: "i finished the 1-1 how the web works i feel good i didnt stuck in any thing so far its good"
+- Followability: no number given; reported as good, no stuck-points.
+- Stuck-points: none reported.
+- Action: none — no revision triggered.
+
 ## 1-2 Semantic HTML & Accessibility
 
 ## 1-3 Flexbox
