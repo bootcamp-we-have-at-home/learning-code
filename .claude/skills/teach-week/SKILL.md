@@ -13,7 +13,7 @@ Argument: the week number N. Produces `lessons/N-index.html` plus `lessons/N-<k>
 1. Read `lessons/STYLE.md` in full.
 2. Read ALL of `curriculum/coursebook/week-N/`: README schedule, learning-outcomes, every locally linked .md (workshops, exercises, project briefs). For externally linked GSG workshop repos, read enough (WebFetch the README) to represent them faithfully.
 3. Skim week N-1 and N+1 README + learning-outcomes: week N must end ready for N+1's assumptions.
-4. Read `MISSION.md`, `NOTES.md`, the latest `learning-records/`, and `feedback/week-<N-1>.md` if it exists — student-reported stuck-points from the previous week change how much scaffolding this week needs.
+4. Read `MISSION.md`, `NOTES.md` (including its student-history section), `AGENTS.md` (workshop-fork and review-gate notes), and `feedback/week-<N-1>.md` if it exists — student-reported stuck-points from the previous week change how much scaffolding this week needs.
 
 ## Phase 2 — Map the week
 
@@ -43,7 +43,7 @@ Turn the README schedule into a lesson list, in schedule order:
 
 ## Phase 5 — Record and hand off
 
-- If diagnosis or design decisions changed anything reusable, append a `learning-records/` entry (numbered, dated, Context/Decision/Consequences).
+- If diagnosis or design decisions changed anything reusable, fold it into the living docs: student state → `NOTES.md`, lesson-design rules → `lessons/STYLE.md`, process/infrastructure → `AGENTS.md`.
 - Report to the mentor: lesson list with curriculum-slot mapping, sequencing notes, review rounds summary (found → fixed → overruled), open questions. Commit only when the mentor says so.
 
 ## Link check snippet
