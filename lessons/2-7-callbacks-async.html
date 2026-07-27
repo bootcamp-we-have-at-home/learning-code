@@ -1,0 +1,239 @@
+<meta charset="utf-8">
+<title>2-7 — The Call Stack, Sync vs Async &amp; setTimeout</title>
+<link rel="stylesheet" href="../assets/course.css">
+
+<h1>2-7 — The Call Stack, Sync vs Async &amp; setTimeout</h1>
+<p class="subtitle">~60 minutes (26 of them a video) · Week 2, Day 2, 10:30–13:00 · Source: curriculum <a href="../curriculum/coursebook/week-2/intro-to-functions-slides.md">intro-to-functions-slides.md</a> (second half, "Funception" onward) + the scheduled video <a href="https://www.youtube.com/watch?v=8aGhZQkoFbQ">"What the heck is the event loop anyway?"</a></p>
+
+<p><strong>Why this matters:</strong> lesson 2-1 taught you <em>what</em> a callback is; this one teaches <em>when</em> your code actually runs — the difference between "the next line" and "later". Week 3 is API week: every request you fire returns later, and code that assumes otherwise silently reads the wrong value.</p>
+
+<h2>Idea 1 — Nested calls and the call stack</h2>
+<p>You have a CS degree, so this is a refresh, not a lecture. What matters is how JavaScript specifically behaves. Start with the deck's trap — three functions that only <em>log</em>, nested:</p>
+<pre><code>function foo1(x) { console.log("foo1 got:", x); }
+function foo2(x) { console.log("foo2 got:", x); }
+function foo3()  { console.log("foo3 ran"); }
+
+foo1(foo2(foo3()));   // logs "foo3 ran", then "foo2 got: undefined", then "foo1 got: undefined"</code></pre>
+<p>Two things fall out. First, <strong>order</strong>: arguments must be evaluated before the call that uses them, so the <em>innermost</em> function runs first even though <code>foo1</code> is written first. Second, <strong>the undefineds</strong>: a function with no <code>return</code> returns <code>undefined</code> (the value type from lesson 1-7), so nesting log-only functions passes nothing useful along. <code>typeof foo3()</code> is <code>"undefined"</code>, not <code>"function"</code>.</p>
+<p>Fix it by returning instead of logging — the deck's corrected chain:</p>
+<pre><code>function foo1() {
+  const x = foo2();
+  return x * 3;
+}
+
+function foo2() {
+  const y = foo3();
+  return Number(y);   // Number() is built in: turns the string "1" into the number 1
+}
+
+function foo3() {
+  return "1";         // a STRING, deliberately
+}
+
+foo1();               // 3</code></pre>
+<div class="aside">The coursebook writes <code>var x = foo2()</code>; today we write <code>const</code> — 1-7's const-by-default rule. Same behavior.</div>
+<p>While <code>foo1()</code> is running, none of these functions have finished. JavaScript tracks that with the <span class="term" data-tip="The list of function calls currently in progress. Calling pushes a frame on top; returning pops it off.">call stack</span>: calling <code>foo1</code> pushes a frame, <code>foo1</code> calls <code>foo2</code> which pushes another on top, <code>foo3</code> on top of that. <code>foo3</code> returns <code>"1"</code> and pops; <code>foo2</code> can only now compute <code>Number("1")</code>, returns <code>1</code> and pops; <code>foo1</code> returns <code>3</code>. Strictly last-in-first-out, one frame at a time — JavaScript has <em>one</em> call stack, so exactly one thing is ever running.</p>
+<p>The stack has a size limit. A function that calls itself with no exit condition pushes frames until the engine gives up with <code>RangeError: Maximum call stack size exceeded</code> — a <strong>stack overflow</strong>, which is where the website got its name.</p>
+<details class="examples"><summary>More examples (optional)</summary>
+<p>Reading a stack in DevTools. Paste this into the browser console (the F12 console from lesson 1-1):</p>
+<pre><code>function a() { b(); }
+function b() { c(); }
+function c() { throw new Error("boom"); }
+a();</code></pre>
+<p>The error's stack trace prints <code>c</code>, then <code>b</code>, then <code>a</code> — top of stack first. That trace <em>is</em> the call stack at the moment it blew up, which is why reading traces bottom-up tells you how you got there.</p>
+<p>And the overflow, on purpose (harmless — the engine stops it):</p>
+<pre><code>function forever() { return forever(); }
+forever();   // RangeError: Maximum call stack size exceeded</code></pre>
+</details>
+<p class="read-more"><strong>Read more:</strong> <a href="https://developer.mozilla.org/en-US/docs/Glossary/Call_stack">MDN — call stack</a> · <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">MDN — Number()</a></p>
+
+<h2>Idea 2 — Callbacks more than one layer deep</h2>
+<p>From 2-1: a callback is a function passed as an argument, and you pass the function itself — <code>secondFunction(firstFunction)</code>, no parentheses on <code>firstFunction</code>. That works for one layer:</p>
+<pre><code>function firstFunction() {
+  console.log("I'm the first function");
+}
+
+function secondFunction(callback) {
+  callback();
+  console.log("I'm the second function, I expect a callback as input");
+}
+
+function thirdFunction(callback) {
+  callback();
+  console.log("I'm the third function, I also expect a callback as input");
+}
+
+secondFunction(firstFunction);   // first, then second — works</code></pre>
+<p>Now try two layers the obvious way, and watch it break:</p>
+<pre><code>thirdFunction(secondFunction(firstFunction));
+// logs first, then second... then TypeError: callback is not a function</code></pre>
+<p>Same rule as Idea 1: the argument is evaluated first. <code>secondFunction(firstFunction)</code> <em>runs</em> (logging both lines) and returns <code>undefined</code>, so <code>thirdFunction</code> receives <code>undefined</code> and tries to call it. The fix is to hand <code>thirdFunction</code> something callable that does that work <em>later</em> — wrap it:</p>
+<pre><code>thirdFunction(() =&gt; secondFunction(firstFunction));
+// first, second, third — in that order</code></pre>
+<p><strong>The load-bearing takeaway:</strong> to go more than one layer deep in callbacks, wrap the inner call in an anonymous function. You will use this in every step of the rest of this lesson, and in week 3's callback workshop.</p>
+<div class="aside">The coursebook writes the wrapper as <code>function () { secondFunction(firstFunction) }</code>; today we write the arrow <code>() =&gt; secondFunction(firstFunction)</code>. Identical here — you'll see both forms in real code.</div>
+<p>Callbacks can also take arguments — the caller decides what to pass them:</p>
+<pre><code>function firstFunction(number) {
+  console.log("I'm the first function, I expect an input:", number);
+}
+
+function secondFunction(callback) {
+  const number = 1;
+  callback(number);        // secondFunction supplies the argument
+}
+
+secondFunction(firstFunction);      // "…input: 1"
+secondFunction(firstFunction(1));   // TypeError: callback is not a function</code></pre>
+<p>That last line breaks for the by-now-familiar reason: <code>firstFunction(1)</code> runs immediately and returns <code>undefined</code>. You never call a callback yourself when handing it over — you pass the name, and let the receiving function decide when and with what to invoke it.</p>
+<details class="examples"><summary>More examples (optional)</summary>
+<p>You have already written wrapped callbacks without noticing. In 1-8, <code>nums.map(n =&gt; n * 2)</code> passes an arrow because <code>n * 2</code> alone would be evaluated on the spot — the arrow is exactly the "do it later, with the argument you give me" wrapper from this section.</p>
+<p>Three layers, same pattern, nested:</p>
+<pre><code>thirdFunction(() =&gt; secondFunction(() =&gt; firstFunction()));</code></pre>
+<p>And the DOM version you met in 1-10 — the browser is the caller, and it passes the event object into your callback whenever the click happens:</p>
+<pre><code>button.addEventListener("click", (event) =&gt; {
+  console.log("clicked", event.target);   // you pass the function; the browser calls it later
+});</code></pre>
+</details>
+<p class="read-more"><strong>Read more:</strong> <a href="https://javascript.info/callbacks">javascript.info — callbacks</a> · <a href="https://developer.mozilla.org/en-US/docs/Glossary/Callback_function">MDN — callback function</a></p>
+
+<h2>Idea 3 — Synchronous vs asynchronous, and setTimeout</h2>
+<p>Everything so far was <strong>synchronous</strong>: each action completes before the next one starts, and the stack empties in order. That is JavaScript's default and its only mode <em>on the stack</em>.</p>
+<p><strong>Asynchronous</strong> code doesn't wait. Concretely: your page asks a server for a list of products (week 3's job). The response takes 400&nbsp;ms. If that wait were synchronous, the single call stack would be <span class="term" data-tip="Occupying the one call stack so nothing else — rendering, clicks, timers — can run until it finishes.">blocked</span> for 400&nbsp;ms — no clicks, no scrolling, frozen page. Instead you hand the request a callback and carry on; when the data arrives, your callback is run.</p>
+<p>Which raises the question the video answers: if there is only one call stack, <em>who</em> runs the callback later, and when exactly?</p>
+<div class="aside"><strong>Watch this now — it is a scheduled part of the curriculum, 26 minutes, and it is the single best explanation of this topic that exists:</strong> Philip Roberts, <a href="https://www.youtube.com/watch?v=8aGhZQkoFbQ">"What the heck is the event loop anyway?"</a> (JSConf EU). He builds a live visualizer of the call stack, the queue, and the loop. Watch it before the do-it-for-real steps below; they assume it.</div>
+<p>The short version, so the vocabulary is anchored: the browser (not the JavaScript language) provides timers, network requests, and DOM events. When you call <code>setTimeout</code>, the browser starts a timer <em>outside</em> the stack and <code>setTimeout</code> returns immediately. When the timer finishes, your callback is put in a <span class="term" data-tip="The line of callbacks waiting to run. The event loop moves the first one onto the call stack, but only when the stack is empty.">callback queue</span>. The <span class="term" data-tip="The loop that checks: is the call stack empty? If yes, take the first callback from the queue and push it onto the stack.">event loop</span> pushes queued callbacks onto the stack <em>only when the stack is empty</em> — that is, only when all your currently-running synchronous code has finished.</p>
+<pre><code>setTimeout(() =&gt; console.log("later"), 1000);   // returns instantly; logs after ~1s
+console.log("now");                             // runs first — "now", then "later"</code></pre>
+<p>Two consequences worth memorizing. The delay is a <em>minimum</em>, not a promise: <code>setTimeout(fn, 0)</code> still runs after all your synchronous code, because the queue is only drained on an empty stack. And a value produced inside an async callback does not exist yet on the line after the call — the deck's trap, which you'll run yourself in step 5.</p>
+<details class="examples"><summary>More examples (optional)</summary>
+<p>Two timers plus synchronous work — predict, then run:</p>
+<pre><code>console.log("1");
+setTimeout(() =&gt; console.log("2"), 500);
+setTimeout(() =&gt; console.log("3"), 0);
+console.log("4");
+// 1, 4, 3, 2 — both timers wait for the stack to empty; then 0ms beats 500ms</code></pre>
+<p>Blocking, made visible. This one freezes the tab for ~3 seconds — the timer callback cannot run even though its 0&nbsp;ms elapsed long ago, because the stack is busy:</p>
+<pre><code>setTimeout(() =&gt; console.log("I waited for the stack"), 0);
+const stop = Date.now() + 3000;
+while (Date.now() &lt; stop) {}     // busy-wait, blocks everything
+console.log("blocking finished");</code></pre>
+<p>The log order is "blocking finished", then "I waited for the stack" — the exact demo the video draws.</p>
+</details>
+<p class="read-more"><strong>Read more:</strong> <a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/setTimeout">MDN — setTimeout</a> · <a href="https://javascript.info/event-loop">javascript.info — the event loop</a> · <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise">MDN — Promises</a> (the modern replacement for nested callbacks; week 3 territory)</p>
+
+<h2>Do it for real (~40 min, 26 of them the video)</h2>
+<p>No new project folder for this lesson — everything runs in a REPL. Use either:</p>
+<ul>
+  <li><strong>the browser console</strong> — F12 from lesson 1-1, "Console" tab. Multi-line snippets: press Shift+Enter for a new line, Enter to run. Chrome may ask you to type <code>allow pasting</code> once before it accepts a pasted block.</li>
+  <li><strong>the Node REPL</strong> — from lesson 2-2: run <code>node</code> in your terminal, and the prompt changes to <code>&gt;</code>. Type a line, press Enter, and it prints the value. Exit with <code>.exit</code> or Ctrl+D.</li>
+</ul>
+<p>Predict the output <em>before</em> pressing Enter on every step — that prediction is the whole exercise.</p>
+<ol class="steps">
+  <li>The Oops version — nested log-only functions:
+<pre><code>function foo1(x) { console.log("foo1 got:", x); }
+function foo2(x) { console.log("foo2 got:", x); }
+function foo3()  { console.log("foo3 ran"); }
+
+foo1(foo2(foo3()));</code></pre>
+  <em>You should see</em> three lines in the order <code>foo3 ran</code>, <code>foo2 got: undefined</code>, <code>foo1 got: undefined</code> — innermost first, and nothing useful passed along.</li>
+  <li>The corrected, return-based chain. Redefine all three (a fresh console tab avoids clashing with step 1's definitions):
+<pre><code>function foo3() { return "1"; }
+function foo2() { const y = foo3(); return Number(y); }
+function foo1() { const x = foo2(); return x * 3; }
+
+foo1();          // ?
+typeof foo3();   // ?</code></pre>
+  <em>Success check:</em> <code>foo1()</code> returns <code>3</code>, and <code>typeof foo3()</code> is <code>"string"</code> — not <code>"undefined"</code> like step 1's version.</li>
+  <li>Break the two-layer callback, then fix it. Define the three functions from Idea 2, then run the broken line first:
+<pre><code>thirdFunction(secondFunction(firstFunction));   // logs two lines, then throws</code></pre>
+  <em>You should see</em> the first and second functions' logs, then <code>TypeError: callback is not a function</code>. Now the fix:
+<pre><code>thirdFunction(() =&gt; secondFunction(firstFunction));</code></pre>
+  <em>Success check:</em> three lines, first → second → third, no error.</li>
+  <li>Watch <a href="https://www.youtube.com/watch?v=8aGhZQkoFbQ">"What the heck is the event loop anyway?"</a> — 26 minutes, all of it. <em>Success check:</em> without re-reading Idea 3, you can say out loud what the call stack, the callback queue, and the event loop each do, and why <code>setTimeout(fn, 0)</code> is not "run now".</li>
+  <li>The sync/async mixing trap from the deck. Run these three lines <em>as one block</em>, then wait 3 seconds:
+<pre><code>function asyncAddOne(number, callback) {
+  setTimeout(() =&gt; callback(number + 1), 3000);
+}
+
+let x = 0;
+asyncAddOne(10, (newValue) =&gt; { x = newValue; });
+console.log(x);   // 0 or 11?</code></pre>
+  <em>You should see</em> <code>0</code>. <code>asyncAddOne</code> returned instantly, having only <em>scheduled</em> the callback; <code>console.log(x)</code> ran while the stack was still busy, three seconds before <code>x</code> was assigned. (The coursebook uses <code>var x</code>; <code>let</code> is 1-7's reassignable form.)</li>
+  <li>Prove the value does arrive — move the log <em>inside</em> the callback:
+<pre><code>let y = 0;
+asyncAddOne(10, (newValue) =&gt; { y = newValue; console.log("inside callback:", y); });</code></pre>
+  <em>Success check:</em> nothing for ~3 seconds, then <code>inside callback: 11</code>. The rule: to use an async result, put the code that uses it inside the callback.</li>
+  <li>Confirm that zero is not zero:
+<pre><code>setTimeout(() =&gt; console.log("timeout 0"), 0);
+console.log("synchronous");</code></pre>
+  <em>You should see</em> <code>synchronous</code> first, then <code>timeout 0</code>.</li>
+  <li><strong>Capstone — the deck's challenge.</strong> Define both functions exactly as given (don't modify them), then chain them so the final log is <code>(10 + 1) * 3</code>:
+<pre><code>function asyncAddOne(number, callback) {
+  setTimeout(() =&gt; callback(number + 1), 3000);
+}
+
+function asyncMultiplyThree(number, callback) {
+  console.log("result from first function:", number);
+  setTimeout(() =&gt; callback(number * 3), 3000);
+}
+
+// your code here: log the final result</code></pre>
+  <em>Success check:</em> after ~3 seconds you see <code>result from first function: 11</code>, and ~3 seconds later <code>final result: 33</code>. Give it a real attempt before opening the reveal — this is the exact shape week 3's API code takes.
+<details class="reveal"><summary>Reveal the solution</summary>
+<pre><code>asyncAddOne(10, (newNumber) =&gt; {
+  asyncMultiplyThree(newNumber, (result) =&gt; {
+    console.log("final result:", result);
+  });
+});</code></pre>
+<p>Read it as Idea 2's rule applied twice: you can't write <code>asyncMultiplyThree(asyncAddOne(10), …)</code>, because <code>asyncAddOne</code> returns <code>undefined</code> immediately. The only place <code>11</code> exists is inside the first callback — so the second call has to happen in there. Nesting callbacks like this is why the pattern is nicknamed "callback hell"; promises (week 3) are the cure.</p>
+</details></li>
+  <li>Close the REPL when you're done, so your terminal is a shell again and not a JavaScript prompt (the next lesson starts with <code>cd ~/code</code>, which a Node REPL would read as JavaScript and reject):
+<pre><code>.exit                            # Node REPL only; Ctrl+D does the same</code></pre>
+  <em>Success check:</em> the <code>&gt;</code> prompt is gone and your normal shell prompt is back. (Browser-console students: just close DevTools with F12.)</li>
+</ol>
+
+<h2>Check yourself — predict the output</h2>
+<pre><code>console.log("A");
+
+setTimeout(() =&gt; console.log("B"), 0);
+
+function slow() { return "C"; }
+console.log(slow());
+
+setTimeout(() =&gt; console.log("D"), 10);</code></pre>
+<p>Write down the four letters in the order they log, and one sentence saying why.</p>
+<details class="reveal"><summary>Reveal</summary>
+<p><code>A</code>, <code>C</code>, <code>B</code>, <code>D</code>. <code>A</code> and <code>C</code> are synchronous, so they run to completion on the call stack first — <code>slow()</code> pushes and pops a frame before <code>console.log</code> prints <code>C</code>. Both timers were handed to the browser, and their callbacks only reach the stack once it is empty: <code>B</code> (0&nbsp;ms) was queued before <code>D</code> (10&nbsp;ms), so it goes first.</p>
+</details>
+
+<div class="quiz"
+  data-q="You want thirdFunction to run secondFunction, which runs firstFunction. Which line works?"
+  data-opts='["thirdFunction(secondFunction, firstFunction) — pass both and let it sort them out",
+              "thirdFunction(() =&gt; secondFunction(firstFunction)) — the wrapper defers the inner call",
+              "thirdFunction(secondFunction(firstFunction)) — reads left to right in call order"]'
+  data-answer="1"
+  data-why="Arguments are evaluated before the call, so thirdFunction(secondFunction(firstFunction)) runs secondFunction immediately and hands thirdFunction its undefined return value. Passing both as separate arguments just drops the second, since the function takes one callback. More than one layer deep means wrapping in an anonymous function."></div>
+
+<div class="quiz"
+  data-q="fetchPrice(id, callback) gets a price from a server and calls your callback with it. Where must the code that displays the price live?"
+  data-opts='["On the line after fetchPrice(...), since JavaScript waits for it to finish",
+              "In a setTimeout of 1000ms after fetchPrice, to give the server time",
+              "Inside the callback — that is the only place the price exists"]'
+  data-answer="2"
+  data-why="fetchPrice returns immediately; the price arrives later, as the callback&apos;s argument. Guessing a delay with setTimeout is a race you will lose on a slow network."></div>
+
+<h2>Go deeper</h2>
+<p><strong>Primary source:</strong> the second half of the curriculum's <a href="../curriculum/coursebook/week-2/intro-to-functions-slides.md">intro-to-functions slides</a> (from "Funception" to the end) — every example above comes from it, modernized. The deck's repl.it links are long dead; your console is the replacement. Then rewatch the last five minutes of <a href="https://www.youtube.com/watch?v=8aGhZQkoFbQ">the event loop talk</a>, where Philip Roberts runs the queue at slow motion.</p>
+
+<p><strong>Next up:</strong> you can now explain <em>when</em> code runs. Lesson 2-8 is about keeping functions predictable so tests stay easy — pure functions.</p>
+
+<div class="feedback-ask">Finished? Tell your teacher (the agent) two things: ① Could you follow this lesson alone — 1 to 5? ② Where did you get stuck, if anywhere? Answers are recorded in <code>feedback/week-2.md</code> and improve the lesson for the next student.</div>
+
+<div class="footer-nav">
+Reference: <a href="../reference/javascript-cheatsheet.html">JavaScript cheat sheet</a> · Week map: <a href="2-index.html">Week 2 index</a><br>
+Previous: <a href="2-6-es6-refresh-challenge.html">2-6 ES6 Refresh &amp; Challenge</a> · Next: <a href="2-8-pure-functions.html">2-8 Pure Functions</a><br>
+Stuck or curious? Ask your teacher (the agent). "Why does a promise callback jump the queue ahead of setTimeout?" is a great follow-up.
+</div>
+
+<script src="../assets/quiz.js"></script>
+<script src="../assets/tooltip.js"></script>

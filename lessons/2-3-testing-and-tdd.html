@@ -1,0 +1,193 @@
+<meta charset="utf-8">
+<title>2-3 — Testing &amp; TDD: Your First Jest Test</title>
+<link rel="stylesheet" href="../assets/course.css">
+
+<h1>2-3 — Testing &amp; TDD: Your First Jest Test</h1>
+<p class="subtitle">~45 minutes · Week 2, Day 1, 11:30–12:00 · Source: curriculum <a href="https://github.com/bootcamp-we-have-at-home/testing-tdd-intro">testing-tdd-intro</a></p>
+
+<p><strong>Why this matters:</strong> the curriculum's own line for this week is "refactoring your code without tests in place is like playing Russian roulette" (<a href="../curriculum/coursebook/week-2/learning-outcomes.md">learning-outcomes.md</a>). Everything you build from here — the week project, the API week, every job — gets changed after it's written, and tests are what let you change it without fear.</p>
+
+<h2>Idea 1 — What a test is, and what "unit" means</h2>
+<p>The curriculum defines it plainly: <em>testing is the process of executing your code to check it does what it's supposed to do</em>. You have been testing all week — every time you opened the F12 console from lesson 1-1, called a function, and eyeballed the result. That's a manual test: it works, and it evaporates the moment you close the tab.</p>
+<p>An <span class="term" data-tip="A test that exercises one small piece of code — usually a single function — in isolation.">automated unit test</span> is that same check written as code, so it can be re-run in one second, forever. Here is the idea with no framework at all — pure JavaScript you could already write after 1-7:</p>
+<pre><code>const double = (num) =&gt; num * 2;
+
+const testDouble = () =&gt; {
+  const actual = double(2);        // run the thing
+  const expected = 4;              // say what it should be
+  if (actual !== expected) {       // === / !== comparison from 1-7
+    console.log(actual + " should equal " + expected + " ✗");
+  } else {
+    console.log("Test passed ✔");
+  }
+};</code></pre>
+<p>A framework like Jest is only that pattern, prewritten and prettier. "Unit" means the thing under test is one small piece — a single function such as <code>double</code>. Its opposite is an <span class="term" data-tip="A test that checks several pieces working together — e.g. a form, its validation, and the storage it writes to.">integration test</span>, which checks that several pieces fit together. This week is unit tests only: small functions, called directly, with a known answer.</p>
+<div class="aside">The coursebook writes its examples with <code>function</code> declarations and <code>var</code>; today we write <code>const</code> + arrow functions (from 1-7 and 1-8) — same behavior, less noise.</div>
+<details class="examples"><summary>More examples (optional)</summary>
+<p>Three checks on the same function, written the manual way — notice that the only things changing are the input and the expected value:</p>
+<pre><code>const shout = (word) =&gt; word.toUpperCase() + "!";
+
+shout("hi")     // expect "HI!"    — normal case
+shout("")       // expect "!"      — empty input, the classic edge case
+shout("Hi!")    // expect "HI!!"   — does it double the punctuation? decide, then test</code></pre>
+<p>Writing them out is how you discover that the third case is a <em>requirements question</em>, not a coding question. That discovery-before-code effect is the whole argument for TDD in Idea 2.</p>
+<p>And the unit/integration line in one concrete pair: "does <code>calculateTotal([2, 3])</code> return 5?" is a unit test; "does clicking <em>Add to cart</em> update the on-screen total <em>and</em> what's saved in the browser?" is an integration test.</p>
+</details>
+<p class="read-more"><strong>Read more:</strong> <a href="https://martinfowler.com/articles/practical-test-pyramid.html">Martin Fowler — the practical test pyramid</a> (unit vs integration vs end-to-end vs regression, with when to use each) · <a href="https://jestjs.io/docs/using-matchers">Jest — other matchers</a> · <a href="https://medium.com/javascript-scene/what-every-unit-test-needs-f6cd34d9836d">5 questions every unit test must answer</a> (the curriculum's own resource)</p>
+
+<h2>Idea 2 — TDD and the red-green-refactor cycle</h2>
+<p>Test-Driven Development inverts the obvious order: <strong>you write the test before the function exists</strong>. That sounds backwards until you notice what it forces — to write <code>expect(add(2, 2)).toBe(4)</code> you must first decide the function's name, its arguments, and its return value. Requirements get settled while they are still cheap to change.</p>
+<p>The loop has three beats:</p>
+<table>
+  <tr><th>Beat</th><th>You do</th><th>Why</th></tr>
+  <tr><td><strong>Red</strong></td><td>Write one failing test</td><td>Proves the test can fail — a test that passes before the code exists is testing nothing</td></tr>
+  <tr><td><strong>Green</strong></td><td>Write the simplest code that passes it</td><td>Smallest step that could work; no extra features</td></tr>
+  <tr><td><strong>Refactor</strong></td><td>Tidy the code while the test stays green</td><td>Safe cleanup — the test tells you the second you break something</td></tr>
+</table>
+<p>Then repeat for the next requirement. A good test also reads like a bug report, answering three questions: <em>what is being tested</em>, <em>what should it do</em>, <em>what did it actually do</em>. Jest gives you all three for free — the first two from the name you type, the third from its failure output.</p>
+<details class="examples"><summary>More examples (optional)</summary>
+<p>One full cycle in miniature, for a <code>isEven</code> function:</p>
+<pre><code>// RED — the test exists, the function does not
+test("2 is even", () =&gt; {
+  expect(isEven(2)).toBe(true);
+});
+// run it: fails, "isEven is not defined"
+
+// GREEN — the simplest thing that passes
+const isEven = (n) =&gt; true;        // yes, really: it passes the one test you wrote
+
+// RED again — add the case that exposes the cheat
+test("3 is not even", () =&gt; {
+  expect(isEven(3)).toBe(false);
+});
+
+// GREEN — now the real implementation is forced
+const isEven = (n) =&gt; n % 2 === 0;</code></pre>
+<p>That deliberately silly <code>=&gt; true</code> step is a real TDD teaching move: it shows that your tests, not your intentions, define what "done" means. If a stupid implementation passes, you are missing a test.</p>
+</details>
+<p class="read-more"><strong>Read more:</strong> <a href="http://blog.cleancoder.com/uncle-bob/2014/12/17/TheCyclesOfTDD.html">Uncle Bob — the cycles of TDD</a> · <a href="http://codesolid.com/post/pros-and-cons-of-test-driven-development/">pros and cons of TDD</a> (both from the week's <a href="../curriculum/coursebook/week-2/resources.md">resources.md</a>)</p>
+
+<h2>Do it for real (~25 min)</h2>
+<p>You'll build a tiny project from nothing, write a test for a function that doesn't exist, watch it fail, and then make it pass. Everything here uses <code>npm init</code> and <code>npm install</code> exactly as lesson 2-2 taught them, and the terminal moves (<code>mkdir</code>, <code>cd</code>, <code>ls</code>, <code>cat</code>) from 1-4.</p>
+<ol class="steps">
+  <li>Make the project folder inside your week-2 workspace (created in 2-2) and move into it:
+<pre><code>mkdir -p ~/code/week-2/jest-practice   # -p: create parents if missing
+cd ~/code/week-2/jest-practice
+pwd                                    # confirm where you are</code></pre>
+  <em>You should see</em> a path ending in <code>/code/week-2/jest-practice</code>.</li>
+
+  <li>Create the <code>package.json</code> that marks this folder as an npm project (2-2):
+<pre><code>npm init -y     # -y accepts every default instead of prompting
+cat package.json</code></pre>
+  <em>You should see</em> a small JSON object with <code>"name": "jest-practice"</code> and <code>"version": "1.0.0"</code>.</li>
+
+  <li>Install Jest as a <span class="term" data-tip="A package needed only while developing and testing — not by the finished program when it runs.">dev dependency</span>:
+<pre><code>npm install -D jest     # -D  = --save-dev
+                        # "19 high severity vulnerabilities" at the end is expected
+ls                      # package.json, package-lock.json, node_modules</code></pre>
+  <em>You should see</em> npm report roughly <code>added 294 packages</code>, then a new <code>node_modules</code> folder and <code>"jest"</code> listed under <code>devDependencies</code> in <code>package.json</code>.
+  <div class="aside">npm ends every Jest install with an audit summary — currently <code>19 high severity vulnerabilities</code>. It is counting advisories in small packages that Jest itself depends on, not in anything you wrote, and none of them run in a browser or on a server here. <strong>Never run the <code>npm audit fix --force</code> npm suggests</strong>: "force" gives it permission to install a different major version of Jest, which is how a working test setup breaks. Expect this same summary in every lesson that installs Jest this week.</div></li>
+
+  <li>Open this folder in your editor — File → Open Folder → <code>~/code/week-2/jest-practice</code>. It probably still shows a week-1 project, and autosave is off, so you must <strong>save every file</strong> before running anything.
+  <p>Then edit <code>package.json</code> so the <code>scripts</code> block reads:</p>
+<pre><code>"scripts": {
+  "test": "jest"
+},</code></pre>
+  Save the file. <em>Success check:</em> <code>cat package.json</code> shows <code>"test": "jest"</code> where the generated placeholder used to be.</li>
+
+  <li>Now the TDD part: write the <strong>test first</strong>. Create <code>add.test.js</code> with exactly this, and save:
+<pre><code>const add = require("./add");          // pull in the file we haven't written yet
+
+test("adds two numbers", () =&gt; {       // name = "what should it do?"
+  expect(add(2, 2)).toBe(4);           // run it, assert the result
+});</code></pre>
+  <em>Then check what's on disk:</em>
+<pre><code>ls</code></pre>
+  <em>You should see</em> a new <code>add.test.js</code> alongside <code>package.json</code>, <code>package-lock.json</code> and <code>node_modules</code> — and <strong>no <code>add.js</code></strong>. That missing file is intentional.</li>
+
+  <li>Run the tests and <strong>get red on purpose</strong>:
+<pre><code>npm test        # runs the "test" script, i.e. jest</code></pre>
+  <em>You should see</em> a failure naming exactly what's missing — <code>Cannot find module './add' from 'add.test.js'</code>, and a red summary line <code>Test Suites: 1 failed, 1 total</code> with <code>Tests: 0 total</code>. (Zero tests, not one failed test: the <code>require</code> blew up before Jest ever got to register your <code>test(...)</code> block — that is what a missing-module red looks like.) This is the method working, not you failing: red proves the test is really checking something.</li>
+
+  <li>Green. Create <code>add.js</code> with the simplest thing that could pass, and save:
+<pre><code>const add = (a, b) =&gt; a + b;
+
+module.exports = add;      // hand this value to whoever require()s this file</code></pre>
+  <em>Then:</em>
+<pre><code>npm test</code></pre>
+  <em>You should see</em> <code>✓ adds two numbers</code> and <code>Tests: 1 passed, 1 total</code>. You have completed one red-green cycle.</li>
+
+  <li>Feel the safety net — break the code deliberately and watch the test catch it. Change <code>add.js</code> to <code>(a, b) =&gt; a * b</code>, save, then:
+<pre><code>npm test        # predict: does the test catch the sabotage?</code></pre>
+  <em>You should see</em> it still passes — because <code>2 * 2</code> is also 4. That is a missing test, not a working function. Add a second case to <code>add.test.js</code>, save, and run again:
+<pre><code>test("adds two different numbers", () =&gt; {
+  expect(add(2, 3)).toBe(5);
+});</code></pre>
+  <em>Success check:</em> Jest now reports <code>Expected: 5 / Received: 6</code> — the bug report writes itself. Restore <code>a + b</code>, save, and confirm both tests pass.</li>
+
+  <li>Meet the two matchers you'll otherwise get wrong. Add to <code>add.test.js</code>, save, and run <code>npm test</code>:
+<pre><code>test("toBe vs toEqual", () =&gt; {
+  expect([1, 2]).toEqual([1, 2]);      // passes — compares CONTENTS
+  expect([1, 2]).toBe([1, 2]);         // FAILS  — compares identity, like ===
+});</code></pre>
+  This is the by-reference comparison from 1-7: two separately-built arrays are never <code>===</code> to each other. <em>You should see</em> the <code>toEqual</code> line pass and the <code>toBe</code> line fail with Jest suggesting "use toEqual". Delete this test when you've seen it, save, and get back to green.
+  <div class="aside">Rule of thumb: <code>toBe</code> for numbers, strings, booleans; <code>toEqual</code> for arrays and objects; <code>toBeNull</code> when the answer should literally be <code>null</code>. The rest live on the cheat sheet — look them up, don't memorize them.</div></li>
+</ol>
+
+<h2>Check yourself — predict the output</h2>
+<p>A folder contains these two files, both saved, with Jest installed and <code>"test": "jest"</code> set:</p>
+<pre><code>// greet.js
+const greet = (name) =&gt; {};
+module.exports = greet;
+
+// greet.test.js
+const greet = require("./greet");
+
+test("greets by name", () =&gt; {
+  expect(greet("Amjad")).toBe("Hello, Amjad!");
+});</code></pre>
+<p>You run <code>npm test</code>. Does it pass or fail, and what does Jest report?</p>
+<details class="reveal"><summary>Reveal</summary>
+<p>It <strong>fails</strong> — red, one test failed. The <code>require</code> works fine (the file exists this time), the function runs fine, but a function body of <code>{}</code> returns <code>undefined</code>, so Jest prints roughly:</p>
+<pre><code>● greets by name
+
+  expect(received).toBe(expected)
+
+  Expected: "Hello, Amjad!"
+  Received: undefined</code></pre>
+<p>Two failure shapes to recognize from now on: <em>Cannot find module</em> = the file or export is missing; <em>Expected/Received</em> = the file is there and the logic is wrong. And the green version is one line: <code>const greet = (name) =&gt; `Hello, ${name}!`;</code> — the template literal from 1-10.</p>
+</details>
+
+<div class="quiz"
+  data-q="You write a new test and it passes immediately, before you write any implementation. What should you conclude?"
+  data-opts='["Great, the feature already works; move on to the next test",
+              "Jest cached the result; delete node_modules and rerun",
+              "Something is wrong — a test that never went red might not be testing anything"]'
+  data-answer="2"
+  data-why="Red first is what proves the test can fail. A test that is green before the code exists is usually asserting the wrong thing — or nothing at all."></div>
+
+<div class="quiz"
+  data-q="A function returns { name: &quot;Amjad&quot;, hours: 6 }. Which assertion passes?"
+  data-opts='["expect(result).toEqual({ name: &quot;Amjad&quot;, hours: 6 })",
+              "expect(result).toBe({ name: &quot;Amjad&quot;, hours: 6 })",
+              "expect(result).toBeNull()"]'
+  data-answer="0"
+  data-why="toEqual compares contents; toBe is === , and two separately-created objects are never === (the reference comparison from 1-7). toBeNull only passes for literal null."></div>
+
+<h2>Go deeper</h2>
+<p><strong>Primary source:</strong> the curriculum's <a href="https://github.com/bootcamp-we-have-at-home/testing-tdd-intro">testing-tdd-intro</a> — read it end to end now that the words mean something; its <code>describe(...)</code> template is the "test as bug report" idea in code. Then the week's own resource, <a href="https://medium.com/javascript-scene/what-every-unit-test-needs-f6cd34d9836d">5 questions every unit test must answer</a>.</p>
+
+<p><strong>Research pointer (optional).</strong> The week's <a href="../curriculum/coursebook/week-2/research-afternoon.md">research afternoon</a> asks two questions this lesson only half-answers: unit vs integration vs end-to-end testing (the Fowler pyramid linked above), and <em>how Jest compares to other frameworks</em> — <a href="https://qunitjs.com/">QUnit</a> and <a href="https://github.com/tape-testing/tape">Tape</a> are the two the curriculum names, and the interesting detail is what each calls the matchers you just met (<code>equal</code> for identity vs <code>deepEqual</code> for contents — Jest's <code>toBe</code> and <code>toEqual</code> under different names).</p>
+
+<p><strong>Next:</strong> you have the cycle — 2-4 makes you live in it for two hours.</p>
+
+<div class="feedback-ask">Finished? Tell your teacher (the agent) two things: ① Could you follow this lesson alone — 1 to 5? ② Where did you get stuck, if anywhere? Answers are recorded in <code>feedback/week-2.md</code> and improve the lesson for the next student.</div>
+
+<div class="footer-nav">
+Reference: <a href="../reference/npm-jest-tdd-cheatsheet.html">npm, Jest &amp; TDD cheat sheet</a> · Week map: <a href="2-index.html">Week 2 index</a><br>
+Previous: <a href="2-2-npm.html">2-2 npm</a> · Next: <a href="2-4-fizzbuzz-tdd-workshop.html">2-4 FizzBuzz TDD Workshop</a><br>
+Stuck or curious? Ask your teacher (the agent). "How much of my code should be tested?" is a great follow-up.
+</div>
+
+<script src="../assets/quiz.js"></script>
+<script src="../assets/tooltip.js"></script>

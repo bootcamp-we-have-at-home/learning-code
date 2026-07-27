@@ -1,0 +1,306 @@
+<meta charset="utf-8">
+<title>2-10 — Week Project: Ecommerce App</title>
+<link rel="stylesheet" href="../assets/course.css">
+
+<h1>2-10 — Week Project: Ecommerce App (Tested, Pure, Persistent)</h1>
+<p class="subtitle">~2.5 days — most of the week's hours · Day 2 16:30 intro, Days 3–4 build, Day 5 09:00 code review → 10:00 respond to issues → 11:00 presentation (solo: written) · Source: curriculum <a href="../curriculum/coursebook/week-2/project.md">week-2 project brief</a> + the web-storage topic from <a href="../curriculum/coursebook/week-2/research-afternoon.md">research-afternoon.md</a></p>
+
+<p><strong>Why this matters:</strong> this is the first app in the mission with a <em>tested</em> core — every rule you wrote a Jest test for in 2-3/2-4 now guards real shopping-cart logic. It is also the portfolio piece that shows you can design code to be testable, not just make it work.</p>
+
+<h2>The brief (from the curriculum, in full)</h2>
+<p>An ecommerce app with <strong>two flows</strong>. These are the brief's user stories, copy-edited only for typos (the original writes "I want to able to search for item…"); nothing has been added or removed. They are your definition of scope: nothing more is required, nothing here is optional.</p>
+
+<p><strong>1. Buyer / Customer</strong></p>
+<ul>
+  <li>I want to see all of the items available on the store</li>
+  <li>I want to be able to search for an item on the store by the name</li>
+  <li>I want to be able to filter items by the price or by category</li>
+  <li>I want to add an item to my cart</li>
+  <li>I want to be able to see the items inside my cart</li>
+  <li>I want to be able to delete any item inside my cart</li>
+  <li>I want to be able to see the total price of the items inside my cart</li>
+  <li>I want to be able to display the items either as a grid or a list</li>
+</ul>
+
+<p><strong>2. Seller</strong></p>
+<ul>
+  <li>I want to be able to add my product (name, detail, price, image [link], and category) — the <strong>category must be a dropdown</strong> (a list of options), not a free-text field</li>
+  <li>I want to be able to see all of my products</li>
+  <li>I want to be able to search through my products</li>
+  <li>I want to be able to delete my own product</li>
+  <li>I want to be able to edit all the information of my product</li>
+</ul>
+
+<p><strong>Important note — the hard requirements.</strong> The brief lists three bullets; the third packs two separate requirements, so it is split in two here:</p>
+<ul>
+  <li>You should have pure functions</li>
+  <li>You should write a test for every function you have</li>
+  <li>The app should be responsive</li>
+  <li>…and should save its state even after closing the page (<code>local storage</code>)</li>
+</ul>
+<p><strong>How "a test for every function" is satisfied here.</strong> Taken literally it is impossible — you cannot meaningfully unit-test a function whose whole job is to paint the DOM. The architecture in Idea 1 is what makes it achievable: <em>every function that decides anything lives in <code>src/store.js</code> and has a test</em>, and <code>src/app.js</code> is kept so thin that it contains no decisions left to test. That is the rule this project is marked against, and it is the same rule the done-checklist at the bottom states. If you find yourself wanting to test something in <code>app.js</code>, that is the signal to move the logic into <code>store.js</code>.</p>
+
+<p><strong>The brief's hints.</strong> A product is an object (the object literal shape from lesson 1-10) — the brief sketches it as:</p>
+<pre><code>{
+  id: 0,                  // unique — how delete/edit find this exact product
+  name: "T-shirt",
+  details: ".....",
+  price: 25,
+  // ...image link, category
+}</code></pre>
+<p>and it points you at the methods you already own: <code>filter</code>, <code>map</code>, <code>sort</code>, the spread operator <code>...</code>, <code>concat</code>, <code>includes</code> — <code>filter</code>/<code>map</code>/<code>includes</code> from lesson 1-8, spread from lesson 2-6. <code>sort</code> and <code>concat</code> are on the <a href="../reference/javascript-cheatsheet.html">JavaScript cheat sheet</a>; look them up, don't memorize them.</p>
+<p class="read-more"><strong>Read more:</strong> <a href="https://www.makeareadme.com/">Make a README</a> (your Day-5 deliverable) · <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort">MDN — Array.sort</a> (the comparator argument is a callback, like 2-1's)</p>
+
+<h2>Idea 1 — Architecture: a pure core with a thin dirty shell</h2>
+<p>"Write a test for every function" is impossible if your functions read the DOM and write the DOM. It is easy if you split the app in two, which is exactly the split lesson 2-8 taught — that split is the <em>design rule</em> of this project, not a suggestion:</p>
+<table>
+  <tr><th>Layer</th><th>File</th><th>Rule</th><th>Tested?</th></tr>
+  <tr><td>Data / logic</td><td><code>src/store.js</code></td><td>Pure (2-8): takes data in, returns <strong>new</strong> data out. Never touches <code>document</code>, never touches <code>localStorage</code>, never mutates its arguments.</td><td>Yes — a Jest test each (2-3)</td></tr>
+  <tr><td>Shell / rendering</td><td><code>src/app.js</code></td><td>Impure and <em>thin</em>: reads inputs, calls a pure function, paints the result, saves to storage. Almost no <code>if</code>s, no arithmetic.</td><td>No — keep it too boring to break</td></tr>
+</table>
+<p>Every pure function follows one shape: current state in, new state out. Note <code>addToCart</code> below returns a brand-new array via spread (2-6) instead of <code>cart.push(...)</code> — that is what makes it testable, because the test can compare "before" and "after" and both still exist:</p>
+<pre><code>// src/store.js — pure. No document, no localStorage, no mutation.
+
+const addToCart = (cart, product) =&gt; [...cart, product];        // NEW array, old cart untouched
+
+const removeFromCart = (cart, id) =&gt; cart.filter(i =&gt; i.id !== id);
+
+const cartTotal = (cart) =&gt; cart.reduce((sum, i) =&gt; sum + i.price, 0);
+// reduce is 1-8's fold-into-one-value method: it walks the array carrying a
+// running total (starting at the 0) and returns that single number at the end.
+
+const searchByName = (products, query) =&gt;
+  products.filter(p =&gt; p.name.toLowerCase().includes(query.toLowerCase()));
+
+const updateProduct = (products, id, changes) =&gt;                  // the "edit all info" story
+  products.map(p =&gt; (p.id === id ? { ...p, ...changes } : p));    // spread-merge, 2-6
+
+if (typeof module !== "undefined") {              // the browser guard from 2-5:
+  module.exports = { addToCart, removeFromCart, cartTotal, searchByName, updateProduct };
+}                                                 // true in Node (Jest), false in a plain script tag</code></pre>
+<p><code>updateProduct</code> is the whole edit feature in two lines, and it is the one you will reach for last (step 9): <code>map</code> rebuilds the list, and <code>{ ...p, ...changes }</code> makes a copy of the matched product with only the changed fields overwritten — every other product comes back as the identical object. Its test is a one-liner too: edit one product's price, assert the others came back unchanged.</p>
+<p>That guard is not optional here. <code>index.html</code> loads <code>store.js</code> with a plain <code>&lt;script&gt;</code> tag — there is no bundler in this project — and an unguarded <code>module.exports</code> throws <code>ReferenceError: module is not defined</code> in the browser, which stops the rest of the file from running. Same file, two runtimes, exactly as in 2-5's <code>romanizer.js</code>. Load order matters too: <code>store.js</code> before <code>app.js</code>, because <code>app.js</code> calls into it.</p>
+<pre><code>&lt;!-- index.html, at the end of &lt;body&gt; --&gt;
+&lt;script src="src/store.js"&gt;&lt;/script&gt;   &lt;!-- pure functions first... --&gt;
+&lt;script src="src/app.js"&gt;&lt;/script&gt;     &lt;!-- ...then the shell that calls them --&gt;</code></pre>
+<p>And the test for the first one — the test that would fail if someone "optimized" it into a <code>push</code>:</p>
+<pre><code>// src/store.test.js
+const { addToCart } = require("./store");
+
+test("addToCart returns a new cart without mutating the old one", () =&gt; {
+  const cart = [];
+  const shirt = { id: 1, name: "T-shirt", price: 25 };
+
+  expect(addToCart(cart, shirt)).toEqual([shirt]);   // the new cart has it
+  expect(cart).toEqual([]);                          // the ORIGINAL is untouched
+});</code></pre>
+<details class="examples"><summary>More examples (optional)</summary>
+<p>The rest of the buyer flow's pure core, one function per user story — plus the seller's add and remove, which are the same two shapes again (<code>updateProduct</code>, the third, is in the body above):</p>
+<pre><code>const filterByCategory = (products, category) =&gt;
+  category === "all" ? products : products.filter(p =&gt; p.category === category);
+
+const filterByMaxPrice = (products, max) =&gt; products.filter(p =&gt; p.price &lt;= max);
+
+const sortByPrice = (products) =&gt; [...products].sort((a, b) =&gt; a.price - b.price);
+// spread FIRST: sort mutates, so sorting a copy keeps the function pure
+
+const addProduct = (products, product) =&gt; [...products, product];
+
+const removeProduct = (products, id) =&gt; products.filter(p =&gt; p.id !== id);</code></pre>
+<p>Contrast with the shell, which stays boring on purpose:</p>
+<pre><code>// src/app.js — impure, thin, untested
+const onSearch = (event) =&gt; {                        // a callback, 2-1
+  const results = searchByName(state.products, event.target.value);
+  renderProducts(results);
+};</code></pre>
+</details>
+<p class="read-more"><strong>Read more:</strong> <a href="https://kentcdodds.com/blog/pure-modules">Kent C. Dodds — pure modules</a> · <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Spread_syntax">MDN — spread syntax</a></p>
+
+<h2>Idea 2 — localStorage: making state survive a closed tab</h2>
+<p>The brief requires the app to keep its state after the page is closed. Nothing in this week's sessions covered how — so the <em>web storage</em> research topic from <a href="../curriculum/coursebook/week-2/research-afternoon.md">research-afternoon.md</a> is promoted to required material, and this section is it.</p>
+<p><span class="term" data-tip="A small key–value store the browser keeps per site, on disk. Survives refresh, tab close, and reboot until code or the user clears it.">localStorage</span> is a built-in object with two methods you need. Try them in the browser console (F12, from lesson 1-1) on any page:</p>
+<pre><code>localStorage.setItem("greeting", "hello")   // save under a key
+localStorage.getItem("greeting")            // → "hello"
+localStorage.getItem("nothing-here")        // → null   (missing key, not an error)</code></pre>
+<p><strong>The catch: it stores strings only.</strong> Hand it an array and you get useless text back. So every save/load round-trips through JSON:</p>
+<pre><code>const cart = [{ id: 1, name: "T-shirt", price: 25 }];
+
+localStorage.setItem("cart", cart)                  // BAD → stored as "[object Object]"
+localStorage.setItem("cart", JSON.stringify(cart))  // GOOD → stored as '[{"id":1,...}]'
+
+JSON.parse(localStorage.getItem("cart"))            // back to a real array of objects</code></pre>
+<p>That gives the pattern the project needs — <strong>save on every change, load once at start</strong>:</p>
+<pre><code>// src/app.js — impure by design: this is the shell's job, not store.js's
+const save = (key, value) =&gt; localStorage.setItem(key, JSON.stringify(value));
+
+const load = (key, fallback) =&gt; {
+  const raw = localStorage.getItem(key);
+  return raw === null ? fallback : JSON.parse(raw);   // first-ever visit → fallback
+};
+
+const STARTING_PRODUCTS = [ /* the hard-coded products from step 4 */ ];
+
+let state = {                                         // on start:
+  products: load("products", STARTING_PRODUCTS),      // never stored yet → the starter list
+  cart: load("cart", []),                             // never stored yet → an empty cart
+};
+
+// after ANY state change:
+state = { ...state, cart: addToCart(state.cart, product) };
+save("cart", state.cart);
+renderCart(state.cart);</code></pre>
+<p>Notice the pure function still knows nothing about storage — <code>addToCart</code> computes the new cart, the shell persists it. That is the whole architecture in three lines. The <em>fallback</em> argument matters as much as the key: on a brand-new browser there is nothing under <code>"products"</code>, so whatever you pass as the fallback is what the shop opens with. Pass <code>[]</code> and your step-4 products vanish the moment you add persistence.</p>
+<p><code>load</code> is the one place in <code>app.js</code> with a decision in it (the <code>? :</code>), and that is deliberate: it decides nothing about <em>your</em> data, only whether the browser has any yet. Everything about products, carts and prices still gets decided in <code>store.js</code>, where the tests are.</p>
+<details class="examples"><summary>More examples (optional)</summary>
+<p>Run this in the console on your own page to feel the round-trip, one line at a time:</p>
+<pre><code>localStorage.setItem("cart", JSON.stringify([{ id: 1, price: 25 }]))
+JSON.parse(localStorage.getItem("cart"))[0].price   // → 25, a real number again
+
+localStorage.removeItem("cart")     // delete one key
+localStorage.clear()                // delete EVERY key for this site — check what you'll lose first</code></pre>
+<p>Two traps worth meeting before they cost you an hour:</p>
+<ul>
+  <li><code>JSON.parse(null)</code> returns <code>null</code>, but <code>JSON.parse("")</code> throws — hence the explicit <code>raw === null</code> check in <code>load</code> above rather than a truthiness test.</li>
+  <li>Opening your app as <code>file:///…</code> vs through a local server gives you two <em>different</em> storage buckets. Pick one way to open the app and stay with it, or your cart will seem to vanish.</li>
+</ul>
+<p>You can inspect everything you've stored in DevTools (F12, 1-1) → <strong>Application</strong> tab → Local Storage — useful when the app loads state you didn't expect.</p>
+</details>
+<p class="read-more"><strong>Read more:</strong> <a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/sessionStorage">MDN — sessionStorage</a> (same API, but wiped when the tab closes; that is the entire difference, and it's the research topic's second question) · <a href="https://developer.mozilla.org/en-US/docs/Web/API/Web_Storage_API">MDN — Web Storage API</a></p>
+
+<h2>Do it for real — the build (~2 days)</h2>
+<p>Build in this order. From step 4 onward, <strong>each step is a branch and a PR</strong> (lesson 1-5), each merged before the next starts, so <code>main</code> always runs. Steps 1–3 are the repo baseline — an empty repo with no branches to merge into anything — so like the portfolio baseline in <a href="1-11-project.html">1-11</a>, they commit straight to <code>main</code>. That is the one declared exception. <em>Soft prerequisite:</em> if you haven't done lesson <a href="1-9-git-conflicts.html">1-9 (git conflicts)</a> yet, do it as catch-up first — you merge a lot of PRs here, but since you are the only committer and each branch merges before the next starts, none of them should conflict. You'll hit your first real conflict eventually and it shouldn't be here.</p>
+<ol class="steps">
+  <li>Create an empty repo named <code>ecommerce-app</code> on GitHub (with a README), then clone it next to your other work (<code>clone</code> from 1-5, <code>cd</code> from 1-4):
+<pre><code>cd ~/code
+git clone URL             # URL from your new ecommerce-app repo
+cd ecommerce-app
+ls                        # README.md</code></pre>
+  <em>Success check:</em> <code>ls</code> shows <code>README.md</code>. Now open <strong>this</strong> folder in your editor — File → Open Folder → <code>~/code/ecommerce-app</code> (it probably still shows a week-2 exercise folder), so the files you save land in the repo.</li>
+  <li>Make it an npm project with Jest (2-2 and 2-3):
+<pre><code>npm init -y               # creates package.json
+npm install --save-dev jest</code></pre>
+  Then edit <code>package.json</code> so the test script is <code>"test": "jest"</code>, and <strong>save the file</strong>. <em>Success check:</em> <code>npm test</code> runs and reports "No tests found" — that is Jest working, not failing.</li>
+  <li>Keep <code>node_modules</code> out of git — it's thousands of files you never commit. Create a file named <code>.gitignore</code> in the repo root, containing exactly:
+<pre><code>node_modules/</code></pre>
+  Save it, then verify before you stage anything:
+<pre><code>git status                # node_modules must NOT be listed
+git add .gitignore package.json package-lock.json
+git commit -m "Set up npm project with Jest"
+git push</code></pre>
+  <em>Success check:</em> <code>git status</code> shows <code>.gitignore</code> and the package files, and no <code>node_modules</code>. If <code>node_modules</code> still appears, fix <code>.gitignore</code> before committing — never <code>git add .</code> until it's clean.</li>
+  <li>Build the page skeleton on a branch: semantic HTML (1-2) with a <code>&lt;header&gt;</code>, one <code>&lt;main&gt;</code>, a products <code>&lt;section&gt;</code>, a cart <code>&lt;aside&gt;</code>; flexbox layout (1-3) and mobile-first with at least one media query (1-6). Hard-code three fake products in an array in <code>src/app.js</code> and render them with <code>map</code> + a template literal (1-8, 1-10).
+<pre><code>git switch -c product-list
+# ...write index.html, style.css, src/app.js, save all files...
+git add .
+git commit -m "Render product list from data"
+git push -u origin product-list</code></pre>
+  <em>Success check:</em> opening <code>index.html</code> in the browser shows three product cards, and they reflow sensibly when you narrow the window.</li>
+  <li>Buyer flow, one branch + PR per story, pure function first with its test (the red-green loop from 2-4), shell second: <strong>search by name → filter by price/category → add to cart → view cart → delete from cart → cart total</strong>. After each merge, sync and re-run everything:
+<pre><code>git switch main
+git pull
+npm test                  # every test from every merged story still passes</code></pre>
+  <em>Success check after each merge:</em> the suite is green and the app in the browser does one more thing than it did yesterday.</li>
+  <li>Add persistence with the <code>save</code>/<code>load</code> pair from Idea 2 — save after every cart and product change, load once at startup. Move your step-4 hard-coded array into <code>STARTING_PRODUCTS</code> and pass it as <code>load</code>'s fallback, so a first-time visitor still sees a stocked shop. <em>Success check (the requirement, proven):</em> your three products are still on the page, and after you add two items to the cart, close the tab entirely and reopen <code>index.html</code>, the cart and its total are still there.</li>
+  <li>Add the grid/list toggle — one button that flips a CSS class on the products container, so the same cards lay out as a grid or a single column (flexbox from 1-3). The DOM move is <code>classList</code>, the same object 2-9's shipped <code>blinkLight</code> used to switch lights on and off with <code>.add(name)</code> and <code>.remove(name)</code> — and <code>.toggle(name)</code> is just those two in one call: it adds the class if the element doesn't have it, removes it if it does, which is exactly what one button needs. Add the button to <code>index.html</code> first — it doesn't exist yet — then grab both elements with <code>querySelector</code> (1-10):
+<pre><code>&lt;!-- index.html, just above the products section --&gt;
+&lt;button id="view-toggle" type="button"&gt;Grid / list&lt;/button&gt;</code></pre>
+<pre><code>const list = document.querySelector("#products");        // the products container
+const button = document.querySelector("#view-toggle");   // the button you just added
+
+button.addEventListener("click", () =&gt; {   // a callback, 2-1
+  list.classList.toggle("grid");           // add "grid" if absent, remove it if present
+});</code></pre> <em>Success check:</em> clicking the button switches layout, and the choice survives a refresh once you save it to storage too.</li>
+  <li>Seller flow next: an "add product" form (name, details, price, image link, and category), the seller's own product list, search over it, and delete. It is the labelled-form pattern from 2-5 (<code>&lt;label for&gt;</code> + <code>&lt;input id&gt;</code>, <code>submit</code> listener, <code>event.preventDefault()</code>) with one new tag: the brief requires category to be a <strong>dropdown</strong>, which in HTML is <code>&lt;select&gt;</code> wrapping one <code>&lt;option&gt;</code> per choice. It is labelled and read exactly like an <code>&lt;input&gt;</code> — <code>.value</code> gives you the selected option's <code>value</code> attribute, as a string:
+<pre><code>&lt;label for="category"&gt;Category&lt;/label&gt;
+&lt;select id="category" name="category" required&gt;
+  &lt;option value=""&gt;Choose one…&lt;/option&gt;      &lt;!-- empty value + required = must pick --&gt;
+  &lt;option value="clothing"&gt;Clothing&lt;/option&gt;  &lt;!-- value is what your JS reads... --&gt;
+  &lt;option value="books"&gt;Books&lt;/option&gt;        &lt;!-- ...the text is what the user sees --&gt;
+&lt;/select&gt;</code></pre>
+<pre><code>document.querySelector("#category").value   // → "books"  — a string, like input.value (2-5)</code></pre>
+  Same discipline as every story: pure function + test, then wire the form. <em>Success check:</em> a product you add — with its category picked from the dropdown, never typed — appears in the buyer list, and is still there after a refresh.
+  <p class="read-more"><strong>If you want more:</strong> <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/select">MDN — the <code>&lt;select&gt;</code> element</a> lists the extras (<code>multiple</code>, <code>&lt;optgroup&gt;</code>) this project does not need.</p></li>
+  <li>Edit-a-product last — it is the fiddliest story, and it is the mirror image of reading the form. To <em>pre-fill</em> it you assign to the same <code>.value</code> you have been reading from, which puts text into the field and selects the matching <code>&lt;option&gt;</code>:
+<pre><code>const product = state.products.find(p =&gt; p.id === id);    // find: like filter (1-8), but
+                                                          // returns the FIRST match itself,
+                                                          // not an array of matches
+document.querySelector("#name").value = product.name;     // reading .value gets, assigning sets
+document.querySelector("#category").value = product.category;   // selects that option</code></pre>
+  Then on submit, don't add a second product — replace the existing one with <code>updateProduct(products, id, changes)</code> from Idea 1, and save the result. <em>Success check:</em> change a product's price and category; the buyer list, the cart total for new adds, and storage all agree, and the product count did <em>not</em> go up by one.</li>
+  <li><strong>Day 5, 09:00 — get reviewed.</strong> With the buyer flow merged, ask your teacher (the agent) to review the repo the way the curriculum's <a href="../curriculum/coursebook/week-1/codereviewintro.md">code review guide</a> describes: it reads the README, runs <code>npm test</code>, and files GitHub issues phrased as questions with links to exact lines. <em>Success check:</em> at least three issues exist on your repo, and you understand each one.</li>
+  <li><strong>Day 5, 10:00 — respond to the issues.</strong> Reply in each issue thread first (agree, push back, or ask), then fix the ones you accept on a branch and let the PR close them for you. GitHub does that automatically if the PR description contains a closing keyword and the issue number — write it as one line in the description box when you open the PR:
+<pre><code>Closes #12          # merging this PR closes issue 12. "Fixes #12" works the same way.
+Closes #12, closes #14   # one keyword per issue if a PR settles several</code></pre>
+  Answering is part of the etiquette; silently fixing is not. <em>Success check:</em> every issue is either closed by a merged PR or has your written reason for leaving it open.</li>
+  <li><strong>Day 5, 11:00 — the presentation, written.</strong> Solo, the cohort's demo becomes your README (same WHY / WHAT / HOW structure as the portfolio README in 1-11), plus two sections the cohort demo would have covered live:
+<pre><code>## Why        — the problem and who the two flows serve
+## What       — the features, mapped to the user stories
+## How        — architecture: pure core in src/store.js, thin shell in src/app.js, localStorage for state
+## Run the tests
+git clone URL &amp;&amp; cd ecommerce-app
+npm install
+npm test
+## What I'd do next   — 2–3 honest sentences</code></pre>
+  <em>Success check:</em> a stranger could clone your repo, follow the README, and see a green test run without asking you anything.</li>
+</ol>
+
+<!-- agent-pair: three distinct modes for this project; the student picks, the agent never volunteers all three.
+     (1) REVIEWER (Day 5, 09:00 slot). Follow codereviewintro.md etiquette strictly: open-minded
+         questions, never "this is bad code", link the exact lines (permalink with commit id), one
+         main point per review plus at most two nits. Review ONLY against this lesson's done-checklist
+         and week-1/week-2 taught material — do not demand modules/bundlers, classes, React, CSS Grid,
+         accessibility beyond 1-2's landmarks, or async patterns beyond 2-7. File findings as GitHub
+         issues with clear titles, not as a chat dump, so the 10:00 "respond to issues" slot has
+         something real to answer. Leave one improvable-but-acceptable thing unmentioned; raise it in
+         the next review only if it recurs.
+     (2) TEST-QUALITY REVIEW. The brief's "a test for every function" is easy to fake. For each pure
+         function ask: is there a test that would FAIL if this function were subtly broken? Probe
+         specifically for (a) mutation — does any test assert the input array is unchanged after
+         addToCart/removeFromCart/sortByPrice? (b) empty-input cases — cartTotal([]) === 0,
+         searchByName(products, "") ; (c) tests that only assert truthiness, or that call the function
+         and assert nothing. Ask about at most two gaps per pass; let the student write the test.
+     (3) PAIRING ON A STUCK STORY. If a user story stalls for more than ~30 minutes, pair using
+         driver/navigator from week-1's pair-programming material: the student drives and narrates the
+         plan, the agent navigates by asking questions ("what does this function return when the cart
+         is empty?") and never dictates code. Swap only if the student asks to watch a worked example;
+         then narrate every step and hand the keyboard back at the next test. Never write the pure
+         function AND its test for the student — that removes the entire point of the week. -->
+
+<h2>Check yourself — the done checklist</h2>
+<p>This checklist <em>is</em> the check: every buyer story, every seller story, and the four hard requirements. Nothing here is optional, and every box maps to something the brief asked for.</p>
+<ul class="check">
+  <li><input type="checkbox"> Buyer: all items visible on load</li>
+  <li><input type="checkbox"> Buyer: search items by name</li>
+  <li><input type="checkbox"> Buyer: filter by price <em>and</em> by category</li>
+  <li><input type="checkbox"> Buyer: add an item to the cart</li>
+  <li><input type="checkbox"> Buyer: see the items inside the cart</li>
+  <li><input type="checkbox"> Buyer: delete any item from the cart</li>
+  <li><input type="checkbox"> Buyer: see the cart's total price, updating on every change</li>
+  <li><input type="checkbox"> Buyer: toggle the display between grid and list</li>
+  <li><input type="checkbox"> Seller: add a product with name, details, price, image link, and category — category chosen from a dropdown</li>
+  <li><input type="checkbox"> Seller: see all own products</li>
+  <li><input type="checkbox"> Seller: search own products</li>
+  <li><input type="checkbox"> Seller: delete own product</li>
+  <li><input type="checkbox"> Seller: edit <em>all</em> the information of a product</li>
+  <li><input type="checkbox"> <strong>Pure functions</strong> — every function in <code>src/store.js</code> returns new data and mutates nothing (2-8)</li>
+  <li><input type="checkbox"> <strong>A test for every function</strong> — <code>npm test</code> is green, and each pure function has a test that would fail if the function broke (2-3)</li>
+  <li><input type="checkbox"> <strong>Responsive</strong> — mobile-first with at least one media query, usable at 375px and at 1280px (1-3, 1-6)</li>
+  <li><input type="checkbox"> <strong>State survives closing the page</strong> — cart, products, and display mode reload from localStorage</li>
+  <li><input type="checkbox"> Workflow: GitHub repo, every feature on a branch merged by PR, pushed frequently (1-5); <code>node_modules</code> git-ignored</li>
+  <li><input type="checkbox"> Semantic HTML skeleton with exactly one <code>&lt;main&gt;</code> and real landmarks (1-2)</li>
+  <li><input type="checkbox"> Review issues answered, and a README with WHY / WHAT / HOW, how to run the tests, and what you'd do next</li>
+</ul>
+
+<h2>Go deeper</h2>
+<p><strong>Primary source:</strong> the <a href="../curriculum/coursebook/week-2/project.md">project brief</a> itself — re-read it after you finish and check your app against its words, not your memory of them. The remaining <a href="../curriculum/coursebook/week-2/research-afternoon.md">research-afternoon topics</a> (unit vs integration vs e2e testing, test coverage with Istanbul/nyc, comparing testing frameworks) are the natural next reading once your suite is green.</p>
+
+<div class="feedback-ask">Project shipped and reviewed? Tell your teacher (the agent) two things: ① Could you follow this week's lessons alone — 1 to 5 overall? ② Where did the week feel hardest? Answers are recorded in <code>feedback/week-2.md</code> and improve the material for the next student. <em>Want the agent as reviewer, test-quality critic, or pair partner? It has instructions hidden in this page's source.</em></div>
+
+<div class="footer-nav">
+References: <a href="../reference/npm-jest-tdd-cheatsheet.html">npm, Jest &amp; TDD</a> · <a href="../reference/javascript-cheatsheet.html">JavaScript</a> · <a href="../reference/git-branch-pr-cheatsheet.html">git branch &amp; PR</a> · <a href="../reference/html-flexbox-cheatsheet.html">HTML &amp; flexbox</a><br>
+Previous: <a href="2-9-traffic-lights.html">2-9 Traffic Lights</a> · Week map: <a href="2-index.html">Week 2 index</a><br>
+Stuck or curious? Ask your teacher (the agent) — it reviews PRs, critiques test quality, and pairs on a stuck user story.<br>
+Next week: APIs. Your callbacks are about to meet the network.
+</div>
+
+<script src="../assets/tooltip.js"></script>

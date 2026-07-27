@@ -1,0 +1,284 @@
+<meta charset="utf-8">
+<title>2-5 — Roman Numerals: TDD Code-Along</title>
+<link rel="stylesheet" href="../assets/course.css">
+
+<h1>2-5 — Roman Numerals: TDD Code-Along</h1>
+<p class="subtitle">~75 minutes · Week 2, Day 1, 15:00–17:00 · Source: curriculum <a href="https://github.com/bootcamp-we-have-at-home/Roman-Numerals">bootcamp-we-have-at-home/Roman-Numerals</a> code-along, adapted solo</p>
+
+<p><strong>Why this matters:</strong> FizzBuzz in 2-4 was TDD on a problem you already knew the answer to; this one is TDD on a problem where the algorithm genuinely <em>arrives</em> out of the tests. Then you wire the tested function to a real accessible form — the same "pure logic + thin DOM layer" split the week project is built on.</p>
+
+<h2>Idea 1 — A kata grows the algorithm out of the tests</h2>
+<p>A <span class="term" data-tip="A small exercise you repeat deliberately to practise a technique rather than to produce novel code. Borrowed from martial arts.">kata</span> is a problem you solve for the practice, not the product. The roman-numerals kata (the repo credits <a href="https://remonsinnema.com/2011/12/05/practicing-tdd-using-the-roman-numerals-kata/">Ray Sinnema</a>) is the classic demonstration of TDD's central claim: if you only ever write the <em>simplest</em> code that turns the current red test green, the design shows up by itself.</p>
+<p>Concretely: test <code>1 → "I"</code> and you write <code>return "I"</code>. That feels like cheating — it isn't, it's the rule. Test <code>2 → "II"</code>, <code>3 → "III"</code> and the honest simplest fix is "repeat <code>I</code> that many times". Test <code>4 → "IV"</code> and repetition breaks, so you special-case it. Test <code>5</code>, <code>9</code>, <code>10</code> and you're writing your fourth near-identical <code>if</code> — that repetition is the design pressure. You collapse the <code>if</code>s into <em>data</em>: an array of objects pairing a number with its symbol (arrays of objects, dot access — lesson 1-10), walked largest-first. That table is the finished algorithm, and you never designed it up front.</p>
+<div class="aside">Red → green → <strong>refactor</strong>: the third step is the one people skip. Refactoring means changing the shape of the code while the tests stay green — the tests are what make it safe, which is the entire payoff of having written them first (2-3).</div>
+<details class="examples"><summary>More examples (optional)</summary>
+<p>The subtractive pairs are the whole trick. Roman numerals are written largest-first and additively — <code>MDCLXVI</code> = 1000+500+100+50+10+5+1 — <em>except</em> for six cases where a smaller symbol sits in front and is subtracted:</p>
+<pre><code>4    IV     // 5 - 1
+9    IX     // 10 - 1
+40   XL     // 50 - 10
+90   XC     // 100 - 10
+400  CD     // 500 - 100
+900  CM     // 1000 - 100</code></pre>
+<p>The trick that makes the code trivial: stop treating them as exceptions and put them <em>in the table as ordinary entries</em>, each just above the value it subtracts from. Then one greedy loop handles both cases:</p>
+<pre><code>1994
+  - 1000 M    → "M",        994 left
+  -  900 CM   → "MCM",       94 left
+  -   90 XC   → "MCMXC",      4 left
+  -    4 IV   → "MCMXCIV",    0 left   // done</code></pre>
+<p>Same walk for 2024: <code>M</code>, <code>M</code> (1000 twice), then <code>X</code>, <code>X</code>, then <code>IV</code> → <code>MMXXIV</code>.</p>
+</details>
+<p class="read-more"><strong>Read more:</strong> <a href="http://codekata.com/">Dave Thomas — Code Kata</a> (where the practice-problem idea comes from) · <a href="https://kata-log.rocks/">kata-log.rocks</a> (a catalogue to keep repping) · <a href="https://martinfowler.com/bliki/OpportunisticRefactoring.html">Fowler — opportunistic refactoring</a></p>
+
+<h2>Idea 2 — From tested function to page: an accessible form</h2>
+<p>The converter is pure logic, so it belongs in its own file with its own tests. The page is a separate, thin layer: take input, call the function, show the result. Three pieces you need for that layer.</p>
+<p><strong>1. A labelled input.</strong> Lesson 1-2 made the case that tags should say what they mean and that accessibility is checkable with Lighthouse; forms are where that bites hardest. Every input needs a <code>&lt;label&gt;</code> whose <code>for</code> matches the input's <code>id</code> — that pairing is what a screen reader announces, and it also makes clicking the label focus the input. A placeholder is <em>not</em> a label.</p>
+<pre><code>&lt;label for="numeral"&gt;Enter a number (1–3999)&lt;/label&gt;
+&lt;input id="numeral" name="numeral" type="text" placeholder="e.g. 42" required&gt;
+&lt;!-- id is what the label points at; name is the key the browser would submit under --&gt;
+&lt;button type="submit"&gt;Convert&lt;/button&gt;</code></pre>
+<p><strong>2. The submit event.</strong> A form's default behaviour is to send its data to a server and reload the page — which throws away your result instantly. You listen for <code>submit</code> on the <em>form</em> (not click on the button: that way <kbd>Enter</kbd> in the field works too) and cancel the default:</p>
+<pre><code>form.addEventListener("submit", (event) =&gt; {   // the arrow is a callback — 2-1
+  event.preventDefault();                      // stop the page reloading
+  // …read the input, call romanizer, show the result
+});</code></pre>
+<p><strong>3. Writing the result into the DOM</strong> — <code>document.querySelector</code> plus <code>.textContent</code>, exactly as in 1-10.</p>
+<details class="examples"><summary>More examples (optional)</summary>
+<p>Reading the typed value. <code>.value</code> is always a <strong>string</strong>, even from <code>type="number"</code> — which is why the converter starts by running its input through <code>Number()</code>:</p>
+<pre><code>const input = document.querySelector("#numeral");
+input.value            // "42"  — a string, always
+Number(input.value)    // 42    — a number
+Number("abc")          // NaN   — "not a number", the value the guard tests for</code></pre>
+<p>Proof that <code>preventDefault()</code> is doing something: comment it out, submit, and watch the URL gain <code>?numeral=42</code> and the page blink — that's the browser navigating away with your form data.</p>
+<p>One more accessibility touch the repo's page doesn't have: mark the result box as a <span class="term" data-tip="An element a screen reader watches; when its content changes, the new text is announced without the user moving focus.">live region</span> so screen-reader users hear the answer appear:</p>
+<pre><code>&lt;div class="result" role="status" aria-live="polite"&gt;&lt;/div&gt;</code></pre>
+</details>
+<p class="read-more"><strong>Read more:</strong> <a href="https://developer.mozilla.org/en-US/docs/Learn/Forms/Your_first_form">MDN — your first form</a> · <a href="https://developer.mozilla.org/en-US/docs/Web/API/Event/preventDefault">MDN — event.preventDefault()</a> · <a href="https://www.w3.org/WAI/tutorials/forms/labels/">W3C — labelling controls</a></p>
+
+<h2>Do it for real (~50 min)</h2>
+<p>This is the code-along, and <strong>this page is the presenter</strong>: each numbered step hands you the next test case, you make it pass before reading on. Resist scrolling ahead — the point is to feel the design pressure build, not to arrive at the answer.</p>
+<p>You are <em>not</em> cloning the curriculum repo to work in: it ships the <em>finished</em> converter and its 27 passing tests (verified by cloning it while writing this lesson), so cloning it would hand you the answer before you've felt the problem. You'll scaffold fresh, the same way you did in 2-3, and read the original as a solution afterwards.</p>
+<ol class="steps">
+  <li>Make the project folder and scaffold Jest (<code>mkdir</code> and <code>cd</code> are from 1-4; the npm commands are from 2-2 and 2-3):
+<pre><code>mkdir -p ~/code/week-2/roman-numerals   # -p: create week-2 too if it isn't there yet
+cd ~/code/week-2/roman-numerals
+npm init -y                             # writes package.json with defaults
+npm install --save-dev jest             # installs the test runner into node_modules/
+                                        # same audit summary as 2-3; never run --force</code></pre>
+  <em>You should see</em> npm report the added packages, and <code>ls</code> shows <code>package.json</code>, <code>package-lock.json</code>, <code>node_modules</code>.</li>
+
+  <li>Open <strong>this</strong> folder in your editor — File → Open Folder → <code>~/code/week-2/roman-numerals</code> (it will still be showing whatever 2-4 left open, and autosave is off, so every step below ends with <em>save the file</em>). In <code>package.json</code>, find the <code>"scripts"</code> block <code>npm init -y</code> wrote and replace <em>only the line inside it</em> so it reads:
+<pre><code>"scripts": {
+  "test": "jest"
+},                    &lt;-- keep this comma: more fields follow it in the file</code></pre>
+  JSON has no comments and no forgiveness — every entry except the last needs its trailing comma, and a missing one makes <code>npm test</code> answer with <code>EJSONPARSE</code> instead of running. Save, then check it runs:
+<pre><code>npm test          # "No tests found" — that's the correct answer right now</code></pre>
+  <em>You should see</em> Jest start and report no tests found, exiting with an error. Jest works; you have nothing to run yet.</li>
+
+  <li><strong>Red #1.</strong> Create <code>romanizer.test.js</code> with the first case only, and save:
+<pre><code>const romanizer = require("./romanizer");   // pulls in the file you're about to write
+
+test("1 → I", () =&gt; {
+  expect(romanizer(1)).toBe("I");
+});</code></pre>
+  Run <code>npm test</code>. <em>You should see</em> it fail with <code>Cannot find module './romanizer'</code>. A missing file is a perfectly good red.</li>
+
+  <li><strong>Green #1 — the simplest thing that works.</strong> Create <code>romanizer.js</code>, save, rerun:
+<pre><code>function romanizer(num) {
+  return "I";                 // yes, really. Simplest code that passes the test.
+}
+
+module.exports = romanizer;   // makes it importable by the test file</code></pre>
+  <em>You should see</em> <code>1 passed</code>. It is obviously incomplete — the next test is what makes it grow.</li>
+
+  <li>Start the watcher so you stop retyping <code>npm test</code>. This is an <strong>interactive</strong> program: it takes over the terminal, reruns on every save, and waits with a menu (<code>Watch Usage: Press a to run all tests… Press q to quit</code>). Leave it running in this terminal and edit files in the editor; press <kbd>q</kbd> (or <kbd>Ctrl</kbd>+<kbd>C</kbd>) to exit when you're done.
+<pre><code>npx jest --watchAll        # rerun every test on every save; q to quit</code></pre>
+  <em>You should see</em> the green result redraw within a second of you saving a file.</li>
+
+  <li><strong>Red #2 — repetition.</strong> Add these two tests, save, watch them fail, then make all three pass:
+<pre><code>test("2 → II", () =&gt; {
+  expect(romanizer(2)).toBe("II");
+});
+
+test("3 → III", () =&gt; {
+  expect(romanizer(3)).toBe("III");
+});</code></pre>
+  Simplest honest implementation: build a string of <code>num</code> copies of <code>"I"</code> (a loop, or <code>"I".repeat(num)</code>). <em>Success check:</em> <code>3 passed</code>. Don't peek ahead — the next case is designed to break exactly this.</li>
+
+  <li><strong>Red #3 — the first exception.</strong> Add it, save:
+<pre><code>test("4 → IV", () =&gt; {
+  expect(romanizer(4)).toBe("IV");
+});</code></pre>
+  Your repeat gives <code>"IIII"</code>. Fix it the crude way — an <code>if (num === 4) return "IV";</code> before the loop. <em>Success check:</em> <code>4 passed</code>, and you're now looking at a special case you know will multiply.</li>
+
+  <li><strong>Red #4 — it multiplies.</strong> Add all four at once and make them pass, still crudely (more <code>if</code>s, string concatenation, whatever gets to green):
+<pre><code>test("5 → V",   () =&gt; { expect(romanizer(5)).toBe("V"); });
+test("6 → VI",  () =&gt; { expect(romanizer(6)).toBe("VI"); });
+test("9 → IX",  () =&gt; { expect(romanizer(9)).toBe("IX"); });
+test("10 → X",  () =&gt; { expect(romanizer(10)).toBe("X"); });</code></pre>
+  <em>Success check:</em> <code>8 passed</code> and a function you'd be embarrassed to show anyone. That embarrassment is the signal to refactor.</li>
+
+  <li><strong>Refactor — the table.</strong> Green tests are a safety net: rewrite the body freely, and the moment you save, Jest tells you whether you broke anything. Replace <em>all</em> the branches with the lookup table (an array of objects, largest value first — 1-10) and one greedy walk:
+<pre><code>const NUMERALS = [
+  { value: 10, symbol: "X" },
+  { value: 9,  symbol: "IX" },     // subtractive pairs sit just above what they subtract from
+  { value: 5,  symbol: "V" },
+  { value: 4,  symbol: "IV" },
+  { value: 1,  symbol: "I" },
+];
+
+function romanizer(num) {
+  let remaining = num;
+  let result = "";
+  NUMERALS.forEach(({ value, symbol }) =&gt; {   // forEach + a callback — 1-8 and 2-1
+    while (remaining &gt;= value) {              // take this symbol as often as it fits
+      result += symbol;
+      remaining -= value;
+    }
+  });
+  return result;
+}
+
+module.exports = romanizer;</code></pre>
+  <em>Success check:</em> still <code>8 passed</code>, zero test edits. You changed the design without changing the behaviour — that is the refactor step, and it only felt safe because the tests existed.
+  <div class="aside">The <code>{ value, symbol }</code> in the parameter list is <span class="term" data-tip="Destructuring: unpacking object properties into variables by name. ({value}) =&gt; … is shorthand for (entry) =&gt; { const value = entry.value; … }">destructuring</span> — 2-6 covers it properly tomorrow. If it distracts you, write <code>(entry) =&gt;</code> and use <code>entry.value</code> / <code>entry.symbol</code> instead; identical behaviour.</div></li>
+
+  <li><strong>Now growing is free.</strong> Add these, save, and notice you fix them by editing <em>data</em>, not logic — new rows in <code>NUMERALS</code>, still largest-first:
+<pre><code>test("14 → XIV",     () =&gt; { expect(romanizer(14)).toBe("XIV"); });
+test("40 → XL",      () =&gt; { expect(romanizer(40)).toBe("XL"); });
+test("90 → XC",      () =&gt; { expect(romanizer(90)).toBe("XC"); });
+test("400 → CD",     () =&gt; { expect(romanizer(400)).toBe("CD"); });
+test("1987 → MCMLXXXVII", () =&gt; { expect(romanizer(1987)).toBe("MCMLXXXVII"); });
+test("3999 → MMMCMXCIX",  () =&gt; { expect(romanizer(3999)).toBe("MMMCMXCIX"); });</code></pre>
+  (Rows you'll need: 1000 <code>M</code>, 900 <code>CM</code>, 500 <code>D</code>, 400 <code>CD</code>, 100 <code>C</code>, 90 <code>XC</code>, 50 <code>L</code>, 40 <code>XL</code> — work out the order yourself before adding them.) <em>Success check:</em> <code>14 passed</code>, and <code>romanizer(14)</code> passed without you touching a line of the loop.</li>
+
+  <li><strong>Guard the edges</strong> — the repo's converter answers with a message instead of nonsense. Add these, then make them pass with two early returns at the top of the function:
+<pre><code>test("0 is out of range",    () =&gt; { expect(romanizer(0)).toBe("out of range"); });
+test("4000 is out of range", () =&gt; { expect(romanizer(4000)).toBe("out of range"); });
+test("'abc' is not a number",() =&gt; { expect(romanizer("abc")).toBe("Not a Number"); });
+test("'42' from an input field still works", () =&gt; { expect(romanizer("42")).toBe("XLII"); });</code></pre>
+  That last one matters for the next section: form fields hand you strings. Your parameter is still called <code>num</code>, so start the function body with <code>const n = Number(num);</code> and work from <code>n</code> after that — return <code>"Not a Number"</code> when <code>Number.isNaN(n)</code>, return <code>"out of range"</code> when <code>n &lt;= 0 || n &gt; 3999</code>, and convert <code>n</code>. <em>Success check:</em> <code>18 passed</code>. Press <kbd>q</kbd> to leave the watcher.</li>
+
+  <li><strong>Wire it to a page.</strong> Create <code>index.html</code> in the same folder and save it:
+<pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+  &lt;meta charset="utf-8"&gt;
+  &lt;meta name="viewport" content="width=device-width, initial-scale=1"&gt;
+  &lt;title&gt;Roman numeral converter&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;main&gt;
+    &lt;h1&gt;Roman numeral converter&lt;/h1&gt;
+    &lt;form id="converter"&gt;
+      &lt;label for="numeral"&gt;Enter a number (1–3999)&lt;/label&gt;
+      &lt;input id="numeral" name="numeral" type="text" placeholder="e.g. 42" required&gt;
+      &lt;button type="submit"&gt;Convert&lt;/button&gt;
+    &lt;/form&gt;
+    &lt;div id="result" role="status" aria-live="polite"&gt;&lt;/div&gt;
+  &lt;/main&gt;
+  &lt;script src="romanizer.js"&gt;&lt;/script&gt;
+  &lt;script src="app.js"&gt;&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+  <em>You should see</em>, on opening the file in the browser, a labelled field and a button — and clicking the label text should focus the field (that's the <code>for</code>/<code>id</code> pairing working).</li>
+
+  <li><strong>Make <code>romanizer.js</code> safe to load in a browser.</strong> <code>module.exports</code> is a Node idea (2-2); in a plain <code>&lt;script&gt;</code> there is no <code>module</code>, so that line throws <code>ReferenceError: module is not defined</code> in the console. Guard it — change the last line of <code>romanizer.js</code> to:
+<pre><code>if (typeof module !== "undefined") {   // true in Node (Jest), false in the browser
+  module.exports = romanizer;
+}</code></pre>
+  Save, run <code>npm test</code> once more. <em>Success check:</em> still <code>18 passed</code>, and reloading the page no longer shows <code>ReferenceError: module is not defined</code> in the console (<kbd>F12</kbd>, from 1-1). One error remains — a 404 for <code>app.js</code>, because you haven't written it yet. That one disappears in the next step.</li>
+
+  <li><strong>Handle the submit.</strong> Create <code>app.js</code>, save, reload the page:
+<pre><code>const form = document.querySelector("#converter");
+const result = document.querySelector("#result");
+
+form.addEventListener("submit", (event) =&gt; {
+  event.preventDefault();                              // don't reload the page
+  const typed = document.querySelector("#numeral").value;
+  result.textContent = romanizer(typed);               // the function your tests proved
+});</code></pre>
+  <em>Success check:</em> type <code>1987</code>, press <kbd>Enter</kbd> (not just the button) — <code>MCMLXXXVII</code> appears below the form, the URL does not change, and the page does not blink. Try <code>abc</code> and <code>5000</code>: you get the guard messages, straight from the tested function.</li>
+
+  <li>Optional, 2 minutes, good habit: put it under version control with the 1-5 loop. First protect yourself from committing thousands of dependency files:
+<pre><code>ls                       # look before you commit: node_modules is huge
+echo "node_modules" &gt; .gitignore   # creates .gitignore (overwrites it if it exists — it doesn't yet)
+git init
+git add .
+git status               # verify: NO node_modules paths listed
+git commit -m "Roman numeral converter, built test-first"</code></pre>
+  <em>Success check:</em> <code>git status</code> before committing lists your source files and <code>.gitignore</code>, and nothing from <code>node_modules</code>.</li>
+</ol>
+
+<h2>Check yourself</h2>
+<p><strong>1. Predict the output.</strong> Using the finished table, trace the greedy walk by hand before running anything:</p>
+<pre><code>romanizer(14)
+romanizer(40)</code></pre>
+<details class="reveal"><summary>Reveal</summary>
+<p><code>"XIV"</code> — 14 ≥ 10 → <code>X</code>, 4 left; 4 is less than 10, 9, 5, but 4 ≥ 4 → <code>IV</code>, 0 left.</p>
+<p><code>"XL"</code> — the walk hits the 40 row <em>before</em> the 10 row (largest first), so it takes <code>XL</code> once and finishes with 0 left. Without that row it would produce <code>"XXXX"</code>: the row order is the algorithm.</p>
+</details>
+
+<p><strong>2. Fix the broken snippet.</strong> All the "simple" values are here and the loop is fine, but three tests fail: 4 gives <code>"IIII"</code>, 9 gives <code>"VIIII"</code>, 40 gives <code>"XXXX"</code>. What's missing, and where exactly does it go?</p>
+<pre><code>const NUMERALS = [
+  { value: 100, symbol: "C" },
+  { value: 50,  symbol: "L" },
+  { value: 10,  symbol: "X" },
+  { value: 5,   symbol: "V" },
+  { value: 1,   symbol: "I" },
+];</code></pre>
+<details class="reveal"><summary>Reveal</summary>
+<p>The subtractive pairs are missing. Each one goes immediately <em>above</em> the value it is built from, so the greedy walk meets it first:</p>
+<pre><code>{ value: 100, symbol: "C" },
+{ value: 90,  symbol: "XC" },   // added: above 50, so 90 is matched before L
+{ value: 50,  symbol: "L" },
+{ value: 40,  symbol: "XL" },   // added: above 10, so 40 doesn't become XXXX
+{ value: 10,  symbol: "X" },
+{ value: 9,   symbol: "IX" },   // added
+{ value: 5,   symbol: "V" },
+{ value: 4,   symbol: "IV" },   // added
+{ value: 1,   symbol: "I" },</code></pre>
+<p>Put <code>XL</code> <em>below</em> <code>X</code> instead and 40 still comes out <code>"XXXX"</code> — the walk consumes the 40 with four <code>X</code>s before it ever reaches the <code>XL</code> row.</p>
+</details>
+
+<div class="quiz"
+  data-q="Your 12 tests are green and you want to replace a pile of if-statements with a lookup table. What does TDD say to do first?"
+  data-opts='["Nothing extra — refactor with the tests green, and rerun them after each change; that safety net is what you built them for",
+              "Delete the old tests first so they do not fail against the new design",
+              "Write a new test for the lookup table before you write it"]'
+  data-answer="0"
+  data-why="Refactoring means changing structure without changing behaviour, so the existing tests must keep passing untouched — they are the proof you did not break anything. Needing to edit tests during a refactor means you changed behaviour, not structure."></div>
+
+<div class="quiz"
+  data-q="Your form handler works, but every submit reloads the page and the result flashes away. What is missing?"
+  data-opts='["The romanizer call should be wrapped in a setTimeout",
+              "event.preventDefault() inside the submit listener",
+              "type=&apos;button&apos; instead of type=&apos;submit&apos; on the button"]'
+  data-answer="1"
+  data-why="A form&apos;s default submit action navigates the browser. preventDefault() cancels it so your JavaScript can handle the data instead."></div>
+
+<h2>Go deeper</h2>
+<p><strong>Primary source:</strong> the curriculum's <a href="https://github.com/bootcamp-we-have-at-home/Roman-Numerals">bootcamp-we-have-at-home/Roman-Numerals</a> repo — read its <code>romanizer.js</code> and <code>romanizer.test.js</code> <em>after</em> finishing, and compare: it goes up to 4999 with an <code>MMMM</code> row and mops up leftovers with a final <code>I</code> loop instead of a <code>while</code> per row. Optional: <a href="https://youtu.be/7qEXPwG71RI">the author's screencast of this code-along</a> (~30 min) — the version you just did solo. And <a href="https://remonsinnema.com/2011/12/05/practicing-tdd-using-the-roman-numerals-kata/">Ray Sinnema's original write-up</a> of the kata's test order, which is where the sequence above comes from.</p>
+
+<!-- agent-pair: two modes for this kata.
+     (1) Ping-pong, as in 2-4: student writes the failing test, agent writes only enough code to pass,
+         agent writes the next failing test, student implements. Swap every case.
+     (2) Navigator/presenter mode (default when the student says "code-along"): the agent plays the
+         presenter and reveals ONE test case at a time, withholding the next until the student reports
+         green — never showing the table refactor before the student has felt the if-pile pain
+         (steps 7-8). After the refactor lands, the agent challenges it with edge cases the student
+         has not tested: 3999, 0, 40, 90, 4000, "42" as a string, negative numbers, 3.7.
+     Refactor review per codereviewintro.md etiquette: ask questions ("what happens if the 40 row
+     moves below the 10 row?") rather than dictating; one main point per round.
+     Extension if there is time: ask for the inverse function, romanToNumber, test-first. -->
+
+<div class="feedback-ask">Finished? Tell your teacher (the agent) two things: ① Could you follow this lesson alone — 1 to 5? ② Where did you get stuck, if anywhere? Answers are recorded in <code>feedback/week-2.md</code> and improve the lesson for the next student. <em>Want the code-along driven live, one test case at a time? The agent has presenter instructions hidden in this page's source.</em></div>
+
+<div class="footer-nav">
+Reference: <a href="../reference/javascript-cheatsheet.html">JavaScript cheat sheet</a> · Week map: <a href="2-index.html">Week 2 index</a><br>
+Previous: <a href="2-4-fizzbuzz-tdd-workshop.html">2-4 FizzBuzz TDD Workshop</a> · Next: <a href="2-6-es6-refresh-challenge.html">2-6 ES6 Refresh &amp; the ES6→ES5 Challenge</a><br>
+Next up: Day 2 opens with a syntax time-machine — the ES6 you write, translated into the ES5 you'll read in old code.<br>
+Stuck or curious? Ask your teacher (the agent). "How would I test the DOM wiring, not just the converter?" is a great follow-up.
+</div>
+
+<script src="../assets/quiz.js"></script>
+<script src="../assets/tooltip.js"></script>

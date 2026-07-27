@@ -1,0 +1,187 @@
+<meta charset="utf-8">
+<title>2-2 — npm: Node's Package Manager</title>
+<link rel="stylesheet" href="../assets/course.css">
+
+<h1>2-2 — npm: Node's Package Manager</h1>
+<p class="subtitle">~35 minutes · Week 2, Day 1, 11:00–11:30 · Source: curriculum <a href="https://github.com/bootcamp-we-have-at-home/npm-introduction">npm-introduction workshop</a></p>
+
+<p><strong>Why this matters:</strong> every tool you use from now on — Jest tomorrow, the week project's test suite, anything you clone from a job — arrives through npm. Half an hour here and the rest of the week is <code>npm install</code> and go.</p>
+
+<h2>Idea 1 — Node runs JS outside the browser; npm brings the packages</h2>
+<p>Until now every line of JavaScript you wrote ran in the browser — the F12 console from lesson 1-1, and the page scripts from 1-10. <strong>Node</strong> is the same JavaScript engine that Chrome uses (V8), packaged as a program on your machine, so <code>node script.js</code> runs JS with no page and no browser. <strong>npm</strong> ships with it: a command plus a public registry of hundreds of thousands of reusable packages (<a href="https://www.npmjs.com/">npmjs.com</a>).</p>
+<p>Three files and folders make up the whole system:</p>
+<table>
+  <tr><th>Thing</th><th>Who creates it</th><th>What it is</th></tr>
+  <tr><td><code>package.json</code></td><td><code>npm init</code></td><td>Your project's ID card: name, version, scripts, and the list of packages it needs. You commit it.</td></tr>
+  <tr><td><code>node_modules/</code></td><td><code>npm install</code></td><td>The actual downloaded package code. Huge, regenerable, <strong>never committed</strong>.</td></tr>
+  <tr><td><code>.gitignore</code></td><td>You</td><td>A list of paths git should pretend it can't see — <code>node_modules</code> goes in it.</td></tr>
+</table>
+<p>Installing has two flavors, and the flag is the whole difference:</p>
+<pre><code>npm install lodash        # a "dependency"    — the app itself needs it to run
+npm install jest -D       # a "devDependency" — only YOU need it, while developing</code></pre>
+<p>Both land in <code>node_modules</code>; they get recorded in different sections of <code>package.json</code>. That record is the point: a collaborator clones your repo (<code>git clone</code>, lesson 1-5) with no <code>node_modules</code> in it at all, runs <code>npm install</code> with no arguments, and npm reads <code>package.json</code> and rebuilds the exact same environment. Undeclared packages — ones you installed but that never made it into <code>package.json</code> — are how "works on my machine" happens.</p>
+<details class="examples"><summary>More examples (optional)</summary>
+<p>A <code>package.json</code> after installing one of each, with the two sections side by side:</p>
+<pre><code>{
+  "name": "shopping-cart",
+  "version": "1.0.0",
+  "dependencies": {                 // shipped to users — the app breaks without it
+    "lodash": "^4.17.21"
+  },
+  "devDependencies": {              // dev-machine only — users never run the tests
+    "jest": "^30.4.2"
+  }
+}</code></pre>
+<p>Deciding which flavor, by asking one question — <em>does the running app need this?</em></p>
+<pre><code>npm install express            # a web server the app runs on   → dependency
+npm install jest -D            # runs your tests                → devDependency
+npm install eslint -D          # checks your code style         → devDependency
+npm install cowsay -D          # a dev toy, as in this lesson   → devDependency</code></pre>
+<p>And what the <code>^</code> means in <code>"^4.17.21"</code>: "this version or any later 4.x" — npm may install 4.18.0 on your collaborator's machine, but never 5.0.0, because a major-version bump is allowed to break things. That's <span class="term" data-tip="Semantic versioning: MAJOR.MINOR.PATCH — major breaks compatibility, minor adds features, patch fixes bugs.">semver</span>.</p>
+</details>
+<p class="read-more"><strong>Read more:</strong> <a href="https://docs.npmjs.com/about-semantic-versioning">npm docs — semantic versioning</a> · <a href="https://www.npmjs.com/">npmjs.com</a> (search a package before you trust it: weekly downloads, last publish date) · <a href="https://nodejs.org/en/learn/getting-started/introduction-to-nodejs">Node — what it is and why it exists</a></p>
+
+<h2>Idea 2 — npm scripts: named shortcuts that know where your tools live</h2>
+<p>Installed packages put their command-line programs in <code>node_modules/.bin/</code> — inside your project, not on your system's command path. So the raw way to run one is the full path, which nobody types twice:</p>
+<pre><code>node_modules/.bin/cowsay hello        # works, but you must remember the path</code></pre>
+<p>Instead you name it in the <code>"scripts"</code> section of <code>package.json</code> and run it by name. npm puts <code>node_modules/.bin</code> on the path first, so the short name resolves:</p>
+<pre><code>{
+  "scripts": {
+    "greeting": "cowsay hello"        // "cowsay" alone is enough inside a script
+  }
+}</code></pre>
+<pre><code>npm run greeting                      # npm looks up "greeting" and runs it</code></pre>
+<p>This is why every JS repo you'll ever clone has a README that says "run <code>npm test</code>" instead of a paragraph of paths — and it's how you'll run Jest for the rest of the week.</p>
+<details class="examples"><summary>More examples (optional)</summary>
+<p>A realistic scripts block — the same shape your week-2 project will end up with:</p>
+<pre><code>{
+  "scripts": {
+    "test": "jest",                   // npm test      — run the suite once
+    "test:watch": "jest --watch",     // npm run test:watch — rerun on every save
+    "lint": "eslint ."                // npm run lint  — check code style
+  }
+}</code></pre>
+<p>Two details worth knowing now:</p>
+<ol>
+  <li>A handful of names are special and skip the word <code>run</code>: <code>npm test</code> and <code>npm start</code> work bare. Everything else needs <code>npm run &lt;name&gt;</code>.</li>
+  <li>A script is just a shell line, so anything you learned in lesson 1-4 works in it — <code>"clean": "rm -rf node_modules"</code> is a valid (and destructive) script.</li>
+</ol>
+<p><code>npm run</code> with no name lists every script the project defines — the fastest way to orient yourself in a stranger's repo.</p>
+</details>
+<p class="read-more"><strong>Read more:</strong> <a href="https://docs.npmjs.com/cli/v10/using-npm/scripts">npm docs — scripts</a> · <a href="https://docs.npmjs.com/cli/v10/commands/npm-install">npm docs — install (every flag, including <code>-g</code>)</a></p>
+
+<h2>Do it for real (~20 min)</h2>
+<p>This replays the workshop's eight tasks. Terminal moves (<code>cd</code>, <code>mkdir -p</code>, <code>ls</code>, <code>cat</code>) are all from lesson 1-4.</p>
+
+<p><strong>Part A — Get Node on the machine</strong></p>
+<ol class="steps">
+  <li>Week 1 never installed Node, so check before assuming. Type:
+<pre><code>node -v      # prints a version like v22.14.0, or "command not found"
+npm -v       # prints a version like 10.9.2, or "command not found"</code></pre>
+  <em>You should see</em> two version numbers. If you got "command not found", do step 2; if both printed, skip to step 3.</li>
+  <li>Install Node with your operating system's package manager. <code>sudo</code> runs the command as administrator and will ask for your login password (nothing appears as you type it — that's normal). Pick the one line that matches your machine:
+<pre><code>sudo pacman -S nodejs npm        # Arch / Manjaro  ← this track's default
+sudo apt install nodejs npm      # Debian / Ubuntu / Mint
+brew install node                # macOS with Homebrew
+node -v                          # verify
+npm -v                           # verify</code></pre>
+  <em>Success check:</em> both commands print a version number. (Node 20 or 22 is what this week's Jest 30 supports; 22 is the safest choice.) If none of those apply — Windows, or a distro that ships an ancient Node — use the official installer at <a href="https://nodejs.org/en/download">nodejs.org/download</a> and re-run the two <code>-v</code> checks afterwards.</li>
+  <li>Meet the Node REPL — an interactive JavaScript prompt, the terminal's answer to the browser console from 1-1. Type <code>node</code> with no filename; the prompt changes to <code>&gt;</code> and stays there, evaluating each line you type:
+<pre><code>node               # your prompt becomes >
+1 + 1              # 2
+[1,2,3].map(n => n * 2)   # [ 2, 4, 6 ] — array methods from 1-8, no browser involved
+.exit              # leave the REPL (Ctrl+D does the same)</code></pre>
+  <em>You should see</em> results printed after each line, and your normal shell prompt back after <code>.exit</code>. If you ever find yourself stuck at a <code>&gt;</code> that ignores your shell commands, that's the REPL — <code>.exit</code>.</li>
+</ol>
+
+<p><strong>Part B — A real project folder</strong></p>
+<ol class="steps" start="4">
+  <li>Create this week's workspace and the practice project inside it. You'll reuse <code>~/code/week-2</code> for the rest of week 2:
+<pre><code>mkdir -p ~/code/week-2/npm-practice   # -p creates both levels
+cd ~/code/week-2/npm-practice         # move in
+pwd                                    # confirm where you are
+ls -a                                  # nothing but . and .. — an empty folder</code></pre>
+  <em>You should see</em> a path ending in <code>/code/week-2/npm-practice</code> and an empty listing. Now open this folder in your editor (File → Open Folder) — it will still be showing a week-1 folder, and you'll be editing files here for the rest of the lesson.</li>
+  <li>Initialize the project. <code>npm init</code> on its own is <em>interactive</em>: it asks about a dozen questions (package name, version, description, entry point, …) with a suggested answer in parentheses, and <kbd>Enter</kbd> accepts each suggestion. The <code>-y</code> flag says "yes to all defaults" and skips the questions — use that:
+<pre><code>npm init -y        # create package.json with default answers
+cat package.json   # print what it made</code></pre>
+  <em>You should see</em> a JSON object with <code>"name": "npm-practice"</code> (npm named it after the folder), a <code>"version"</code>, and a <code>"scripts"</code> section containing a placeholder <code>"test"</code> entry. Nothing else exists yet.</li>
+  <li>Install the workshop's package as a dev dependency:
+<pre><code>npm install cowsay -D     # download cowsay, record it in devDependencies</code></pre>
+  <em>You should see</em> npm report something like "added 41 packages, and audited 42 packages" (cowsay has dependencies of its own — that's the whole ecosystem arriving).</li>
+  <li>See what changed in the project — the two halves of an install:
+<pre><code>cat package.json          # a "devDependencies" block now lists cowsay
+ls node_modules           # dozens of package folders, one per line
+ls node_modules/.bin      # the runnable programs, including cowsay</code></pre>
+  <em>You should see</em> <code>"cowsay": "^1.6.0"</code> (or similar) under <code>devDependencies</code>, and <code>cowsay</code> listed in <code>.bin</code>. Only the first of these gets committed.</li>
+  <li>Run the tool the raw way, by its path:
+<pre><code>node_modules/.bin/cowsay hello</code></pre>
+  <em>You should see</em> an ASCII cow saying "hello". Remember this path — step 10 is about never typing it again.</li>
+  <li>Keep the repo clean. <code>node_modules</code> is regenerable and can hold hundreds of thousands of files, so it never belongs in a commit (lesson 1-5: you commit sources, and anything committed is history forever). <code>&gt;</code> replaces a file's whole content, so check first that nothing is there to lose:
+<pre><code>ls -a                          # confirm there is no .gitignore yet
+echo "node_modules" > .gitignore   # create it with one line
+cat .gitignore                 # verify the content</code></pre>
+  <em>You should see</em> no <code>.gitignore</code> in the first listing, then the single word <code>node_modules</code> printed back. Optional proof it works: <code>git init</code> then <code>git status</code> — the untracked list shows <code>package.json</code>, <code>package-lock.json</code> and <code>.gitignore</code>, but not <code>node_modules</code>.</li>
+</ol>
+
+<p><strong>Part C — Script it</strong></p>
+<ol class="steps" start="10">
+  <li>In your editor, open <code>package.json</code> and add a <code>greeting</code> entry to the existing <code>"scripts"</code> object — note the comma after the <code>"test"</code> line:
+<pre><code>"scripts": {
+  "test": "echo \"Error: no test specified\" && exit 1",
+  "greeting": "cowsay hello"
+},</code></pre>
+  <strong>Save the file</strong> (autosave is off), then confirm from the terminal:
+<pre><code>cat package.json     # the greeting script is in there</code></pre>
+  <em>You should see</em> both script entries in the printed file. If npm later complains about invalid JSON, the culprit is almost always that missing comma.</li>
+  <li>Run it by name:
+<pre><code>npm run greeting     # npm resolves "cowsay" from node_modules/.bin</code></pre>
+  <em>Success check:</em> the same cow, from a command with no path in it. That's the lesson.</li>
+</ol>
+
+<h2>Check yourself — fix the broken snippet</h2>
+<p>A teammate pushes this <code>package.json</code>. You clone the repo, run <code>npm install</code>, then <code>npm test</code> — and get <code>jest: not found</code>.</p>
+<pre><code>{
+  "name": "cart",
+  "version": "1.0.0",
+  "scripts": {
+    "test": "jest"
+  },
+  "devDependencies": {}
+}</code></pre>
+<p>What's wrong, and what single command on the teammate's machine would have prevented it?</p>
+<details class="reveal"><summary>Reveal</summary>
+<p>The script calls <code>jest</code>, but no package declares it — <code>devDependencies</code> is empty, so <code>npm install</code> had nothing to fetch and <code>node_modules/.bin/jest</code> doesn't exist on your machine. It works for the teammate because they have Jest installed locally without it being recorded (likely installed globally with <code>-g</code>, or installed and then removed from the file).</p>
+<p>The fix, run in the project: <code>npm install jest -D</code> — it downloads Jest <em>and</em> writes it into <code>devDependencies</code>, so the declaration travels with the repo. That's the difference between a package being on a machine and a package being part of a project.</p>
+</details>
+
+<div class="quiz"
+  data-q="You clone a JS repo. It has package.json but no node_modules folder. What do you run?"
+  data-opts='["npm install — with no arguments, it reads package.json and downloads everything listed",
+              "npm init -y — recreate package.json first, then the packages appear",
+              "Ask the author to commit node_modules so the clone is complete"]'
+  data-answer="0"
+  data-why="package.json is the declaration; node_modules is the regenerable result. Bare npm install rebuilds it. node_modules is git-ignored precisely because it never needs to travel."></div>
+
+<div class="quiz"
+  data-q="Why can an npm script say &quot;cowsay hello&quot; when typing cowsay hello straight into your terminal says command not found?"
+  data-opts='["Scripts run as administrator, which unlocks extra commands",
+              "npm puts node_modules/.bin on the path while the script runs, so local tools resolve by name",
+              "npm downloads the package again each time a script runs"]'
+  data-answer="1"
+  data-why="Locally installed executables live in node_modules/.bin inside the project. npm run adds that folder to the path for the duration of the script — no global install, no long paths."></div>
+
+<h2>Go deeper</h2>
+<p><strong>Primary source:</strong> the curriculum's <a href="https://github.com/bootcamp-we-have-at-home/npm-introduction">npm-introduction workshop</a> — its eight tasks are what you just did; skim it to confirm. Then <a href="https://docs.npmjs.com/cli/v10/configuring-npm/package-json">npm's package.json reference</a> for every field you'll meet in real repos, and <a href="https://github.com/nvm-sh/nvm">nvm</a> if you later need several Node versions side by side (not needed this week — the <code>pacman</code> install is fine).</p>
+
+<div class="feedback-ask">Finished? Tell your teacher (the agent) two things: ① Could you follow this lesson alone — 1 to 5? ② Where did you get stuck, if anywhere? Answers are recorded in <code>feedback/week-2.md</code> and improve the lesson for the next student.</div>
+
+<div class="footer-nav">
+Reference: <a href="../reference/npm-jest-tdd-cheatsheet.html">npm, Jest &amp; TDD cheat sheet</a> · Week map: <a href="2-index.html">Week 2 index</a><br>
+Previous: <a href="2-1-functions-and-callbacks.html">2-1 Functions &amp; Callbacks</a> · Next: <a href="2-3-testing-and-tdd.html">2-3 Testing &amp; TDD: Your First Jest Test</a><br>
+Next lesson installs the one dev dependency this whole week revolves around: Jest.<br>
+Stuck or curious? Ask your teacher (the agent). "What is package-lock.json actually for?" is a great follow-up.
+</div>
+
+<script src="../assets/quiz.js"></script>
+<script src="../assets/tooltip.js"></script>
