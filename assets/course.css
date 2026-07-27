@@ -9,8 +9,9 @@
   --ok: #2e7d32;
   --bad: #c62828;
 }
+/* Dark palette: follows the system unless config.html saved an explicit choice. */
 @media (prefers-color-scheme: dark) {
-  :root {
+  html:not(.theme-light) {
     --ink: #e8e6e0;
     --paper: #16150f;
     --accent: #e08a5c;
@@ -19,7 +20,19 @@
     --code-bg: #24221a;
   }
 }
+html.theme-dark {
+  --ink: #e8e6e0;
+  --paper: #16150f;
+  --accent: #e08a5c;
+  --muted: #9a988f;
+  --rule: #3a3830;
+  --code-bg: #24221a;
+}
 * { box-sizing: border-box; }
+/* Overrides saved by lessons/config.html (applied by assets/layout.js) */
+html.wide body { max-width: min(85rem, 96vw); }
+html.text-large body { font-size: 1.2rem; }
+html.font-sans body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
 body {
   font-family: Georgia, "Times New Roman", serif;
   color: var(--ink);
