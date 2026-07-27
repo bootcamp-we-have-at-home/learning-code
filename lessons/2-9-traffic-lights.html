@@ -5,10 +5,16 @@
 <h1>2-9 — Traffic Lights: Callbacks Morning Challenge</h1>
 <p class="subtitle">~60 minutes · Week 2, Day 3 (09:00–10:00 morning challenge) · Source: curriculum <a href="https://github.com/bootcamp-we-have-at-home/morning-challenge-traffic-lights">bootcamp-we-have-at-home/morning-challenge-traffic-lights</a></p>
 
-<p><strong>Why this matters:</strong> this is the bridge between the toy <code>setTimeout</code> chains you predicted in lesson 2-7 and week 3's real async work — here a callback chain drives something you can watch, so "the callback runs later" stops being a rule you memorised and becomes a light you can see turn on. Week 3 opens by asking "what is a callback and why would you use one?"; after this hour you answer it with a working animation.</p>
+<p><strong>Why this matters:</strong> in lesson 2-7 you predicted the order of <code>setTimeout</code> chains on paper. Here the same kind of chain drives something you can watch, so "the callback runs later" stops being a rule you memorised and becomes a light you can see turn on.</p>
+
+<p>Week 3 opens by asking "what is a callback and why would you use one?" — after this hour you answer it with a working animation.</p>
 
 <h2>Idea 1 — A function that hands you the "when I'm done" slot</h2>
-<p>The challenge repo ships a helper you must <em>not</em> edit, <code>blinkLight</code>. It's a function that builds and returns another function — first-class functions, exactly as lesson 2-1 defined them (functions are values: you can store them, pass them, and return them). Read it once; you only ever <em>use</em> it:</p>
+<p>Lesson 2-1 defined <span class="term" data-tip="Functions are values: you can store one in a variable, pass it to another function, and return it from a function.">first-class functions</span>: a function is a value you can store, pass around, and return.</p>
+
+<p>The challenge repo ships one helper built on that idea, <code>blinkLight</code>. You must <em>not</em> edit it.</p>
+
+<p>What makes it unusual is that it returns <em>another function</em>. Read it once; you only ever <em>use</em> it:</p>
 <pre><code>// this block ships in script.js — read it, don't edit it
 var time = 1000;                                  // every blink lasts 1 second
 
@@ -36,7 +42,11 @@ function blinkLight(element, colour) {
 function get(id) {                                // a one-line alias for the 1-10 DOM lookup
   return document.getElementById(id);
 }</code></pre>
-<p>So <code>red</code> is not a value, it's a function you call. <code>red()</code> means "red on for a second, then off, then nothing". <code>red(green)</code> means "red on for a second, then off, then run <code>green</code>" — <code>green</code> passed <em>without</em> parentheses, because you're handing over the function itself, not its result (2-1's most-repeated warning).</p>
+<p>So <code>red</code> is not a colour value. It is a function you call.</p>
+
+<p><code>red()</code> means "red on for a second, then off, then nothing". <code>red(green)</code> means "red on for a second, then off, then run <code>green</code>".</p>
+
+<p>Notice that <code>green</code> is passed <em>without</em> parentheses — you are handing over the function itself, not its result. That is 2-1's most-repeated warning, and it is the mistake to watch for all morning.</p>
 <div class="aside">The repo writes <code>var</code> and <code>function (callback) { … }</code>; today we write <code>const</code> and arrow functions. Leave the shipped block exactly as it is — it's the "don't change anything between here / and here" zone — and write <em>your own</em> code below it in modern style.</div>
 <details class="examples"><summary>More examples (optional)</summary>
 <p>The same shape, stripped of traffic lights — a function whose one job is to do something and then call your function:</p>
@@ -59,18 +69,32 @@ red(green)      // RIGHT: red receives the function and calls it when it's done<
 <p class="read-more"><strong>Read more:</strong> <a href="https://developer.mozilla.org/en-US/docs/Web/API/Element/classList">MDN — Element.classList</a> · <a href="https://javascript.info/closure">javascript.info — closures</a> (why the returned <code>blink</code> still remembers its <code>element</code> and <code>colour</code>)</p>
 
 <h2>Idea 2 — Chaining, and the anonymous-wrapper trick</h2>
-<p>Two lights in a row is easy: <code>red(green)</code>. Three is where beginners stall, because the obvious guess is wrong:</p>
+<p>You can already do two lights in a row: <code>red(green)</code>, from Idea 1.</p>
+
+<p>Three lights is where beginners stall, because both obvious guesses are wrong:</p>
 <pre><code>red(green, yellow)          // WRONG: blinkLight takes ONE callback; the second is ignored
 red(green(yellow))          // WRONG: green runs immediately (see Idea 1)</code></pre>
-<p>The fix is the takeaway of this whole challenge: <strong>when the next step needs an argument of its own, wrap it in an anonymous function</strong>. That wrapper is a function value, so it can be passed; and its body doesn't run until it's called:</p>
+<p>The fix is the takeaway of this whole challenge: <strong>when the next step needs an argument of its own, wrap it in an <span class="term" data-tip="A function with no name, written inline — here an arrow function, from lesson 2-1.">anonymous function</span></strong>.</p>
+
+<p>That wrapper is a function value, so it can be passed. And its body doesn't run until it's called:</p>
 <pre><code>red(() =&gt; green(yellow))    // red → (1s) → green → (1s) → yellow</code></pre>
-<p>Read it inside-out: <code>() =&gt; green(yellow)</code> is a function that, <em>when someone calls it</em>, starts green with yellow queued behind it. <code>red</code> is that someone, one second later. Longer chains nest the same way — and yes, the parentheses pile up on the right. That pyramid has a name you'll meet in week 3 ("callback hell") and a cure you'll meet there too (promises, <code>async</code>/<code>await</code>); for one hour, embrace it.</p>
-<p><strong>Two lights at the <em>same</em> time is a different move</strong>, and you need it below for the red-and-yellow stage: you don't nest, you call both in one tick and let only <em>one</em> of them carry the chain onward:</p>
+<p>Read it inside-out. <code>() =&gt; green(yellow)</code> is a function that, <em>when someone calls it</em>, starts green with yellow queued behind it.</p>
+
+<p><code>red</code> is that someone, one second later. Longer chains nest the same way — and yes, the parentheses pile up on the right.</p>
+
+<p>That pyramid has a name you'll meet in week 3 ("callback hell") and a cure you'll meet there too (promises, <code>async</code>/<code>await</code>). For one hour, embrace it.</p>
+
+<h3>Two lights at the same time</h3>
+<p><strong>Two lights at the <em>same</em> time is a different move</strong>, and you need it below for the red-and-yellow stage.</p>
+
+<p>You don't nest. You call both in one tick, and let only <em>one</em> of them carry the chain onward:</p>
 <pre><code>const bothThenGreen = () =&gt; {
   red();               // starts now, no callback — this one just lights up and stops
   yellow(green);       // starts now too, and carries the sequence onward after 1s
 };</code></pre>
-<p>Both classes get added in the same tick, so the browser paints them together: one second of red-and-yellow, then green. Which of the two carries the callback doesn't matter — what matters is that only one does, or you'd fork the sequence into two chains running side by side.</p>
+<p>Both classes get added in the same tick, so the browser paints them together: one second of red-and-yellow, then green.</p>
+
+<p>Which of the two carries the callback doesn't matter. What matters is that only one does — otherwise you fork the sequence into two chains running side by side.</p>
 <details class="examples"><summary>More examples (optional)</summary>
 <p>Four steps, built up one at a time so the nesting never surprises you:</p>
 <pre><code>red(green)                                  // 2 steps
@@ -83,7 +107,9 @@ red(thenYellow)                             // ...passed exactly like the anonym
 <p class="read-more"><strong>Read more:</strong> <a href="http://callbackhell.com/">callbackhell.com</a> (the pyramid, and why week 3 escapes it) · <a href="https://javascript.info/settimeout-setinterval">javascript.info — setTimeout and setInterval</a></p>
 
 <h2>Do it for real (~45 min)</h2>
-<p>Four parts, exactly as the challenge repo states them. Parts 1–3 are the challenge; Part 4 is a clearly-marked stretch goal — a good morning if you finish Part 3. All your work happens in one file, <code>script.js</code>, below the shipped block.</p>
+<p>Four parts, exactly as the challenge repo states them. Parts 1–3 are the challenge; Part 4 is a clearly-marked stretch goal.</p>
+
+<p>Finishing Part 3 is a good morning. All your work happens in one file, <code>script.js</code>, below the shipped block.</p>
 <ol class="steps">
   <li>Clone the challenge into your code folder (<code>git clone</code> is from lesson 1-5; <code>cd</code> from 1-4):
 <pre><code>cd ~/code

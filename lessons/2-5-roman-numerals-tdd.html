@@ -5,11 +5,23 @@
 <h1>2-5 — Roman Numerals: TDD Code-Along</h1>
 <p class="subtitle">~75 minutes · Week 2, Day 1, 15:00–17:00 · Source: curriculum <a href="https://github.com/bootcamp-we-have-at-home/Roman-Numerals">bootcamp-we-have-at-home/Roman-Numerals</a> code-along, adapted solo</p>
 
-<p><strong>Why this matters:</strong> FizzBuzz in 2-4 was TDD on a problem you already knew the answer to; this one is TDD on a problem where the algorithm genuinely <em>arrives</em> out of the tests. Then you wire the tested function to a real accessible form — the same "pure logic + thin DOM layer" split the week project is built on.</p>
+<p><strong>Why this matters:</strong> In 2-4 you did TDD on FizzBuzz — a problem whose answer you already knew before the first test.</p>
+<p>This one is different: the algorithm genuinely <em>arrives</em> out of the tests.</p>
+<p>Then you wire the tested function to a real accessible form — the same "pure logic + thin DOM layer" split the week project is built on.</p>
 
 <h2>Idea 1 — A kata grows the algorithm out of the tests</h2>
-<p>A <span class="term" data-tip="A small exercise you repeat deliberately to practise a technique rather than to produce novel code. Borrowed from martial arts.">kata</span> is a problem you solve for the practice, not the product. The roman-numerals kata (the repo credits <a href="https://remonsinnema.com/2011/12/05/practicing-tdd-using-the-roman-numerals-kata/">Ray Sinnema</a>) is the classic demonstration of TDD's central claim: if you only ever write the <em>simplest</em> code that turns the current red test green, the design shows up by itself.</p>
-<p>Concretely: test <code>1 → "I"</code> and you write <code>return "I"</code>. That feels like cheating — it isn't, it's the rule. Test <code>2 → "II"</code>, <code>3 → "III"</code> and the honest simplest fix is "repeat <code>I</code> that many times". Test <code>4 → "IV"</code> and repetition breaks, so you special-case it. Test <code>5</code>, <code>9</code>, <code>10</code> and you're writing your fourth near-identical <code>if</code> — that repetition is the design pressure. You collapse the <code>if</code>s into <em>data</em>: an array of objects pairing a number with its symbol (arrays of objects, dot access — lesson 1-10), walked largest-first. That table is the finished algorithm, and you never designed it up front.</p>
+<p>In 2-4 you wrote one failing test, made it pass, and repeated. You already know that loop.</p>
+<p>What you did there had a name: a <span class="term" data-tip="A small exercise you repeat deliberately to practise a technique rather than to produce novel code. Borrowed from martial arts.">kata</span> — a problem you solve for the practice, not the product.</p>
+<p>The roman-numerals kata (the repo credits <a href="https://remonsinnema.com/2011/12/05/practicing-tdd-using-the-roman-numerals-kata/">Ray Sinnema</a>) is the classic demonstration of TDD's central claim.</p>
+<p>The claim: if you only ever write the <em>simplest</em> code that turns the current red test green, the design shows up by itself.</p>
+
+<h3>How that plays out here</h3>
+<p>Test <code>1 → "I"</code> and you write <code>return "I"</code>. That feels like cheating — it isn't, it's the rule.</p>
+<p>Test <code>2 → "II"</code> and <code>3 → "III"</code>, and the honest simplest fix is "repeat <code>I</code> that many times".</p>
+<p>Test <code>4 → "IV"</code> and repetition breaks, so you special-case it.</p>
+<p>Test <code>5</code>, <code>9</code>, <code>10</code> and you're writing your fourth near-identical <code>if</code>. That repetition is the design pressure.</p>
+<p>So you collapse the <code>if</code>s into <em>data</em>: an array of objects pairing a number with its symbol (arrays of objects, dot access — lesson 1-10), walked largest-first.</p>
+<p>That table is the finished algorithm, and you never designed it up front.</p>
 <div class="aside">Red → green → <strong>refactor</strong>: the third step is the one people skip. Refactoring means changing the shape of the code while the tests stay green — the tests are what make it safe, which is the entire payoff of having written them first (2-3).</div>
 <details class="examples"><summary>More examples (optional)</summary>
 <p>The subtractive pairs are the whole trick. Roman numerals are written largest-first and additively — <code>MDCLXVI</code> = 1000+500+100+50+10+5+1 — <em>except</em> for six cases where a smaller symbol sits in front and is subtracted:</p>
@@ -30,13 +42,21 @@
 <p class="read-more"><strong>Read more:</strong> <a href="http://codekata.com/">Dave Thomas — Code Kata</a> (where the practice-problem idea comes from) · <a href="https://kata-log.rocks/">kata-log.rocks</a> (a catalogue to keep repping) · <a href="https://martinfowler.com/bliki/OpportunisticRefactoring.html">Fowler — opportunistic refactoring</a></p>
 
 <h2>Idea 2 — From tested function to page: an accessible form</h2>
-<p>The converter is pure logic, so it belongs in its own file with its own tests. The page is a separate, thin layer: take input, call the function, show the result. Three pieces you need for that layer.</p>
-<p><strong>1. A labelled input.</strong> Lesson 1-2 made the case that tags should say what they mean and that accessibility is checkable with Lighthouse; forms are where that bites hardest. Every input needs a <code>&lt;label&gt;</code> whose <code>for</code> matches the input's <code>id</code> — that pairing is what a screen reader announces, and it also makes clicking the label focus the input. A placeholder is <em>not</em> a label.</p>
+<p>In 1-10 you already read a value off the page and wrote a result back into it with <code>querySelector</code>. This section is that same move, one layer tidier.</p>
+<p>The converter is pure logic, so it belongs in its own file with its own tests.</p>
+<p>The page is a separate, thin layer: take input, call the function, show the result.</p>
+<p>Three pieces build that layer.</p>
+
+<p><strong>1. A labelled input.</strong> Lesson 1-2 made the case that tags should say what they mean, and that accessibility is checkable with Lighthouse. Forms are where that bites hardest.</p>
+<p>Every input needs a <code>&lt;label&gt;</code> whose <code>for</code> matches the input's <code>id</code>. That pairing is what a screen reader announces. It also makes clicking the label focus the input.</p>
+<p>A placeholder is <em>not</em> a label.</p>
 <pre><code>&lt;label for="numeral"&gt;Enter a number (1–3999)&lt;/label&gt;
 &lt;input id="numeral" name="numeral" type="text" placeholder="e.g. 42" required&gt;
 &lt;!-- id is what the label points at; name is the key the browser would submit under --&gt;
 &lt;button type="submit"&gt;Convert&lt;/button&gt;</code></pre>
-<p><strong>2. The submit event.</strong> A form's default behaviour is to send its data to a server and reload the page — which throws away your result instantly. You listen for <code>submit</code> on the <em>form</em> (not click on the button: that way <kbd>Enter</kbd> in the field works too) and cancel the default:</p>
+<p><strong>2. The submit event.</strong> A form's default behaviour is to send its data to a server and reload the page. That throws away your result instantly.</p>
+<p>So you listen for <code>submit</code> on the <em>form</em>, not for a click on the button — that way pressing <kbd>Enter</kbd> in the field works too.</p>
+<p>Then you cancel the default:</p>
 <pre><code>form.addEventListener("submit", (event) =&gt; {   // the arrow is a callback — 2-1
   event.preventDefault();                      // stop the page reloading
   // …read the input, call romanizer, show the result
@@ -55,8 +75,10 @@ Number("abc")          // NaN   — "not a number", the value the guard tests fo
 <p class="read-more"><strong>Read more:</strong> <a href="https://developer.mozilla.org/en-US/docs/Learn/Forms/Your_first_form">MDN — your first form</a> · <a href="https://developer.mozilla.org/en-US/docs/Web/API/Event/preventDefault">MDN — event.preventDefault()</a> · <a href="https://www.w3.org/WAI/tutorials/forms/labels/">W3C — labelling controls</a></p>
 
 <h2>Do it for real (~50 min)</h2>
-<p>This is the code-along, and <strong>this page is the presenter</strong>: each numbered step hands you the next test case, you make it pass before reading on. Resist scrolling ahead — the point is to feel the design pressure build, not to arrive at the answer.</p>
-<p>You are <em>not</em> cloning the curriculum repo to work in: it ships the <em>finished</em> converter and its 27 passing tests (verified by cloning it while writing this lesson), so cloning it would hand you the answer before you've felt the problem. You'll scaffold fresh, the same way you did in 2-3, and read the original as a solution afterwards.</p>
+<p>This is the code-along, and <strong>this page is the presenter</strong>. Each numbered step hands you the next test case, and you make it pass before reading on.</p>
+<p>Resist scrolling ahead — the point is to feel the design pressure build, not to arrive at the answer.</p>
+<p>You are <em>not</em> cloning the curriculum repo to work in. It ships the <em>finished</em> converter and its 27 passing tests (verified by cloning it while writing this lesson), so cloning it would hand you the answer before you've felt the problem.</p>
+<p>Instead you'll scaffold fresh, the same way you did in 2-3, and read the original as a solution afterwards.</p>
 <ol class="steps">
   <li>Make the project folder and scaffold Jest (<code>mkdir</code> and <code>cd</code> are from 1-4; the npm commands are from 2-2 and 2-3):
 <pre><code>mkdir -p ~/code/week-2/roman-numerals   # -p: create week-2 too if it isn't there yet

@@ -5,10 +5,13 @@
 <h1>2-1 — Functions, First-Class: Callbacks &amp; Higher-Order Functions</h1>
 <p class="subtitle">~45 minutes · Week 2, Day 1, 09:00–11:00 (session 1 of 2) · Source: curriculum <a href="../curriculum/coursebook/week-2/intro-to-functions-slides.md">intro-to-functions-slides.md</a>, first half</p>
 
-<p><strong>Why this matters:</strong> everything week 2 tests is a function, and everything week 3 does with APIs is "here's a function, run it when the data arrives". Today you name the thing you already did in lesson <a href="1-8-array-methods.html">1-8</a>: the arrow you handed to <code>map</code> was a <em>callback</em>.</p>
+<p><strong>Why this matters:</strong> everything week 2 tests is a function, and everything week 3 does with APIs is "here's a function, run it when the data arrives".</p>
+<p>Today you name the thing you already did in lesson <a href="1-8-array-methods.html">1-8</a>: the arrow you handed to <code>map</code> was a <em>callback</em>.</p>
 
 <h2>Idea 1 — Anatomy refresh: calling vs referencing, return vs side effect</h2>
-<p>You've written functions in <a href="https://www.freecodecamp.org/learn/javascript-algorithms-and-data-structures/">freeCodeCamp's JavaScript section</a> and used them in 1-7 and 1-8, so this is a compressed refresh. A function has a <strong>name</strong>, <strong>parameters</strong>, and a <strong>body</strong>; the values you hand it when you call it are its <strong>arguments</strong>:</p>
+<p>You've written functions in <a href="https://www.freecodecamp.org/learn/javascript-algorithms-and-data-structures/">freeCodeCamp's JavaScript section</a> and used them in lessons 1-7 and 1-8. So this section is a refresh, not new material.</p>
+<p>A function has a <strong>name</strong>, <strong>parameters</strong>, and a <strong>body</strong>.</p>
+<p>The values you hand it when you call it are its <strong>arguments</strong>:</p>
 <pre><code>const myFunction = (argument1, argument2) =&gt; {
   console.log("first argument:", argument1);    // a side effect — it prints
   console.log("second argument:", argument2);   // still no return statement
@@ -38,7 +41,10 @@ shout("hi") + 1        // NaN          — undefined + 1; the classic "forgot to
 <p class="read-more"><strong>Read more:</strong> <a href="https://javascript.info/function-basics">javascript.info — function basics</a> · <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/Arrow_functions">MDN — arrow functions</a></p>
 
 <h2>Idea 2 — Functions are first-class values</h2>
-<p>In JavaScript a function is a <span class="term" data-tip="First-class: a value the language lets you store in variables, put in objects and arrays, pass as an argument, and return from a function — exactly like a number or a string.">first-class</span> value. Anywhere you can put a number, you can put a function. Five places, and you already know four of the containers:</p>
+<p>In lesson 1-8 you handed an arrow function straight to <code>map</code>, the way you'd hand it a number or a string. That worked on purpose.</p>
+<p>In JavaScript a function is a <span class="term" data-tip="First-class: a value the language lets you store in variables, put in objects and arrays, pass as an argument, and return from a function — exactly like a number or a string.">first-class</span> value.</p>
+<p><strong>Anywhere you can put a number, you can put a function.</strong></p>
+<p>Below are five places it can go. You already know four of the containers — variables, objects (1-10), arrays (1-8), and arguments:</p>
 <pre><code>// 1 — in a variable
 const sayHi = () =&gt; console.log("Hello world");
 const alias = sayHi;        // note: NO parentheses — copying the function, not its result
@@ -65,12 +71,16 @@ const greetSomeone = (greeting) =&gt; (name) =&gt; console.log(greeting, name);
 const sayHello = greetSomeone("hello");   // sayHello is now a function
 sayHello("world");                        // "hello world"</code></pre>
 <div class="aside">The coursebook writes #5 as <code>function greetSomeone(greeting) { return function (name) {…} }</code>; the arrow version above returns the inner arrow implicitly. Same thing, and the inner function remembers the <code>greeting</code> it was born with.</div>
-<p>Now the two words the deck flags with a JARGON ALERT, and they're the vocabulary of week 3:</p>
+<p>Two words name what you just read, and the slide deck flags both with a JARGON ALERT.</p>
+<p>They are also the vocabulary of week 3:</p>
 <ul>
   <li>A function passed as an argument to another function is a <span class="term" data-tip="Callback: a function you hand to another function so that other function can call it — at the right time, or for each item, or when data arrives.">callback function</span>. In #4, <code>sayHi</code> is the callback.</li>
   <li>A function that takes a function as an argument <em>and/or</em> returns one is a <span class="term" data-tip="Higher-order function: a function that operates on other functions — taking them as arguments, returning them, or both.">higher-order function</span>. In #4, <code>run</code> is higher-order; in #5, <code>greetSomeone</code> is too.</li>
 </ul>
-<p>Which makes 1-8 retroactively make sense: <strong>the arrow you passed to <code>map</code> was a callback, and <code>map</code> is a higher-order function.</strong> <code>nums.map(n =&gt; n * 2)</code> hands <code>map</code> a function and lets <code>map</code> call it once per element. Same for <code>filter</code>, <code>find</code>, <code>forEach</code> — you have been writing callbacks for a week without the word.</p>
+<p>Which makes lesson 1-8 retroactively make sense.</p>
+<p><strong>The arrow you passed to <code>map</code> was a callback, and <code>map</code> is a higher-order function.</strong></p>
+<p><code>nums.map(n =&gt; n * 2)</code> hands <code>map</code> a function and lets <code>map</code> call it once per element.</p>
+<p>Same for <code>filter</code>, <code>find</code> and <code>forEach</code> — you have been writing callbacks for a week without the word.</p>
 <details class="examples"><summary>More examples (optional)</summary>
 <p>Callbacks stop looking academic the moment the caller decides <em>when</em> to run them:</p>
 <pre><code>// A higher-order function you could write today: run something twice
@@ -92,7 +102,8 @@ triple(5);         // 15
 <p class="read-more"><strong>Read more:</strong> <a href="https://developer.mozilla.org/en-US/docs/Glossary/Callback_function">MDN — callback function</a> · <a href="https://eloquentjavascript.net/05_higher_order.html">Eloquent JavaScript ch. 5 — higher-order functions</a></p>
 
 <h2>Do it for real (~20 min)</h2>
-<p>The deck's own sequence, rebuilt in the browser console — <kbd>F12</kbd> → Console, from lesson <a href="1-1-intro-to-web.html">1-1</a>, as in 1-7, 1-8 and 1-10. No files, no folders today. <strong>Predict the output before you press Enter on every step</strong>; the prediction is the exercise, the typing is just bookkeeping.</p>
+<p>The deck's own sequence, rebuilt in the browser console — <kbd>F12</kbd> → Console, from lesson <a href="1-1-intro-to-web.html">1-1</a>, as in 1-7, 1-8 and 1-10. No files, no folders today.</p>
+<p><strong>Predict the output before you press Enter on every step.</strong> The prediction is the exercise; the typing is just bookkeeping.</p>
 <ol class="steps">
   <li>Define the deck's function and call it:
 <pre><code>const myFunction = (a, b) =&gt; { console.log("first:", a); console.log("second:", b); }

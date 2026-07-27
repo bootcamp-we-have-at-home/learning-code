@@ -1,6 +1,6 @@
 # Lesson Design Standard
 
-Contract for every generated lesson. Written after the student reported the first three lessons "too hard to follow" — lessons 1–2 were attempted and failed in practice; a 4-reviewer audit found the root causes recorded in `learning-records/0003-lesson-redesign.md`. Every rule below traces to one of them. Rules 9–11 were added after the first cohort finished week 1 (`feedback/week-1.md`, week-overall; `learning-records/0004-week-1-feedback-revision.md`).
+Contract for every generated lesson. Written after the student reported the first three lessons "too hard to follow" — lessons 1–2 were attempted and failed in practice; a 4-reviewer audit found the root causes recorded in `learning-records/0003-lesson-redesign.md`. Every rule below traces to one of them. Rules 9–11 were added after the first cohort finished week 1 (`feedback/week-1.md`, week-overall; `learning-records/0004-week-1-feedback-revision.md`). Rule 12 was added after the first week-2 feedback reported dense openings (`feedback/week-2.md`, 2-2; `learning-records/0006-prose-density.md`).
 
 ## File layout & naming
 
@@ -33,6 +33,8 @@ lessons/<week>-<lesson>-<title>.html # e.g. lessons/1-4-terminal.html
 9. **Extra worked examples, collapsed.** Each idea section carries at least one worked example beyond the minimum teaching path, inside `<details class="examples"><summary>More examples (optional)</summary>…</details>` so it is skippable and the required reading stays short. Nothing the steps or checks depend on may live inside a collapsed block (students reported wanting more examples without more required reading).
 10. **Cite what you assume.** Strengthens rule 1: it is not enough that a skill was taught earlier — its first use in a lesson *names the source inline* ("the F12 console from lesson 1-1"). Knowledge from outside the track (prerequisites included) gets a link to where it is explained (freeCodeCamp section, MDN page), or a one-line explanation in place. A bare "as you know" is a defect (students reported unexplained assumed knowledge).
 11. **Every idea section ends with a "Read more" line** — `<p class="read-more">` with 1–3 optional links to adjacent topics the section opens a door to but doesn't cover (e.g. media queries → mobile-first design). Chosen per section, clearly optional, never required by any step or check, and never a substitute for teaching in the body.
+
+12. **Pace the prose for a first-time programmer.** Required-reading paragraphs are 2–3 sentences at most and introduce at most ONE new concept each — a second new concept starts a new paragraph. A load-bearing claim ("Node runs the same JavaScript you already know") stands alone as its own short paragraph, never as a clause buried mid-paragraph. Every idea section eases in: its first 1–2 sentences anchor in something the student has already done before the first new term appears. Supporting detail that isn't needed to proceed moves to the collapsed examples block (rule 9) or a tooltip — not into a longer paragraph. A 5–6-line paragraph opening a new topic is a defect (students reported week-2 openings jumping straight into comparisons with no ease-in).
 
 ## Check yourself: active over passive
 

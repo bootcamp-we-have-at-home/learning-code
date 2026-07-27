@@ -5,11 +5,15 @@
 <h1>2-3 — Testing &amp; TDD: Your First Jest Test</h1>
 <p class="subtitle">~45 minutes · Week 2, Day 1, 11:30–12:00 · Source: curriculum <a href="https://github.com/bootcamp-we-have-at-home/testing-tdd-intro">testing-tdd-intro</a></p>
 
-<p><strong>Why this matters:</strong> the curriculum's own line for this week is "refactoring your code without tests in place is like playing Russian roulette" (<a href="../curriculum/coursebook/week-2/learning-outcomes.md">learning-outcomes.md</a>). Everything you build from here — the week project, the API week, every job — gets changed after it's written, and tests are what let you change it without fear.</p>
+<p><strong>Why this matters:</strong> the curriculum's own line for this week is "refactoring your code without tests in place is like playing Russian roulette" (<a href="../curriculum/coursebook/week-2/learning-outcomes.md">learning-outcomes.md</a>).</p>
+<p>Everything you build from here — the week project, the API week, every job — gets changed after it's written, and tests are what let you change it without fear.</p>
 
 <h2>Idea 1 — What a test is, and what "unit" means</h2>
-<p>The curriculum defines it plainly: <em>testing is the process of executing your code to check it does what it's supposed to do</em>. You have been testing all week — every time you opened the F12 console from lesson 1-1, called a function, and eyeballed the result. That's a manual test: it works, and it evaporates the moment you close the tab.</p>
-<p>An <span class="term" data-tip="A test that exercises one small piece of code — usually a single function — in isolation.">automated unit test</span> is that same check written as code, so it can be re-run in one second, forever. Here is the idea with no framework at all — pure JavaScript you could already write after 1-7:</p>
+<p>You have been testing all week already. Every time you opened the F12 console from lesson 1-1, called a function, and eyeballed the result — that was a test.</p>
+<p>The curriculum defines it plainly: <em>testing is the process of executing your code to check it does what it's supposed to do</em>.</p>
+<p>What you were doing has a name: a <strong>manual test</strong>. It works, and it evaporates the moment you close the tab.</p>
+<p>An <span class="term" data-tip="A test that exercises one small piece of code — usually a single function — in isolation.">automated unit test</span> is that same check written as code, so it can be re-run in one second, forever.</p>
+<p>Here is the idea with no framework at all — pure JavaScript you could already write after 1-7:</p>
 <pre><code>const double = (num) =&gt; num * 2;
 
 const testDouble = () =&gt; {
@@ -21,7 +25,10 @@ const testDouble = () =&gt; {
     console.log("Test passed ✔");
   }
 };</code></pre>
-<p>A framework like Jest is only that pattern, prewritten and prettier. "Unit" means the thing under test is one small piece — a single function such as <code>double</code>. Its opposite is an <span class="term" data-tip="A test that checks several pieces working together — e.g. a form, its validation, and the storage it writes to.">integration test</span>, which checks that several pieces fit together. This week is unit tests only: small functions, called directly, with a known answer.</p>
+<p>A framework like Jest is only that pattern, prewritten and prettier.</p>
+<p>"Unit" means the thing under test is one small piece — a single function such as <code>double</code>.</p>
+<p>Its opposite is an <span class="term" data-tip="A test that checks several pieces working together — e.g. a form, its validation, and the storage it writes to.">integration test</span>, which checks that several pieces fit together.</p>
+<p>This week is unit tests only: small functions, called directly, with a known answer.</p>
 <div class="aside">The coursebook writes its examples with <code>function</code> declarations and <code>var</code>; today we write <code>const</code> + arrow functions (from 1-7 and 1-8) — same behavior, less noise.</div>
 <details class="examples"><summary>More examples (optional)</summary>
 <p>Three checks on the same function, written the manual way — notice that the only things changing are the input and the expected value:</p>
@@ -36,7 +43,10 @@ shout("Hi!")    // expect "HI!!"   — does it double the punctuation? decide, t
 <p class="read-more"><strong>Read more:</strong> <a href="https://martinfowler.com/articles/practical-test-pyramid.html">Martin Fowler — the practical test pyramid</a> (unit vs integration vs end-to-end vs regression, with when to use each) · <a href="https://jestjs.io/docs/using-matchers">Jest — other matchers</a> · <a href="https://medium.com/javascript-scene/what-every-unit-test-needs-f6cd34d9836d">5 questions every unit test must answer</a> (the curriculum's own resource)</p>
 
 <h2>Idea 2 — TDD and the red-green-refactor cycle</h2>
-<p>Test-Driven Development inverts the obvious order: <strong>you write the test before the function exists</strong>. That sounds backwards until you notice what it forces — to write <code>expect(add(2, 2)).toBe(4)</code> you must first decide the function's name, its arguments, and its return value. Requirements get settled while they are still cheap to change.</p>
+<p>In Idea 1 the check came second: <code>double</code> existed first, and <code>testDouble</code> was written afterwards to confirm it. That is the obvious order.</p>
+<p>Test-Driven Development inverts it: <strong>you write the test before the function exists</strong>.</p>
+<p>That sounds backwards until you notice what it forces. To write <code>expect(add(2, 2)).toBe(4)</code> you must first decide the function's name, its arguments, and its return value.</p>
+<p>Requirements get settled while they are still cheap to change.</p>
 <p>The loop has three beats:</p>
 <table>
   <tr><th>Beat</th><th>You do</th><th>Why</th></tr>
@@ -44,7 +54,9 @@ shout("Hi!")    // expect "HI!!"   — does it double the punctuation? decide, t
   <tr><td><strong>Green</strong></td><td>Write the simplest code that passes it</td><td>Smallest step that could work; no extra features</td></tr>
   <tr><td><strong>Refactor</strong></td><td>Tidy the code while the test stays green</td><td>Safe cleanup — the test tells you the second you break something</td></tr>
 </table>
-<p>Then repeat for the next requirement. A good test also reads like a bug report, answering three questions: <em>what is being tested</em>, <em>what should it do</em>, <em>what did it actually do</em>. Jest gives you all three for free — the first two from the name you type, the third from its failure output.</p>
+<p>Then repeat for the next requirement.</p>
+<p>A good test also reads like a bug report. It answers three questions: <em>what is being tested</em>, <em>what should it do</em>, <em>what did it actually do</em>.</p>
+<p>Jest gives you all three for free — the first two from the name you type, the third from its failure output.</p>
 <details class="examples"><summary>More examples (optional)</summary>
 <p>One full cycle in miniature, for a <code>isEven</code> function:</p>
 <pre><code>// RED — the test exists, the function does not
@@ -68,7 +80,8 @@ const isEven = (n) =&gt; n % 2 === 0;</code></pre>
 <p class="read-more"><strong>Read more:</strong> <a href="http://blog.cleancoder.com/uncle-bob/2014/12/17/TheCyclesOfTDD.html">Uncle Bob — the cycles of TDD</a> · <a href="http://codesolid.com/post/pros-and-cons-of-test-driven-development/">pros and cons of TDD</a> (both from the week's <a href="../curriculum/coursebook/week-2/resources.md">resources.md</a>)</p>
 
 <h2>Do it for real (~25 min)</h2>
-<p>You'll build a tiny project from nothing, write a test for a function that doesn't exist, watch it fail, and then make it pass. Everything here uses <code>npm init</code> and <code>npm install</code> exactly as lesson 2-2 taught them, and the terminal moves (<code>mkdir</code>, <code>cd</code>, <code>ls</code>, <code>cat</code>) from 1-4.</p>
+<p>You'll build a tiny project from nothing, write a test for a function that doesn't exist, watch it fail, and then make it pass.</p>
+<p>Nothing here is a new tool: <code>npm init</code> and <code>npm install</code> are exactly as lesson 2-2 taught them, and the terminal moves (<code>mkdir</code>, <code>cd</code>, <code>ls</code>, <code>cat</code>) are from 1-4.</p>
 <ol class="steps">
   <li>Make the project folder inside your week-2 workspace (created in 2-2) and move into it:
 <pre><code>mkdir -p ~/code/week-2/jest-practice   # -p: create parents if missing

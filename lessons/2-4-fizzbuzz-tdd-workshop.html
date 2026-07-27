@@ -5,16 +5,23 @@
 <h1>2-4 — FizzBuzz: TDD Workshop (Ping-Pong)</h1>
 <p class="subtitle">~60–90 minutes · Week 2, Day 1, 13:00–15:00 · Source: curriculum workshop <a href="https://github.com/bootcamp-we-have-at-home/fizzbuzz">bootcamp-we-have-at-home/fizzbuzz</a>, adapted solo</p>
 
-<p><strong>Why this matters:</strong> lesson 2-3 taught you what a Jest test looks like; this is the first time you build a whole function without ever writing implementation code before a failing test demands it. That reflex is what makes the week project (2-10) testable instead of hopeful.</p>
+<p><strong>Why this matters:</strong> lesson 2-3 taught you what a Jest test looks like. This is the first time you build a whole function without ever writing implementation code before a failing test demands it.</p>
+<p>That reflex is what makes the week project (2-10) testable instead of hopeful.</p>
 
 <h2>Idea 1 — Ping-pong: two hats, never worn at once</h2>
-<p>Ping-pong is the pairing form of the red-green-refactor cycle from lesson 2-3. Partner A writes <em>one</em> failing test and hands the keyboard over. Partner B writes the <strong>minimum</strong> code that makes it pass — deliberately literal, even silly — then writes the next failing test and hands back. The point isn't politeness: B's "cheating" implementation is a bug report against A's test. If <code>return 1</code> passes your whole suite, your suite is too small, and you found that out in ten seconds instead of in production.</p>
-<p><strong>Solo adaptation — you wear both hats, one at a time.</strong> Say the hat out loud before each move, and physically change something (sit back, move to the other file, switch terminal tab) so the switch is real:</p>
+<p>In lesson 2-3 you ran the red-green-refactor cycle alone: you wrote the failing test, then you wrote the code that passed it. Ping-pong is that same cycle, split between two people.</p>
+<p>Partner A writes <em>one</em> failing test and hands the keyboard over.</p>
+<p>Partner B writes the <strong>minimum</strong> code that makes it pass — deliberately literal, even silly — then writes the next failing test and hands back.</p>
+<p>The point isn't politeness: B's "cheating" implementation is a bug report against A's test.</p>
+<p>If <code>return 1</code> passes your whole suite, your suite is too small — and you found that out in ten seconds instead of in production.</p>
+<h3>Solo adaptation — you wear both hats, one at a time</h3>
+<p>Say the hat out loud before each move. Physically change something too (sit back, move to the other file, switch terminal tab) so the switch is real:</p>
 <ul>
   <li><strong>Tester hat:</strong> open <code>test.js</code> only. Write one <code>test(...)</code> block. Say what failure you expect (<em>"this will fail: expected 1, received undefined"</em>). Run it. You must be wrong-free about the failure <em>before</em> you fix it.</li>
   <li><strong>Implementer hat:</strong> open <code>index.js</code> only. Write the laziest code that turns the suite green. Hard-coding is not just allowed, it's the discipline — it proves what the next test has to cover.</li>
 </ul>
-<p>The one rule that makes this work: <strong>never write implementation while wearing the tester hat.</strong> If you catch yourself typing <code>if (n % 3 === 0)</code> inside <code>test.js</code>, you've slipped.</p>
+<p>The one rule that makes this work: <strong>never write implementation while wearing the tester hat.</strong></p>
+<p>If you catch yourself typing <code>if (n % 3 === 0)</code> inside <code>test.js</code>, you've slipped.</p>
 <details class="examples"><summary>More examples (optional)</summary>
 <p>A ping-pong exchange on a different kata — <code>add(a, b)</code>:</p>
 <pre><code>// Tester hat — test.js
@@ -37,8 +44,13 @@ const add = (a, b) =&gt; a + b;     // green, and honestly general</code></pre>
 <p class="read-more"><strong>Read more:</strong> <a href="https://martinfowler.com/bliki/TestDrivenDevelopment.html">Martin Fowler — Test Driven Development</a> · <a href="https://github.com/bootcamp-we-have-at-home/testing-tdd-intro">the curriculum's TDD intro repo</a> · <a href="https://tddmanifesto.com/exercises/">more katas to ping-pong later</a></p>
 
 <h2>Idea 2 — Refactoring under green</h2>
-<p>Refactor means: change how the code is written without changing what it does. The reason TDD makes it safe is timing — you only refactor when <em>every test passes</em>. The suite is your undo detector: change the shape, re-run, and if a test goes red you broke behavior and you know it within seconds. Refactoring on red is guessing; refactoring on green is engineering.</p>
-<p>In this workshop the refactor moment is small and specific: in iteration 5, once every test is green, three near-identical <code>if</code> blocks collapse into one ordered chain. That is a behavior-preserving edit you make with a green suite watching. Earlier edits — like generalising <code>() =&gt; 1</code> into <code>(n) =&gt; n</code> — look similar but are <em>not</em> refactors: they happen on red and add behavior a new test demanded.</p>
+<p>At the end of lesson 2-3 you changed <code>add.js</code> on purpose and a second test caught the change. That is the same safety net this idea is built on.</p>
+<p><span class="term" data-tip="Changing how code is written — its shape, its names, its structure — while every input still produces the same output.">Refactor</span> means: change how the code is written without changing what it does.</p>
+<p>The reason TDD makes it safe is timing — you only refactor when <em>every test passes</em>.</p>
+<p>The suite is your undo detector: change the shape, re-run, and if a test goes red you broke behavior and you know it within seconds.</p>
+<p>Refactoring on red is guessing; refactoring on green is engineering.</p>
+<p>In this workshop the refactor moment is small and specific. In iteration 5, once every test is green, three near-identical <code>if</code> blocks collapse into one ordered chain — a behavior-preserving edit you make with a green suite watching.</p>
+<p>Earlier edits — like generalising <code>() =&gt; 1</code> into <code>(n) =&gt; n</code> — look similar but are <em>not</em> refactors: they happen on red and add behavior a new test demanded.</p>
 <div class="aside">The coursebook's snippets use <code>function fizzbuzz(n) { … }</code> and <code>module.exports</code>; today we write <code>const fizzbuzz = (n) =&gt; { … }</code> with arrow functions (lesson 1-8) — same behavior, and the export line stays exactly as the repo ships it.</div>
 <details class="examples"><summary>More examples (optional)</summary>
 <p>A behavior-preserving refactor, with the suite green before and after:</p>
@@ -57,7 +69,15 @@ const label = (n) =&gt; NAMES[n] ?? "many";</code></pre>
 <p class="read-more"><strong>Read more:</strong> <a href="https://refactoring.com/">refactoring.com — the catalog of named refactorings</a> · <a href="https://jestjs.io/docs/expect#tobevalue">Jest — <code>toBe</code> vs the other matchers</a></p>
 
 <h2>Do it for real (~60 min)</h2>
-<p>You'll build FizzBuzz from nothing but tests, in the curriculum's own repo. The spec, from the <a href="https://github.com/bootcamp-we-have-at-home/fizzbuzz">workshop README</a>: <code>fizzbuzz(n)</code> returns <strong>the number itself</strong> for most inputs, <strong>"Fizz"</strong> for multiples of 3, <strong>"Buzz"</strong> for multiples of 5, and <strong>"FizzBuzz"</strong> for multiples of both. Don't read ahead to the finished algorithm — the exercise is the order.</p>
+<p>You'll build FizzBuzz from nothing but tests, in the curriculum's own repo.</p>
+<p>The spec, from the <a href="https://github.com/bootcamp-we-have-at-home/fizzbuzz">workshop README</a> — <code>fizzbuzz(n)</code> returns:</p>
+<ul>
+  <li><strong>the number itself</strong> for most inputs</li>
+  <li><strong>"Fizz"</strong> for multiples of 3</li>
+  <li><strong>"Buzz"</strong> for multiples of 5</li>
+  <li><strong>"FizzBuzz"</strong> for multiples of both</li>
+</ul>
+<p>Don't read ahead to the finished algorithm — the exercise is the order.</p>
 <ol class="steps">
   <li>Clone the workshop into your workspace (<code>git clone</code> is from lesson 1-5; it creates a folder named after the repo):
 <pre><code>cd ~/code                                          # the workspace from lesson 1-4

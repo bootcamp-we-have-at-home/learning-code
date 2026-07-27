@@ -5,10 +5,16 @@
 <h1>2-10 — Week Project: Ecommerce App (Tested, Pure, Persistent)</h1>
 <p class="subtitle">~2.5 days — most of the week's hours · Day 2 16:30 intro, Days 3–4 build, Day 5 09:00 code review → 10:00 respond to issues → 11:00 presentation (solo: written) · Source: curriculum <a href="../curriculum/coursebook/week-2/project.md">week-2 project brief</a> + the web-storage topic from <a href="../curriculum/coursebook/week-2/research-afternoon.md">research-afternoon.md</a></p>
 
-<p><strong>Why this matters:</strong> this is the first app in the mission with a <em>tested</em> core — every rule you wrote a Jest test for in 2-3/2-4 now guards real shopping-cart logic. It is also the portfolio piece that shows you can design code to be testable, not just make it work.</p>
+<p><strong>Why this matters:</strong> this is the first app in the mission with a <em>tested</em> core. Every rule you wrote a Jest test for in 2-3/2-4 now guards real shopping-cart logic.</p>
+
+<p>It is also the portfolio piece that shows you can design code to be testable, not just make it work.</p>
 
 <h2>The brief (from the curriculum, in full)</h2>
-<p>An ecommerce app with <strong>two flows</strong>. These are the brief's user stories, copy-edited only for typos (the original writes "I want to able to search for item…"); nothing has been added or removed. They are your definition of scope: nothing more is required, nothing here is optional.</p>
+<p>An ecommerce app with <strong>two flows</strong>: a buyer and a seller.</p>
+
+<p>Below are the brief's own user stories, copy-edited only for typos (the original writes "I want to able to search for item…"). Nothing has been added or removed.</p>
+
+<p>They are your definition of scope: nothing more is required, nothing here is optional.</p>
 
 <p><strong>1. Buyer / Customer</strong></p>
 <ul>
@@ -38,9 +44,15 @@
   <li>The app should be responsive</li>
   <li>…and should save its state even after closing the page (<code>local storage</code>)</li>
 </ul>
-<p><strong>How "a test for every function" is satisfied here.</strong> Taken literally it is impossible — you cannot meaningfully unit-test a function whose whole job is to paint the DOM. The architecture in Idea 1 is what makes it achievable: <em>every function that decides anything lives in <code>src/store.js</code> and has a test</em>, and <code>src/app.js</code> is kept so thin that it contains no decisions left to test. That is the rule this project is marked against, and it is the same rule the done-checklist at the bottom states. If you find yourself wanting to test something in <code>app.js</code>, that is the signal to move the logic into <code>store.js</code>.</p>
+<p><strong>How "a test for every function" is satisfied here.</strong> Taken literally it is impossible: you cannot meaningfully unit-test a function whose whole job is to paint the DOM.</p>
 
-<p><strong>The brief's hints.</strong> A product is an object (the object literal shape from lesson 1-10) — the brief sketches it as:</p>
+<p>The architecture in Idea 1 is what makes it achievable. <em>Every function that decides anything lives in <code>src/store.js</code> and has a test</em>, and <code>src/app.js</code> is kept so thin that it contains no decisions left to test.</p>
+
+<p>That is the rule this project is marked against, and the same rule the done-checklist at the bottom states.</p>
+
+<p>So if you find yourself wanting to test something in <code>app.js</code>, that is the signal to move the logic into <code>store.js</code>.</p>
+
+<p><strong>The brief's hints.</strong> A product is an object — the object literal shape from lesson 1-10. The brief sketches it as:</p>
 <pre><code>{
   id: 0,                  // unique — how delete/edit find this exact product
   name: "T-shirt",
@@ -48,17 +60,30 @@
   price: 25,
   // ...image link, category
 }</code></pre>
-<p>and it points you at the methods you already own: <code>filter</code>, <code>map</code>, <code>sort</code>, the spread operator <code>...</code>, <code>concat</code>, <code>includes</code> — <code>filter</code>/<code>map</code>/<code>includes</code> from lesson 1-8, spread from lesson 2-6. <code>sort</code> and <code>concat</code> are on the <a href="../reference/javascript-cheatsheet.html">JavaScript cheat sheet</a>; look them up, don't memorize them.</p>
+<p>It also points you at the methods you already own:</p>
+<ul>
+  <li><code>filter</code>, <code>map</code>, <code>includes</code> — lesson 1-8</li>
+  <li>the spread operator <code>...</code> — lesson 2-6</li>
+  <li><code>sort</code> and <code>concat</code> — on the <a href="../reference/javascript-cheatsheet.html">JavaScript cheat sheet</a>; look them up, don't memorize them</li>
+</ul>
 <p class="read-more"><strong>Read more:</strong> <a href="https://www.makeareadme.com/">Make a README</a> (your Day-5 deliverable) · <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort">MDN — Array.sort</a> (the comparator argument is a callback, like 2-1's)</p>
 
 <h2>Idea 1 — Architecture: a pure core with a thin dirty shell</h2>
-<p>"Write a test for every function" is impossible if your functions read the DOM and write the DOM. It is easy if you split the app in two, which is exactly the split lesson 2-8 taught — that split is the <em>design rule</em> of this project, not a suggestion:</p>
+<p>In lesson 2-8 you split a function in two: the part that decides, and the part that touches the outside world. This project does the same thing to a whole app.</p>
+
+<p>"Write a test for every function" is impossible if your functions read the DOM and write the DOM. It is easy once the deciding lives somewhere the DOM never reaches.</p>
+
+<p>That split is the <em>design rule</em> of this project, not a suggestion:</p>
 <table>
   <tr><th>Layer</th><th>File</th><th>Rule</th><th>Tested?</th></tr>
   <tr><td>Data / logic</td><td><code>src/store.js</code></td><td>Pure (2-8): takes data in, returns <strong>new</strong> data out. Never touches <code>document</code>, never touches <code>localStorage</code>, never mutates its arguments.</td><td>Yes — a Jest test each (2-3)</td></tr>
   <tr><td>Shell / rendering</td><td><code>src/app.js</code></td><td>Impure and <em>thin</em>: reads inputs, calls a pure function, paints the result, saves to storage. Almost no <code>if</code>s, no arithmetic.</td><td>No — keep it too boring to break</td></tr>
 </table>
-<p>Every pure function follows one shape: current state in, new state out. Note <code>addToCart</code> below returns a brand-new array via spread (2-6) instead of <code>cart.push(...)</code> — that is what makes it testable, because the test can compare "before" and "after" and both still exist:</p>
+<p>Every pure function follows one shape: current state in, new state out.</p>
+
+<p>Note that <code>addToCart</code> below returns a brand-new array via spread (2-6) instead of <code>cart.push(...)</code>.</p>
+
+<p>That is what makes it testable: the test can compare "before" and "after", because both still exist.</p>
 <pre><code>// src/store.js — pure. No document, no localStorage, no mutation.
 
 const addToCart = (cart, product) =&gt; [...cart, product];        // NEW array, old cart untouched
@@ -78,8 +103,17 @@ const updateProduct = (products, id, changes) =&gt;                  // the "edi
 if (typeof module !== "undefined") {              // the browser guard from 2-5:
   module.exports = { addToCart, removeFromCart, cartTotal, searchByName, updateProduct };
 }                                                 // true in Node (Jest), false in a plain script tag</code></pre>
-<p><code>updateProduct</code> is the whole edit feature in two lines, and it is the one you will reach for last (step 9): <code>map</code> rebuilds the list, and <code>{ ...p, ...changes }</code> makes a copy of the matched product with only the changed fields overwritten — every other product comes back as the identical object. Its test is a one-liner too: edit one product's price, assert the others came back unchanged.</p>
-<p>That guard is not optional here. <code>index.html</code> loads <code>store.js</code> with a plain <code>&lt;script&gt;</code> tag — there is no bundler in this project — and an unguarded <code>module.exports</code> throws <code>ReferenceError: module is not defined</code> in the browser, which stops the rest of the file from running. Same file, two runtimes, exactly as in 2-5's <code>romanizer.js</code>. Load order matters too: <code>store.js</code> before <code>app.js</code>, because <code>app.js</code> calls into it.</p>
+<p><code>updateProduct</code> is the whole edit feature in two lines, and it is the one you will reach for last (step 9).</p>
+
+<p><code>map</code> rebuilds the list, and <code>{ ...p, ...changes }</code> makes a copy of the matched product with only the changed fields overwritten. Every other product comes back as the identical object.</p>
+
+<p>Its test is a one-liner too: edit one product's price, assert the others came back unchanged.</p>
+
+<p><strong>The <code>module</code> guard at the bottom is not optional here.</strong> Same file, two runtimes, exactly as in 2-5's <code>romanizer.js</code>.</p>
+
+<p><code>index.html</code> loads <code>store.js</code> with a plain <code>&lt;script&gt;</code> tag — there is no bundler in this project. An unguarded <code>module.exports</code> throws <code>ReferenceError: module is not defined</code> in the browser, which stops the rest of the file from running.</p>
+
+<p>Load order matters too: <code>store.js</code> before <code>app.js</code>, because <code>app.js</code> calls into it.</p>
 <pre><code>&lt;!-- index.html, at the end of &lt;body&gt; --&gt;
 &lt;script src="src/store.js"&gt;&lt;/script&gt;   &lt;!-- pure functions first... --&gt;
 &lt;script src="src/app.js"&gt;&lt;/script&gt;     &lt;!-- ...then the shell that calls them --&gt;</code></pre>
@@ -117,8 +151,13 @@ const onSearch = (event) =&gt; {                        // a callback, 2-1
 <p class="read-more"><strong>Read more:</strong> <a href="https://kentcdodds.com/blog/pure-modules">Kent C. Dodds — pure modules</a> · <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Spread_syntax">MDN — spread syntax</a></p>
 
 <h2>Idea 2 — localStorage: making state survive a closed tab</h2>
-<p>The brief requires the app to keep its state after the page is closed. Nothing in this week's sessions covered how — so the <em>web storage</em> research topic from <a href="../curriculum/coursebook/week-2/research-afternoon.md">research-afternoon.md</a> is promoted to required material, and this section is it.</p>
-<p><span class="term" data-tip="A small key–value store the browser keeps per site, on disk. Survives refresh, tab close, and reboot until code or the user clears it.">localStorage</span> is a built-in object with two methods you need. Try them in the browser console (F12, from lesson 1-1) on any page:</p>
+<p>Every page you have built so far forgets everything the moment you close the tab. The brief requires this one to remember.</p>
+
+<p>Nothing in this week's sessions covered how. So the <em>web storage</em> research topic from <a href="../curriculum/coursebook/week-2/research-afternoon.md">research-afternoon.md</a> is promoted to required material, and this section is it.</p>
+
+<p><span class="term" data-tip="A small key–value store the browser keeps per site, on disk. Survives refresh, tab close, and reboot until code or the user clears it.">localStorage</span> is a built-in object with two methods you need.</p>
+
+<p>Try them in the browser console (F12, from lesson 1-1) on any page:</p>
 <pre><code>localStorage.setItem("greeting", "hello")   // save under a key
 localStorage.getItem("greeting")            // → "hello"
 localStorage.getItem("nothing-here")        // → null   (missing key, not an error)</code></pre>
@@ -149,8 +188,15 @@ let state = {                                         // on start:
 state = { ...state, cart: addToCart(state.cart, product) };
 save("cart", state.cart);
 renderCart(state.cart);</code></pre>
-<p>Notice the pure function still knows nothing about storage — <code>addToCart</code> computes the new cart, the shell persists it. That is the whole architecture in three lines. The <em>fallback</em> argument matters as much as the key: on a brand-new browser there is nothing under <code>"products"</code>, so whatever you pass as the fallback is what the shop opens with. Pass <code>[]</code> and your step-4 products vanish the moment you add persistence.</p>
-<p><code>load</code> is the one place in <code>app.js</code> with a decision in it (the <code>? :</code>), and that is deliberate: it decides nothing about <em>your</em> data, only whether the browser has any yet. Everything about products, carts and prices still gets decided in <code>store.js</code>, where the tests are.</p>
+<p>Notice the pure function still knows nothing about storage: <code>addToCart</code> computes the new cart, the shell persists it. That is the whole architecture in three lines.</p>
+
+<p>The <em>fallback</em> argument matters as much as the key. On a brand-new browser there is nothing under <code>"products"</code>, so whatever you pass as the fallback is what the shop opens with.</p>
+
+<p>Pass <code>[]</code> and your step-4 products vanish the moment you add persistence.</p>
+
+<p><code>load</code> is the one place in <code>app.js</code> with a decision in it (the <code>? :</code>), and that is deliberate. It decides nothing about <em>your</em> data, only whether the browser has any yet.</p>
+
+<p>Everything about products, carts and prices still gets decided in <code>store.js</code>, where the tests are.</p>
 <details class="examples"><summary>More examples (optional)</summary>
 <p>Run this in the console on your own page to feel the round-trip, one line at a time:</p>
 <pre><code>localStorage.setItem("cart", JSON.stringify([{ id: 1, price: 25 }]))
@@ -168,7 +214,15 @@ localStorage.clear()                // delete EVERY key for this site — check 
 <p class="read-more"><strong>Read more:</strong> <a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/sessionStorage">MDN — sessionStorage</a> (same API, but wiped when the tab closes; that is the entire difference, and it's the research topic's second question) · <a href="https://developer.mozilla.org/en-US/docs/Web/API/Web_Storage_API">MDN — Web Storage API</a></p>
 
 <h2>Do it for real — the build (~2 days)</h2>
-<p>Build in this order. From step 4 onward, <strong>each step is a branch and a PR</strong> (lesson 1-5), each merged before the next starts, so <code>main</code> always runs. Steps 1–3 are the repo baseline — an empty repo with no branches to merge into anything — so like the portfolio baseline in <a href="1-11-project.html">1-11</a>, they commit straight to <code>main</code>. That is the one declared exception. <em>Soft prerequisite:</em> if you haven't done lesson <a href="1-9-git-conflicts.html">1-9 (git conflicts)</a> yet, do it as catch-up first — you merge a lot of PRs here, but since you are the only committer and each branch merges before the next starts, none of them should conflict. You'll hit your first real conflict eventually and it shouldn't be here.</p>
+<p>Build in this order.</p>
+
+<p>From step 4 onward, <strong>each step is a branch and a PR</strong> (lesson 1-5), each merged before the next starts, so <code>main</code> always runs.</p>
+
+<p>Steps 1–3 are the repo baseline — an empty repo with no branches to merge into anything. So like the portfolio baseline in <a href="1-11-project.html">1-11</a>, they commit straight to <code>main</code>. That is the one declared exception.</p>
+
+<p><em>Soft prerequisite:</em> if you haven't done lesson <a href="1-9-git-conflicts.html">1-9 (git conflicts)</a> yet, do it as catch-up first.</p>
+
+<p>You merge a lot of PRs here, but none of them should conflict: you are the only committer, and each branch merges before the next starts. You'll hit your first real conflict eventually, and it shouldn't be here.</p>
 <ol class="steps">
   <li>Create an empty repo named <code>ecommerce-app</code> on GitHub (with a README), then clone it next to your other work (<code>clone</code> from 1-5, <code>cd</code> from 1-4):
 <pre><code>cd ~/code

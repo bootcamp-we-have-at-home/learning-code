@@ -8,13 +8,17 @@
 <p><strong>Why this matters:</strong> lesson 2-1 taught you <em>what</em> a callback is; this one teaches <em>when</em> your code actually runs — the difference between "the next line" and "later". Week 3 is API week: every request you fire returns later, and code that assumes otherwise silently reads the wrong value.</p>
 
 <h2>Idea 1 — Nested calls and the call stack</h2>
-<p>You have a CS degree, so this is a refresh, not a lecture. What matters is how JavaScript specifically behaves. Start with the deck's trap — three functions that only <em>log</em>, nested:</p>
+<p>In lesson 1-7 you already called one function from inside another, and it simply worked. This section is about what JavaScript is doing while that happens — with a CS degree behind you this is a refresh, not a lecture.</p>
+<p>Start with the deck's trap. Three functions that only <em>log</em>, nested inside each other:</p>
 <pre><code>function foo1(x) { console.log("foo1 got:", x); }
 function foo2(x) { console.log("foo2 got:", x); }
 function foo3()  { console.log("foo3 ran"); }
 
 foo1(foo2(foo3()));   // logs "foo3 ran", then "foo2 got: undefined", then "foo1 got: undefined"</code></pre>
-<p>Two things fall out. First, <strong>order</strong>: arguments must be evaluated before the call that uses them, so the <em>innermost</em> function runs first even though <code>foo1</code> is written first. Second, <strong>the undefineds</strong>: a function with no <code>return</code> returns <code>undefined</code> (the value type from lesson 1-7), so nesting log-only functions passes nothing useful along. <code>typeof foo3()</code> is <code>"undefined"</code>, not <code>"function"</code>.</p>
+<p>Two things fall out of that line.</p>
+<p><strong>Order.</strong> Arguments must be evaluated before the call that uses them. So the <em>innermost</em> function runs first, even though <code>foo1</code> is written first.</p>
+<p><strong>The undefineds.</strong> A function with no <code>return</code> returns <code>undefined</code> — the value type from lesson 1-7.</p>
+<p>So nesting log-only functions passes nothing useful along: <code>typeof foo3()</code> is <code>"undefined"</code>, not <code>"function"</code>.</p>
 <p>Fix it by returning instead of logging — the deck's corrected chain:</p>
 <pre><code>function foo1() {
   const x = foo2();
@@ -32,8 +36,10 @@ function foo3() {
 
 foo1();               // 3</code></pre>
 <div class="aside">The coursebook writes <code>var x = foo2()</code>; today we write <code>const</code> — 1-7's const-by-default rule. Same behavior.</div>
-<p>While <code>foo1()</code> is running, none of these functions have finished. JavaScript tracks that with the <span class="term" data-tip="The list of function calls currently in progress. Calling pushes a frame on top; returning pops it off.">call stack</span>: calling <code>foo1</code> pushes a frame, <code>foo1</code> calls <code>foo2</code> which pushes another on top, <code>foo3</code> on top of that. <code>foo3</code> returns <code>"1"</code> and pops; <code>foo2</code> can only now compute <code>Number("1")</code>, returns <code>1</code> and pops; <code>foo1</code> returns <code>3</code>. Strictly last-in-first-out, one frame at a time — JavaScript has <em>one</em> call stack, so exactly one thing is ever running.</p>
-<p>The stack has a size limit. A function that calls itself with no exit condition pushes frames until the engine gives up with <code>RangeError: Maximum call stack size exceeded</code> — a <strong>stack overflow</strong>, which is where the website got its name.</p>
+<p>While <code>foo1()</code> is running, none of these three functions have finished yet. JavaScript keeps track of that with the <span class="term" data-tip="The list of function calls currently in progress. Calling pushes a frame on top; returning pops it off.">call stack</span>.</p>
+<p>Every call puts a frame on top of the stack: <code>foo1</code> first, then <code>foo2</code>, then <code>foo3</code>. They come off in the opposite order — <code>foo3</code> returns <code>"1"</code> and pops, only then can <code>foo2</code> compute <code>Number("1")</code> and pop, and only then does <code>foo1</code> return <code>3</code>.</p>
+<p>JavaScript has exactly <em>one</em> call stack. So exactly one thing is ever running, one frame at a time.</p>
+<p>That stack has a size limit. A function that calls itself with no exit condition pushes frames until the engine gives up with <code>RangeError: Maximum call stack size exceeded</code> — a <strong>stack overflow</strong>, which is where the website got its name.</p>
 <details class="examples"><summary>More examples (optional)</summary>
 <p>Reading a stack in DevTools. Paste this into the browser console (the F12 console from lesson 1-1):</p>
 <pre><code>function a() { b(); }
@@ -48,7 +54,8 @@ forever();   // RangeError: Maximum call stack size exceeded</code></pre>
 <p class="read-more"><strong>Read more:</strong> <a href="https://developer.mozilla.org/en-US/docs/Glossary/Call_stack">MDN — call stack</a> · <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">MDN — Number()</a></p>
 
 <h2>Idea 2 — Callbacks more than one layer deep</h2>
-<p>From 2-1: a callback is a function passed as an argument, and you pass the function itself — <code>secondFunction(firstFunction)</code>, no parentheses on <code>firstFunction</code>. That works for one layer:</p>
+<p>In lesson 2-1 you passed a function to another function as an argument — a callback. The rule you used there: hand over the function's <em>name</em>, with no parentheses on it.</p>
+<p>That works fine one layer deep:</p>
 <pre><code>function firstFunction() {
   console.log("I'm the first function");
 }
@@ -67,7 +74,9 @@ secondFunction(firstFunction);   // first, then second — works</code></pre>
 <p>Now try two layers the obvious way, and watch it break:</p>
 <pre><code>thirdFunction(secondFunction(firstFunction));
 // logs first, then second... then TypeError: callback is not a function</code></pre>
-<p>Same rule as Idea 1: the argument is evaluated first. <code>secondFunction(firstFunction)</code> <em>runs</em> (logging both lines) and returns <code>undefined</code>, so <code>thirdFunction</code> receives <code>undefined</code> and tries to call it. The fix is to hand <code>thirdFunction</code> something callable that does that work <em>later</em> — wrap it:</p>
+<p>Same rule as Idea 1: the argument is evaluated first. So <code>secondFunction(firstFunction)</code> actually <em>runs</em> here, logs its two lines, and returns <code>undefined</code>.</p>
+<p><code>thirdFunction</code> therefore receives <code>undefined</code> and tries to call it. Hence the <code>TypeError</code>.</p>
+<p>The fix is to hand <code>thirdFunction</code> something callable that does that work <em>later</em> — wrap it:</p>
 <pre><code>thirdFunction(() =&gt; secondFunction(firstFunction));
 // first, second, third — in that order</code></pre>
 <p><strong>The load-bearing takeaway:</strong> to go more than one layer deep in callbacks, wrap the inner call in an anonymous function. You will use this in every step of the rest of this lesson, and in week 3's callback workshop.</p>
@@ -84,7 +93,8 @@ function secondFunction(callback) {
 
 secondFunction(firstFunction);      // "…input: 1"
 secondFunction(firstFunction(1));   // TypeError: callback is not a function</code></pre>
-<p>That last line breaks for the by-now-familiar reason: <code>firstFunction(1)</code> runs immediately and returns <code>undefined</code>. You never call a callback yourself when handing it over — you pass the name, and let the receiving function decide when and with what to invoke it.</p>
+<p>That last line breaks for the by-now-familiar reason: <code>firstFunction(1)</code> runs immediately and returns <code>undefined</code>.</p>
+<p>You never call a callback yourself when handing it over. You pass the name, and the receiving function decides when — and with what — to invoke it.</p>
 <details class="examples"><summary>More examples (optional)</summary>
 <p>You have already written wrapped callbacks without noticing. In 1-8, <code>nums.map(n =&gt; n * 2)</code> passes an arrow because <code>n * 2</code> alone would be evaluated on the spot — the arrow is exactly the "do it later, with the argument you give me" wrapper from this section.</p>
 <p>Three layers, same pattern, nested:</p>
@@ -97,14 +107,27 @@ secondFunction(firstFunction(1));   // TypeError: callback is not a function</co
 <p class="read-more"><strong>Read more:</strong> <a href="https://javascript.info/callbacks">javascript.info — callbacks</a> · <a href="https://developer.mozilla.org/en-US/docs/Glossary/Callback_function">MDN — callback function</a></p>
 
 <h2>Idea 3 — Synchronous vs asynchronous, and setTimeout</h2>
-<p>Everything so far was <strong>synchronous</strong>: each action completes before the next one starts, and the stack empties in order. That is JavaScript's default and its only mode <em>on the stack</em>.</p>
-<p><strong>Asynchronous</strong> code doesn't wait. Concretely: your page asks a server for a list of products (week 3's job). The response takes 400&nbsp;ms. If that wait were synchronous, the single call stack would be <span class="term" data-tip="Occupying the one call stack so nothing else — rendering, clicks, timers — can run until it finishes.">blocked</span> for 400&nbsp;ms — no clicks, no scrolling, frozen page. Instead you hand the request a callback and carry on; when the data arrives, your callback is run.</p>
+<p>Every example so far ran top to bottom, and you could predict the order just by reading down the page.</p>
+<p>That has a name: <strong>synchronous</strong>. Each action completes before the next one starts, and the stack empties in order.</p>
+<p><strong>Asynchronous</strong> code is the other kind. It doesn't wait.</p>
+<p>Take a concrete case. Your page asks a server for a list of products (week 3's job), and the response takes 400&nbsp;ms.</p>
+<p>If that wait were synchronous, the single call stack would be <span class="term" data-tip="Occupying the one call stack so nothing else — rendering, clicks, timers — can run until it finishes.">blocked</span> for 400&nbsp;ms: no clicks, no scrolling, frozen page.</p>
+<p>So instead you hand the request a callback and carry on. When the data arrives, your callback is run.</p>
 <p>Which raises the question the video answers: if there is only one call stack, <em>who</em> runs the callback later, and when exactly?</p>
 <div class="aside"><strong>Watch this now — it is a scheduled part of the curriculum, 26 minutes, and it is the single best explanation of this topic that exists:</strong> Philip Roberts, <a href="https://www.youtube.com/watch?v=8aGhZQkoFbQ">"What the heck is the event loop anyway?"</a> (JSConf EU). He builds a live visualizer of the call stack, the queue, and the loop. Watch it before the do-it-for-real steps below; they assume it.</div>
-<p>The short version, so the vocabulary is anchored: the browser (not the JavaScript language) provides timers, network requests, and DOM events. When you call <code>setTimeout</code>, the browser starts a timer <em>outside</em> the stack and <code>setTimeout</code> returns immediately. When the timer finishes, your callback is put in a <span class="term" data-tip="The line of callbacks waiting to run. The event loop moves the first one onto the call stack, but only when the stack is empty.">callback queue</span>. The <span class="term" data-tip="The loop that checks: is the call stack empty? If yes, take the first callback from the queue and push it onto the stack.">event loop</span> pushes queued callbacks onto the stack <em>only when the stack is empty</em> — that is, only when all your currently-running synchronous code has finished.</p>
+<p>Here is the short version, so the vocabulary is already anchored when you watch.</p>
+<p>Timers, network requests and DOM events are provided by the browser — not by the JavaScript language itself.</p>
+<p>So when you call <code>setTimeout</code>, the browser starts a timer <em>outside</em> the stack, and <code>setTimeout</code> returns immediately.</p>
+<p>When that timer finishes, your callback is put in a <span class="term" data-tip="The line of callbacks waiting to run. The event loop moves the first one onto the call stack, but only when the stack is empty.">callback queue</span> — a line of callbacks waiting for a turn.</p>
+<p>The <span class="term" data-tip="The loop that checks: is the call stack empty? If yes, take the first callback from the queue and push it onto the stack.">event loop</span> has one job: take the first callback off that queue and push it onto the call stack.</p>
+<p>It does that <em>only when the stack is empty</em> — only once all your currently-running synchronous code has finished.</p>
 <pre><code>setTimeout(() =&gt; console.log("later"), 1000);   // returns instantly; logs after ~1s
 console.log("now");                             // runs first — "now", then "later"</code></pre>
-<p>Two consequences worth memorizing. The delay is a <em>minimum</em>, not a promise: <code>setTimeout(fn, 0)</code> still runs after all your synchronous code, because the queue is only drained on an empty stack. And a value produced inside an async callback does not exist yet on the line after the call — the deck's trap, which you'll run yourself in step 5.</p>
+<p>Two consequences worth memorizing:</p>
+<ul>
+  <li><strong>The delay is a minimum, not a promise.</strong> <code>setTimeout(fn, 0)</code> still runs after all your synchronous code, because the queue is only drained on an empty stack.</li>
+  <li><strong>An async value doesn't exist on the next line.</strong> A value produced inside a callback isn't there yet on the line after the call — the deck's trap, which you'll run yourself in step 5.</li>
+</ul>
 <details class="examples"><summary>More examples (optional)</summary>
 <p>Two timers plus synchronous work — predict, then run:</p>
 <pre><code>console.log("1");

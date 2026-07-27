@@ -5,10 +5,12 @@
 <h1>2-8 — Pure Functions: Easy Testing Workshop</h1>
 <p class="subtitle">~70 minutes · Week 2, Day 2, 14:00–16:00 · Source: curriculum workshop <a href="https://github.com/bootcamp-we-have-at-home/pure-functions-easy-testing-ws">pure-functions-easy-testing-ws</a>, adapted solo</p>
 
-<p><strong>Why this matters:</strong> the week project brief (<a href="../curriculum/coursebook/week-2/project.md">project.md</a>) says in plain text: "You should have a pure functions" and "You should write a test for every function you have". This workshop is where you learn what makes that possible — a function you can't test easily is almost always a function that isn't pure.</p>
+<p><strong>Why this matters:</strong> the week project brief (<a href="../curriculum/coursebook/week-2/project.md">project.md</a>) says in plain text: "You should have a pure functions" and "You should write a test for every function you have".</p>
+<p>This workshop is where you learn what makes that possible — a function you can't test easily is almost always a function that isn't pure.</p>
 
 <h2>Idea 1 — What makes a function pure</h2>
-<p>A function is <span class="term" data-tip="Same arguments in, same value out, and it disturbs nothing outside itself.">pure</span> when both of these hold:</p>
+<p>In lesson 2-3 you wrote your first Jest test: call a function with an argument, expect a particular value back. That worked because the function you tested did nothing except return that value.</p>
+<p>There is a name for functions that behave that way. A function is <span class="term" data-tip="Same arguments in, same value out, and it disturbs nothing outside itself.">pure</span> when both of these hold:</p>
 <ol>
   <li><strong>Same arguments → same return value, every time.</strong></li>
   <li><strong>No side effects</strong> — it does nothing but compute its return value. No writing to variables outside itself, no HTTP requests, no touching the DOM (the <code>document.querySelector</code>/<code>textContent</code> work from lesson 1-10).</li>
@@ -27,7 +29,11 @@ const howOldNextBirthday = (a) =&gt; {
 howOldNextBirthday(age)            // 2
 howOldNextBirthday(age)            // 3  ← the SAME line typed twice, different answer,
                                    //     because the side effect moved `age` underneath it</code></pre>
-<p>Why this decides how testable your code is: a test tells you <em>which</em> function is broken. If one test covers a big impure function that also mutates three globals and repaints the page, a red test tells you "something in here is wrong" — which is barely more useful than the bug report. Small pure functions give you the opposite: a failure names the one function to open. That's the whole argument, and it's why the workshop is called <em>pure functions for easy testing</em>.</p>
+<h3>Why this decides how testable your code is</h3>
+<p>The job of a test is to tell you <em>which</em> function is broken.</p>
+<p>Suppose one test covers a big impure function that mutates three outer variables and repaints the page. A red test then says only "something in here is wrong" — barely more useful than the bug report you started from.</p>
+<p>Small pure functions give you the opposite: a failure names the one function to open.</p>
+<p>That's the whole argument, and it's why the workshop is called <em>pure functions for easy testing</em>.</p>
 <div class="aside">The workshop's own snippets use <code>var</code> and <code>function (x) { … }</code>, and link to repl.it pages that no longer load; today we write <code>const</code>/<code>let</code> and arrow functions (1-7, 1-8) and run everything in Node or Jest instead.</div>
 <details class="examples"><summary>More examples (optional)</summary>
 <p>Four functions. Two are pure, two are not — and the reason differs each time:</p>
@@ -50,8 +56,11 @@ const stamp = (note) =&gt;                        // IMPURE — Date.now() chang
 <p class="read-more"><strong>Read more:</strong> <a href="https://developer.mozilla.org/en-US/docs/Glossary/Pure_function">MDN — pure function</a> · <a href="https://en.wikipedia.org/wiki/Referential_transparency">referential transparency</a> (the formal name for rule 1: an expression can be replaced by its value without changing the program)</p>
 
 <h2>Idea 2 — When the side effect is the point: split the function in two</h2>
-<p>Real apps must write to the DOM and to <code>localStorage</code>, so you can't ban side effects. You <em>relocate</em> them: one <strong>pure function that decides</strong>, one <strong>thin impure function that acts</strong>. You test the decision; the action is small enough to read and confirm by eye.</p>
-<p>The workshop's Example 2 is an image whose opacity toggles. Impure version — reads a global, writes the DOM, then writes the global back:</p>
+<p>In lesson 1-10 you changed a page with <code>document.querySelector</code> and <code>textContent</code>. By Idea 1's definition, every one of those lines was a side effect.</p>
+<p>That is fine — real apps have to write to the page and to <code>localStorage</code>. You can't ban side effects.</p>
+<p>What you can do is <em>relocate</em> them. Split one function into two: a <strong>pure function that decides</strong>, and a <strong>thin impure function that acts</strong>.</p>
+<p>Then you test the decision, and the action stays small enough to confirm by eye.</p>
+<p>The workshop's Example 2 is an image whose opacity toggles. Here is the impure version — it reads an outer variable, writes the DOM, then writes that variable back:</p>
 <pre><code>let changeTransition = true;
 
 const visionChange = () =&gt; {
@@ -82,7 +91,9 @@ applyIt();                                        // ← the DOM is touched only
 test("updateDom hands back a function", () =&gt; {
   expect(typeof updateDom(true)).toBe("function");
 });</code></pre>
-<p>Hold this shape in mind for the ecommerce project (2-10): <code>filterByCategory(products, category)</code>, <code>cartTotal(items)</code> and <code>removeItem(cart, id)</code> are pure and get tests; <code>renderProducts(list)</code> and <code>saveCart(cart)</code> are the thin impure edges that write to the page and to <code>localStorage</code>. That split is what makes "a test for every function" achievable instead of miserable.</p>
+<p>Hold this shape in mind for the ecommerce project (2-10). Three of its functions are pure and get tests: <code>filterByCategory(products, category)</code>, <code>cartTotal(items)</code> and <code>removeItem(cart, id)</code>.</p>
+<p>Two are the thin impure edges that write to the page and to <code>localStorage</code>: <code>renderProducts(list)</code> and <code>saveCart(cart)</code>.</p>
+<p>That split is what makes "a test for every function" achievable instead of miserable.</p>
 <div class="aside">One trap the workshop calls out in <code>object-pass-by-reference.js</code>: objects and arrays are handed to functions <em>by reference</em> (the reference-vs-value comparison from 1-7). So <code>obj.x = 1</code> inside a function edits the caller's object — an invisible side effect. Copy first: <code>const copy = { ...obj }</code> or <code>const copy = [...arr]</code>, using the spread operator from 2-6. That copy is shallow — objects nested <em>inside</em> the object are still shared — but nothing this week nests that deep.</div>
 <details class="examples"><summary>More examples (optional)</summary>
 <p>The same decide/act split on a cart button, in the shape the project will need:</p>

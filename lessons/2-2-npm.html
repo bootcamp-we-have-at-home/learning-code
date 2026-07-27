@@ -8,18 +8,28 @@
 <p><strong>Why this matters:</strong> every tool you use from now on — Jest tomorrow, the week project's test suite, anything you clone from a job — arrives through npm. Half an hour here and the rest of the week is <code>npm install</code> and go.</p>
 
 <h2>Idea 1 — Node runs JS outside the browser; npm brings the packages</h2>
-<p>Until now every line of JavaScript you wrote ran in the browser — the F12 console from lesson 1-1, and the page scripts from 1-10. <strong>Node</strong> is the same JavaScript engine that Chrome uses (V8), packaged as a program on your machine, so <code>node script.js</code> runs JS with no page and no browser. <strong>npm</strong> ships with it: a command plus a public registry of hundreds of thousands of reusable packages (<a href="https://www.npmjs.com/">npmjs.com</a>).</p>
-<p>Three files and folders make up the whole system:</p>
+<p>So far you have only ever run JavaScript inside a browser — the F12 console from lesson 1-1, and the page scripts from 1-10.</p>
+<p>There is another place to run it: your own machine, with no browser open at all.</p>
+<p><strong>Node</strong> is the program that does that. It is the same JavaScript engine Chrome uses (<span class="term" data-tip="V8: the engine that reads your JavaScript and executes it. Chrome and Node both embed the same one.">V8</span>), packaged on its own.</p>
+<p><strong>Node is the same JavaScript you already know.</strong> Nothing to relearn.</p>
+<p>What changes is how you start it: <code>node script.js</code> runs a file, with no page and no browser.</p>
+<p>Now the second half. Node ships with a companion command called <strong>npm</strong>.</p>
+<p>npm downloads other people's ready-made code — <em>packages</em> — into your project, from a public registry of hundreds of thousands of them (<a href="https://www.npmjs.com/">npmjs.com</a>).</p>
+<p>On your side, three files and folders make up the whole system:</p>
 <table>
   <tr><th>Thing</th><th>Who creates it</th><th>What it is</th></tr>
   <tr><td><code>package.json</code></td><td><code>npm init</code></td><td>Your project's ID card: name, version, scripts, and the list of packages it needs. You commit it.</td></tr>
   <tr><td><code>node_modules/</code></td><td><code>npm install</code></td><td>The actual downloaded package code. Huge, regenerable, <strong>never committed</strong>.</td></tr>
   <tr><td><code>.gitignore</code></td><td>You</td><td>A list of paths git should pretend it can't see — <code>node_modules</code> goes in it.</td></tr>
 </table>
-<p>Installing has two flavors, and the flag is the whole difference:</p>
+<p>Installing has two flavors. One flag is the whole difference:</p>
 <pre><code>npm install lodash        # a "dependency"    — the app itself needs it to run
 npm install jest -D       # a "devDependency" — only YOU need it, while developing</code></pre>
-<p>Both land in <code>node_modules</code>; they get recorded in different sections of <code>package.json</code>. That record is the point: a collaborator clones your repo (<code>git clone</code>, lesson 1-5) with no <code>node_modules</code> in it at all, runs <code>npm install</code> with no arguments, and npm reads <code>package.json</code> and rebuilds the exact same environment. Undeclared packages — ones you installed but that never made it into <code>package.json</code> — are how "works on my machine" happens.</p>
+<p>Both land in <code>node_modules</code>. They just get recorded in different sections of <code>package.json</code>.</p>
+<p><strong>That record is the point.</strong></p>
+<p>A collaborator clones your repo (<code>git clone</code>, lesson 1-5) and gets no <code>node_modules</code> in it at all — because you never committed it.</p>
+<p>They run <code>npm install</code> with no arguments. npm reads <code>package.json</code> and rebuilds the exact same environment.</p>
+<p>Undeclared packages — ones you installed but that never made it into <code>package.json</code> — are how "works on my machine" happens.</p>
 <details class="examples"><summary>More examples (optional)</summary>
 <p>A <code>package.json</code> after installing one of each, with the two sections side by side:</p>
 <pre><code>{
@@ -42,16 +52,21 @@ npm install cowsay -D          # a dev toy, as in this lesson   → devDependenc
 <p class="read-more"><strong>Read more:</strong> <a href="https://docs.npmjs.com/about-semantic-versioning">npm docs — semantic versioning</a> · <a href="https://www.npmjs.com/">npmjs.com</a> (search a package before you trust it: weekly downloads, last publish date) · <a href="https://nodejs.org/en/learn/getting-started/introduction-to-nodejs">Node — what it is and why it exists</a></p>
 
 <h2>Idea 2 — npm scripts: named shortcuts that know where your tools live</h2>
-<p>Installed packages put their command-line programs in <code>node_modules/.bin/</code> — inside your project, not on your system's command path. So the raw way to run one is the full path, which nobody types twice:</p>
+<p>In lesson 1-4 you typed terminal commands like <code>ls</code> and they simply worked, because your system already knows where those programs live.</p>
+<p>Packages you install are different. Their command-line programs land in <code>node_modules/.bin/</code>, inside your project folder.</p>
+<p>Your system doesn't look in there. So the raw way to run one is to spell out the whole path:</p>
 <pre><code>node_modules/.bin/cowsay hello        # works, but you must remember the path</code></pre>
-<p>Instead you name it in the <code>"scripts"</code> section of <code>package.json</code> and run it by name. npm puts <code>node_modules/.bin</code> on the path first, so the short name resolves:</p>
+<p>Nobody types that twice. Instead you give the command a name in the <code>"scripts"</code> section of <code>package.json</code>:</p>
 <pre><code>{
   "scripts": {
     "greeting": "cowsay hello"        // "cowsay" alone is enough inside a script
   }
 }</code></pre>
+<p>Then you run it by that name, from the project folder:</p>
 <pre><code>npm run greeting                      # npm looks up "greeting" and runs it</code></pre>
-<p>This is why every JS repo you'll ever clone has a README that says "run <code>npm test</code>" instead of a paragraph of paths — and it's how you'll run Jest for the rest of the week.</p>
+<p>The short name works because npm puts <code>node_modules/.bin</code> on the path first, for as long as the script runs.</p>
+<p>This is why every JS repo you'll ever clone has a README that says "run <code>npm test</code>" instead of a paragraph of paths.</p>
+<p>It is also how you'll run Jest for the rest of the week.</p>
 <details class="examples"><summary>More examples (optional)</summary>
 <p>A realistic scripts block — the same shape your week-2 project will end up with:</p>
 <pre><code>{
