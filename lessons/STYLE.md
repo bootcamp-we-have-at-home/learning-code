@@ -5,11 +5,12 @@ Contract for every generated lesson. Written after the student reported the firs
 ## File layout & naming
 
 ```
-lessons/<week>-index.html            # week map: outcomes, prerequisites, lesson order, sequencing notes, project brief link
-lessons/<week>-<lesson>-<title>.html # e.g. lessons/1-4-terminal.html
+lessons/index.html                # track hub: links every week index, the reference sheets, and display settings
+lessons/week-<n>/index.html       # week map: outcomes, prerequisites, lesson order, sequencing notes, project brief link
+lessons/week-<n>/<k>-<title>.html # e.g. lessons/week-1/4-terminal.html — lesson "1-4" in prose
 ```
 
-- Flat under `lessons/` — no per-week subdirectories. Assets are linked as `../assets/…`, references as `../reference/…`.
+- One directory per week under `lessons/`. From inside a week directory: assets are `../../assets/…`, references `../../reference/…`, curriculum `../../curriculum/…`, same-week lessons plain filenames, cross-week lessons `../week-<m>/…`, display settings `../config.html`. A new week adds its row to `lessons/index.html`. Lesson numbering in prose stays `<week>-<k>` ("lesson 1-4") even though filenames carry only `<k>`.
 - Lesson order inside a week MUST follow `curriculum/coursebook/week-<n>/README.md` schedule order. Deviations are only allowed when the curriculum's own ordering is broken for a solo learner — and every deviation MUST be listed in the week index under a "Sequencing notes" section with the reason (the scream register).
 - Cohort-only slots (ice-breakers, welcome talks, pastoral care) are dropped, listed once in the index as "not applicable solo".
 - Pair/cohort workshops are adapted to solo + agent-as-pair. The agent-pair instructions live in HTML comments (`<!-- agent-pair: ... -->`) so they never distract a solo reader; the lesson shows only a subtle footer line pointing at them.

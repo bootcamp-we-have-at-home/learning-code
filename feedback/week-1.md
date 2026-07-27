@@ -28,7 +28,7 @@ _Added 2026-07-27 in response to the week-overall feedback below; no student has
 
 ## Week overall
 
-2026-07-27 — first cohort, end of week (addressed 2026-07-27: STYLE.md rules 9–11, new lesson `1-9-git-conflicts.html`, week-1 revision pass):
+2026-07-27 — first cohort, end of week (addressed 2026-07-27: STYLE.md rules 9–11, new lesson `week-1/9-git-conflicts.html` (1-9), week-1 revision pass):
 
 - We need more examples in the reading section (collapse them and keep them skippable in kind of <details> collapse)
 - Do not assume some pre-requisite information is already known. reference past lessons, or Explain the new needed info/thing and reference them with citation and sources.

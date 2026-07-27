@@ -1,12 +1,12 @@
 <meta charset="utf-8">
 <title>2-3 — Testing &amp; TDD: Your First Jest Test</title>
-<link rel="stylesheet" href="../assets/course.css">
-<script src="../assets/layout.js"></script>
+<link rel="stylesheet" href="../../assets/course.css">
+<script src="../../assets/layout.js"></script>
 
 <h1>2-3 — Testing &amp; TDD: Your First Jest Test</h1>
 <p class="subtitle">~45 minutes · Week 2, Day 1, 11:30–12:00 · Source: curriculum <a href="https://github.com/bootcamp-we-have-at-home/testing-tdd-intro">testing-tdd-intro</a></p>
 
-<p><strong>Why this matters:</strong> the curriculum's own line for this week is "refactoring your code without tests in place is like playing Russian roulette" (<a href="../curriculum/coursebook/week-2/learning-outcomes.md">learning-outcomes.md</a>).</p>
+<p><strong>Why this matters:</strong> the curriculum's own line for this week is "refactoring your code without tests in place is like playing Russian roulette" (<a href="../../curriculum/coursebook/week-2/learning-outcomes.md">learning-outcomes.md</a>).</p>
 <p>Everything you build from here — the week project, the API week, every job — gets changed after it's written, and tests are what let you change it without fear.</p>
 
 <h2>Idea 1 — What a test is, and what "unit" means</h2>
@@ -78,7 +78,7 @@ test("3 is not even", () =&gt; {
 const isEven = (n) =&gt; n % 2 === 0;</code></pre>
 <p>That deliberately silly <code>=&gt; true</code> step is a real TDD teaching move: it shows that your tests, not your intentions, define what "done" means. If a stupid implementation passes, you are missing a test.</p>
 </details>
-<p class="read-more"><strong>Read more:</strong> <a href="http://blog.cleancoder.com/uncle-bob/2014/12/17/TheCyclesOfTDD.html">Uncle Bob — the cycles of TDD</a> · <a href="http://codesolid.com/post/pros-and-cons-of-test-driven-development/">pros and cons of TDD</a> (both from the week's <a href="../curriculum/coursebook/week-2/resources.md">resources.md</a>)</p>
+<p class="read-more"><strong>Read more:</strong> <a href="http://blog.cleancoder.com/uncle-bob/2014/12/17/TheCyclesOfTDD.html">Uncle Bob — the cycles of TDD</a> · <a href="http://codesolid.com/post/pros-and-cons-of-test-driven-development/">pros and cons of TDD</a> (both from the week's <a href="../../curriculum/coursebook/week-2/resources.md">resources.md</a>)</p>
 
 <h2>Do it for real (~25 min)</h2>
 <p>You'll build a tiny project from nothing, write a test for a function that doesn't exist, watch it fail, and then make it pass.</p>
@@ -191,17 +191,17 @@ test("greets by name", () =&gt; {
 <h2>Go deeper</h2>
 <p><strong>Primary source:</strong> the curriculum's <a href="https://github.com/bootcamp-we-have-at-home/testing-tdd-intro">testing-tdd-intro</a> — read it end to end now that the words mean something; its <code>describe(...)</code> template is the "test as bug report" idea in code. Then the week's own resource, <a href="https://medium.com/javascript-scene/what-every-unit-test-needs-f6cd34d9836d">5 questions every unit test must answer</a>.</p>
 
-<p><strong>Research pointer (optional).</strong> The week's <a href="../curriculum/coursebook/week-2/research-afternoon.md">research afternoon</a> asks two questions this lesson only half-answers: unit vs integration vs end-to-end testing (the Fowler pyramid linked above), and <em>how Jest compares to other frameworks</em> — <a href="https://qunitjs.com/">QUnit</a> and <a href="https://github.com/tape-testing/tape">Tape</a> are the two the curriculum names, and the interesting detail is what each calls the matchers you just met (<code>equal</code> for identity vs <code>deepEqual</code> for contents — Jest's <code>toBe</code> and <code>toEqual</code> under different names).</p>
+<p><strong>Research pointer (optional).</strong> The week's <a href="../../curriculum/coursebook/week-2/research-afternoon.md">research afternoon</a> asks two questions this lesson only half-answers: unit vs integration vs end-to-end testing (the Fowler pyramid linked above), and <em>how Jest compares to other frameworks</em> — <a href="https://qunitjs.com/">QUnit</a> and <a href="https://github.com/tape-testing/tape">Tape</a> are the two the curriculum names, and the interesting detail is what each calls the matchers you just met (<code>equal</code> for identity vs <code>deepEqual</code> for contents — Jest's <code>toBe</code> and <code>toEqual</code> under different names).</p>
 
 <p><strong>Next:</strong> you have the cycle — 2-4 makes you live in it for two hours.</p>
 
 <div class="feedback-ask">Finished? Tell your teacher (the agent) two things: ① Could you follow this lesson alone — 1 to 5? ② Where did you get stuck, if anywhere? Answers are recorded in <code>feedback/week-2.md</code> and improve the lesson for the next student.</div>
 
 <div class="footer-nav">
-Reference: <a href="../reference/npm-jest-tdd-cheatsheet.html">npm, Jest &amp; TDD cheat sheet</a> · Week map: <a href="2-index.html">Week 2 index</a><br>
-Previous: <a href="2-2-npm.html">2-2 npm</a> · Next: <a href="2-4-fizzbuzz-tdd-workshop.html">2-4 FizzBuzz TDD Workshop</a><br>
+Reference: <a href="../../reference/npm-jest-tdd-cheatsheet.html">npm, Jest &amp; TDD cheat sheet</a> · Week map: <a href="index.html">Week 2 index</a><br>
+Previous: <a href="2-npm.html">2-2 npm</a> · Next: <a href="4-fizzbuzz-tdd-workshop.html">2-4 FizzBuzz TDD Workshop</a><br>
 Stuck or curious? Ask your teacher (the agent). "How much of my code should be tested?" is a great follow-up.
 </div>
 
-<script src="../assets/quiz.js"></script>
-<script src="../assets/tooltip.js"></script>
+<script src="../../assets/quiz.js"></script>
+<script src="../../assets/tooltip.js"></script>

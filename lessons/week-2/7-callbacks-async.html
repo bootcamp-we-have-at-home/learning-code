@@ -1,10 +1,10 @@
 <meta charset="utf-8">
 <title>2-7 — The Call Stack, Sync vs Async &amp; setTimeout</title>
-<link rel="stylesheet" href="../assets/course.css">
-<script src="../assets/layout.js"></script>
+<link rel="stylesheet" href="../../assets/course.css">
+<script src="../../assets/layout.js"></script>
 
 <h1>2-7 — The Call Stack, Sync vs Async &amp; setTimeout</h1>
-<p class="subtitle">~60 minutes (26 of them a video) · Week 2, Day 2, 10:30–13:00 · Source: curriculum <a href="../curriculum/coursebook/week-2/intro-to-functions-slides.md">intro-to-functions-slides.md</a> (second half, "Funception" onward) + the scheduled video <a href="https://www.youtube.com/watch?v=8aGhZQkoFbQ">"What the heck is the event loop anyway?"</a></p>
+<p class="subtitle">~60 minutes (26 of them a video) · Week 2, Day 2, 10:30–13:00 · Source: curriculum <a href="../../curriculum/coursebook/week-2/intro-to-functions-slides.md">intro-to-functions-slides.md</a> (second half, "Funception" onward) + the scheduled video <a href="https://www.youtube.com/watch?v=8aGhZQkoFbQ">"What the heck is the event loop anyway?"</a></p>
 
 <p><strong>Why this matters:</strong> lesson 2-1 taught you <em>what</em> a callback is; this one teaches <em>when</em> your code actually runs — the difference between "the next line" and "later". Week 3 is API week: every request you fire returns later, and code that assumes otherwise silently reads the wrong value.</p>
 
@@ -247,17 +247,17 @@ setTimeout(() =&gt; console.log("D"), 10);</code></pre>
   data-why="fetchPrice returns immediately; the price arrives later, as the callback&apos;s argument. Guessing a delay with setTimeout is a race you will lose on a slow network."></div>
 
 <h2>Go deeper</h2>
-<p><strong>Primary source:</strong> the second half of the curriculum's <a href="../curriculum/coursebook/week-2/intro-to-functions-slides.md">intro-to-functions slides</a> (from "Funception" to the end) — every example above comes from it, modernized. The deck's repl.it links are long dead; your console is the replacement. Then rewatch the last five minutes of <a href="https://www.youtube.com/watch?v=8aGhZQkoFbQ">the event loop talk</a>, where Philip Roberts runs the queue at slow motion.</p>
+<p><strong>Primary source:</strong> the second half of the curriculum's <a href="../../curriculum/coursebook/week-2/intro-to-functions-slides.md">intro-to-functions slides</a> (from "Funception" to the end) — every example above comes from it, modernized. The deck's repl.it links are long dead; your console is the replacement. Then rewatch the last five minutes of <a href="https://www.youtube.com/watch?v=8aGhZQkoFbQ">the event loop talk</a>, where Philip Roberts runs the queue at slow motion.</p>
 
 <p><strong>Next up:</strong> you can now explain <em>when</em> code runs. Lesson 2-8 is about keeping functions predictable so tests stay easy — pure functions.</p>
 
 <div class="feedback-ask">Finished? Tell your teacher (the agent) two things: ① Could you follow this lesson alone — 1 to 5? ② Where did you get stuck, if anywhere? Answers are recorded in <code>feedback/week-2.md</code> and improve the lesson for the next student.</div>
 
 <div class="footer-nav">
-Reference: <a href="../reference/javascript-cheatsheet.html">JavaScript cheat sheet</a> · Week map: <a href="2-index.html">Week 2 index</a><br>
-Previous: <a href="2-6-es6-refresh-challenge.html">2-6 ES6 Refresh &amp; Challenge</a> · Next: <a href="2-8-pure-functions.html">2-8 Pure Functions</a><br>
+Reference: <a href="../../reference/javascript-cheatsheet.html">JavaScript cheat sheet</a> · Week map: <a href="index.html">Week 2 index</a><br>
+Previous: <a href="6-es6-refresh-challenge.html">2-6 ES6 Refresh &amp; Challenge</a> · Next: <a href="8-pure-functions.html">2-8 Pure Functions</a><br>
 Stuck or curious? Ask your teacher (the agent). "Why does a promise callback jump the queue ahead of setTimeout?" is a great follow-up.
 </div>
 
-<script src="../assets/quiz.js"></script>
-<script src="../assets/tooltip.js"></script>
+<script src="../../assets/quiz.js"></script>
+<script src="../../assets/tooltip.js"></script>

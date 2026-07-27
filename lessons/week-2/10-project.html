@@ -1,10 +1,10 @@
 <meta charset="utf-8">
 <title>2-10 — Week Project: Ecommerce App</title>
-<link rel="stylesheet" href="../assets/course.css">
-<script src="../assets/layout.js"></script>
+<link rel="stylesheet" href="../../assets/course.css">
+<script src="../../assets/layout.js"></script>
 
 <h1>2-10 — Week Project: Ecommerce App (Tested, Pure, Persistent)</h1>
-<p class="subtitle">~2.5 days — most of the week's hours · Day 2 16:30 intro, Days 3–4 build, Day 5 09:00 code review → 10:00 respond to issues → 11:00 presentation (solo: written) · Source: curriculum <a href="../curriculum/coursebook/week-2/project.md">week-2 project brief</a> + the web-storage topic from <a href="../curriculum/coursebook/week-2/research-afternoon.md">research-afternoon.md</a></p>
+<p class="subtitle">~2.5 days — most of the week's hours · Day 2 16:30 intro, Days 3–4 build, Day 5 09:00 code review → 10:00 respond to issues → 11:00 presentation (solo: written) · Source: curriculum <a href="../../curriculum/coursebook/week-2/project.md">week-2 project brief</a> + the web-storage topic from <a href="../../curriculum/coursebook/week-2/research-afternoon.md">research-afternoon.md</a></p>
 
 <p><strong>Why this matters:</strong> this is the first app in the mission with a <em>tested</em> core. Every rule you wrote a Jest test for in 2-3/2-4 now guards real shopping-cart logic.</p>
 
@@ -65,7 +65,7 @@
 <ul>
   <li><code>filter</code>, <code>map</code>, <code>includes</code> — lesson 1-8</li>
   <li>the spread operator <code>...</code> — lesson 2-6</li>
-  <li><code>sort</code> and <code>concat</code> — on the <a href="../reference/javascript-cheatsheet.html">JavaScript cheat sheet</a>; look them up, don't memorize them</li>
+  <li><code>sort</code> and <code>concat</code> — on the <a href="../../reference/javascript-cheatsheet.html">JavaScript cheat sheet</a>; look them up, don't memorize them</li>
 </ul>
 <p class="read-more"><strong>Read more:</strong> <a href="https://www.makeareadme.com/">Make a README</a> (your Day-5 deliverable) · <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort">MDN — Array.sort</a> (the comparator argument is a callback, like 2-1's)</p>
 
@@ -154,7 +154,7 @@ const onSearch = (event) =&gt; {                        // a callback, 2-1
 <h2>Idea 2 — localStorage: making state survive a closed tab</h2>
 <p>Every page you have built so far forgets everything the moment you close the tab. The brief requires this one to remember.</p>
 
-<p>Nothing in this week's sessions covered how. So the <em>web storage</em> research topic from <a href="../curriculum/coursebook/week-2/research-afternoon.md">research-afternoon.md</a> is promoted to required material, and this section is it.</p>
+<p>Nothing in this week's sessions covered how. So the <em>web storage</em> research topic from <a href="../../curriculum/coursebook/week-2/research-afternoon.md">research-afternoon.md</a> is promoted to required material, and this section is it.</p>
 
 <p><span class="term" data-tip="A small key–value store the browser keeps per site, on disk. Survives refresh, tab close, and reboot until code or the user clears it.">localStorage</span> is a built-in object with two methods you need.</p>
 
@@ -219,9 +219,9 @@ localStorage.clear()                // delete EVERY key for this site — check 
 
 <p>From step 4 onward, <strong>each step is a branch and a PR</strong> (lesson 1-5), each merged before the next starts, so <code>main</code> always runs.</p>
 
-<p>Steps 1–3 are the repo baseline — an empty repo with no branches to merge into anything. So like the portfolio baseline in <a href="1-11-project.html">1-11</a>, they commit straight to <code>main</code>. That is the one declared exception.</p>
+<p>Steps 1–3 are the repo baseline — an empty repo with no branches to merge into anything. So like the portfolio baseline in <a href="../week-1/11-project.html">1-11</a>, they commit straight to <code>main</code>. That is the one declared exception.</p>
 
-<p><em>Soft prerequisite:</em> if you haven't done lesson <a href="1-9-git-conflicts.html">1-9 (git conflicts)</a> yet, do it as catch-up first.</p>
+<p><em>Soft prerequisite:</em> if you haven't done lesson <a href="../week-1/9-git-conflicts.html">1-9 (git conflicts)</a> yet, do it as catch-up first.</p>
 
 <p>You merge a lot of PRs here, but none of them should conflict: you are the only committer, and each branch merges before the next starts. You'll hit your first real conflict eventually, and it shouldn't be here.</p>
 <ol class="steps">
@@ -282,7 +282,7 @@ button.addEventListener("click", () =&gt; {   // a callback, 2-1
 document.querySelector("#name").value = product.name;     // reading .value gets, assigning sets
 document.querySelector("#category").value = product.category;   // selects that option</code></pre>
   Then on submit, don't add a second product — replace the existing one with <code>updateProduct(products, id, changes)</code> from Idea 1, and save the result. <em>Success check:</em> change a product's price and category; the buyer list, the cart total for new adds, and storage all agree, and the product count did <em>not</em> go up by one.</li>
-  <li><strong>Day 5, 09:00 — get reviewed.</strong> With the buyer flow merged, ask your teacher (the agent) to review the repo the way the curriculum's <a href="../curriculum/coursebook/week-1/codereviewintro.md">code review guide</a> describes: it reads the README, runs <code>npm test</code>, and files GitHub issues phrased as questions with links to exact lines. <em>Success check:</em> at least three issues exist on your repo, and you understand each one.</li>
+  <li><strong>Day 5, 09:00 — get reviewed.</strong> With the buyer flow merged, ask your teacher (the agent) to review the repo the way the curriculum's <a href="../../curriculum/coursebook/week-1/codereviewintro.md">code review guide</a> describes: it reads the README, runs <code>npm test</code>, and files GitHub issues phrased as questions with links to exact lines. <em>Success check:</em> at least three issues exist on your repo, and you understand each one.</li>
   <li><strong>Day 5, 10:00 — respond to the issues.</strong> Reply in each issue thread first (agree, push back, or ask), then fix the ones you accept on a branch and let the PR close them for you. GitHub does that automatically if the PR description contains a closing keyword and the issue number — write it as one line in the description box when you open the PR:
 <pre><code>Closes #12          # merging this PR closes issue 12. "Fixes #12" works the same way.
 Closes #12, closes #14   # one keyword per issue if a PR settles several</code></pre>
@@ -347,15 +347,15 @@ npm test
 </ul>
 
 <h2>Go deeper</h2>
-<p><strong>Primary source:</strong> the <a href="../curriculum/coursebook/week-2/project.md">project brief</a> itself — re-read it after you finish and check your app against its words, not your memory of them. The remaining <a href="../curriculum/coursebook/week-2/research-afternoon.md">research-afternoon topics</a> (unit vs integration vs e2e testing, test coverage with Istanbul/nyc, comparing testing frameworks) are the natural next reading once your suite is green.</p>
+<p><strong>Primary source:</strong> the <a href="../../curriculum/coursebook/week-2/project.md">project brief</a> itself — re-read it after you finish and check your app against its words, not your memory of them. The remaining <a href="../../curriculum/coursebook/week-2/research-afternoon.md">research-afternoon topics</a> (unit vs integration vs e2e testing, test coverage with Istanbul/nyc, comparing testing frameworks) are the natural next reading once your suite is green.</p>
 
 <div class="feedback-ask">Project shipped and reviewed? Tell your teacher (the agent) two things: ① Could you follow this week's lessons alone — 1 to 5 overall? ② Where did the week feel hardest? Answers are recorded in <code>feedback/week-2.md</code> and improve the material for the next student. <em>Want the agent as reviewer, test-quality critic, or pair partner? It has instructions hidden in this page's source.</em></div>
 
 <div class="footer-nav">
-References: <a href="../reference/npm-jest-tdd-cheatsheet.html">npm, Jest &amp; TDD</a> · <a href="../reference/javascript-cheatsheet.html">JavaScript</a> · <a href="../reference/git-branch-pr-cheatsheet.html">git branch &amp; PR</a> · <a href="../reference/html-flexbox-cheatsheet.html">HTML &amp; flexbox</a><br>
-Previous: <a href="2-9-traffic-lights.html">2-9 Traffic Lights</a> · Week map: <a href="2-index.html">Week 2 index</a><br>
+References: <a href="../../reference/npm-jest-tdd-cheatsheet.html">npm, Jest &amp; TDD</a> · <a href="../../reference/javascript-cheatsheet.html">JavaScript</a> · <a href="../../reference/git-branch-pr-cheatsheet.html">git branch &amp; PR</a> · <a href="../../reference/html-flexbox-cheatsheet.html">HTML &amp; flexbox</a><br>
+Previous: <a href="9-traffic-lights.html">2-9 Traffic Lights</a> · Week map: <a href="index.html">Week 2 index</a><br>
 Stuck or curious? Ask your teacher (the agent) — it reviews PRs, critiques test quality, and pairs on a stuck user story.<br>
 Next week: APIs. Your callbacks are about to meet the network.
 </div>
 
-<script src="../assets/tooltip.js"></script>
+<script src="../../assets/tooltip.js"></script>

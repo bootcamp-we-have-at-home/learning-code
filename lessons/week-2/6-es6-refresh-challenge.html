@@ -1,7 +1,7 @@
 <meta charset="utf-8">
 <title>2-6 — ES6 Features Refresh &amp; the ES6→ES5 Challenge</title>
-<link rel="stylesheet" href="../assets/course.css">
-<script src="../assets/layout.js"></script>
+<link rel="stylesheet" href="../../assets/course.css">
+<script src="../../assets/layout.js"></script>
 
 <h1>2-6 — ES6 Features Refresh &amp; the ES6→ES5 Challenge</h1>
 <p class="subtitle">~60 minutes (15 reading + 45 challenge) · Week 2, Day 2, 09:00–10:30 morning challenge · Source: curriculum <a href="https://github.com/bootcamp-we-have-at-home/mc-es6-challenge">bootcamp-we-have-at-home/mc-es6-challenge</a>, part 1</p>
@@ -31,7 +31,7 @@ class T { constructor(n) { this.n = n } } ; new T(5).n</code></pre>
 [2, 3]                   // rest collects "everything left" into an array
 2                        // a Set stores each unique value once
 5                        // class is a constructor function in nicer clothes</code></pre>
-<p><strong>All nine right <em>and</em> you could write ES5 for each?</strong> Jump straight to <a href="#challenge">Do it for real</a> — or, if you've done this exact challenge before, to <a href="2-7-callbacks-async.html">2-7 The Call Stack, Sync vs Async &amp; setTimeout</a> with a clear conscience. Any miss, or any "I know what it does but not how to undo it": the two sections below cover exactly those nine, in the same order.</p>
+<p><strong>All nine right <em>and</em> you could write ES5 for each?</strong> Jump straight to <a href="#challenge">Do it for real</a> — or, if you've done this exact challenge before, to <a href="7-callbacks-async.html">2-7 The Call Stack, Sync vs Async &amp; setTimeout</a> with a clear conscience. Any miss, or any "I know what it does but not how to undo it": the two sections below cover exactly those nine, in the same order.</p>
 </details>
 
 <h2>Idea 1 — Nine ES6 features and their ES5 undo</h2>
@@ -39,9 +39,9 @@ class T { constructor(n) { this.n = n } } ; new T(5).n</code></pre>
 <p>Three of the nine features below are exactly those. One row each, then move on:</p>
 <table>
   <tr><th>Feature</th><th>Taught in</th><th>ES5 equivalent</th></tr>
-  <tr><td><code>let</code> / <code>const</code></td><td><a href="1-7-javascript-refresh.html">1-7</a> (const-by-default, <code>var</code> as legacy)</td><td><code>var</code> — looser scoping, see Idea 2</td></tr>
-  <tr><td>arrow functions</td><td><a href="1-8-array-methods.html">1-8</a> (the arrows you passed to <code>map</code>)</td><td><code>function (x) { return … }</code></td></tr>
-  <tr><td>template literals</td><td><a href="1-10-objects-operators-dom.html">1-10</a> (the backtick string in <code>describe()</code>)</td><td><code>"a " + b + " c"</code> concatenation</td></tr>
+  <tr><td><code>let</code> / <code>const</code></td><td><a href="../week-1/7-javascript-refresh.html">1-7</a> (const-by-default, <code>var</code> as legacy)</td><td><code>var</code> — looser scoping, see Idea 2</td></tr>
+  <tr><td>arrow functions</td><td><a href="../week-1/8-array-methods.html">1-8</a> (the arrows you passed to <code>map</code>)</td><td><code>function (x) { return … }</code></td></tr>
+  <tr><td>template literals</td><td><a href="../week-1/10-objects-operators-dom.html">1-10</a> (the backtick string in <code>describe()</code>)</td><td><code>"a " + b + " c"</code> concatenation</td></tr>
 </table>
 <p>The other six are new here.</p>
 <p>Each one below is a code block plus its ES5 undo — the older way of writing the same thing:</p>
@@ -143,7 +143,7 @@ for (var i = 0; i &lt; 3; i++) setTimeout(() =&gt; console.log(i));   // 3 3 3</
 <p><code>let</code> makes a fresh <code>i</code> per iteration; <code>var</code> makes one <code>i</code> for the whole function, and by the time the callbacks run it is 3. (Why the callbacks run <em>after</em> the loop finishes at all is 2-7's subject — park it for now.)</p>
 <p>Arrow functions are not <em>always</em> a drop-in for <code>function</code> either: an arrow takes <code>this</code> from the surrounding scope, a <code>function</code> gets its own. It doesn't bite in this challenge's file — none of the arrows there use <code>this</code> — but it is the reason "replace all arrows with functions" is not a blind find-and-replace in general.</p>
 </details>
-<p class="read-more"><strong>Read more:</strong> <a href="https://javascript.info/var">javascript.info — the old <code>var</code></a> · <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/concat">MDN — Array.concat</a> · the ES6↔ES5 table in the <a href="../reference/javascript-cheatsheet.html">JavaScript cheat sheet</a></p>
+<p class="read-more"><strong>Read more:</strong> <a href="https://javascript.info/var">javascript.info — the old <code>var</code></a> · <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/concat">MDN — Array.concat</a> · the ES6↔ES5 table in the <a href="../../reference/javascript-cheatsheet.html">JavaScript cheat sheet</a></p>
 
 <h2 id="challenge">Do it for real (~45 min) — ship it for Internet Explorer</h2>
 <p>The curriculum's scenario: as part of a job application you wrote an <code>assertEquals</code> function using every ES6 feature you could.</p>
@@ -152,7 +152,7 @@ for (var i = 0; i &lt; 3; i++) setTimeout(() =&gt; console.log(i));   // 3 3 3</
 <p>The repo is explicit that this is not a race: <em>a variety of different features attempted beats complete coverage of one</em>.</p>
 <p>Timebox it at 45 minutes and stop where you stop.</p>
 <ol class="steps">
-  <li>Confirm Node is there (installed in lesson <a href="2-2-npm.html">2-2</a>) and go to your code folder:
+  <li>Confirm Node is there (installed in lesson <a href="2-npm.html">2-2</a>) and go to your code folder:
 <pre><code>node -v          # v20 or v22 — if this errors, do 2-2 first
 cd ~/code        # the workspace folder from 1-4</code></pre>
   <em>You should see</em> a version number, and no error from <code>cd</code>.</li>
@@ -270,10 +270,10 @@ function label(opts) {                                       // their ES5 attemp
 <div class="feedback-ask">Finished (or skipped via the checkpoint)? Tell your teacher (the agent) two things: ① Could you follow this lesson alone — 1 to 5? ② Where did you get stuck, if anywhere? Answers are recorded in <code>feedback/week-2.md</code> and improve the lesson for the next student. <em>Want your conversions spot-checked as you go? The agent has pair instructions hidden in this page's source.</em></div>
 
 <div class="footer-nav">
-Reference: <a href="../reference/javascript-cheatsheet.html">JavaScript cheat sheet</a> · Week map: <a href="2-index.html">Week 2 index</a><br>
-Previous: <a href="2-5-roman-numerals-tdd.html">2-5 Roman Numerals TDD</a> · Next: <a href="2-7-callbacks-async.html">2-7 The Call Stack, Sync vs Async &amp; setTimeout</a><br>
+Reference: <a href="../../reference/javascript-cheatsheet.html">JavaScript cheat sheet</a> · Week map: <a href="index.html">Week 2 index</a><br>
+Previous: <a href="5-roman-numerals-tdd.html">2-5 Roman Numerals TDD</a> · Next: <a href="7-callbacks-async.html">2-7 The Call Stack, Sync vs Async &amp; setTimeout</a><br>
 Stuck or curious? Ask your teacher (the agent). "If Babel converts this automatically, why do it by hand?" is a great follow-up.
 </div>
 
-<script src="../assets/quiz.js"></script>
-<script src="../assets/tooltip.js"></script>
+<script src="../../assets/quiz.js"></script>
+<script src="../../assets/tooltip.js"></script>

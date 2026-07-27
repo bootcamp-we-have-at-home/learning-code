@@ -4,12 +4,13 @@ This repo is a modernized, self-serve delivery of the GSG Code Academy curriculu
 
 ## Standing rules
 
-- **Lessons**: live flat in `lessons/` as `<week>-<lesson>-<title>.html` + `<week>-index.html`. Any lesson edit or creation follows `lessons/STYLE.md` — it is the contract; its preamble records the diagnosed failures each rule traces to. To generate or regenerate a whole week, use the `teach-week` skill, not ad-hoc generation.
+- **Lessons**: live in `lessons/week-<n>/` as `<k>-<title>.html` + `index.html`, with `lessons/index.html` as the track hub. Any lesson edit or creation follows `lessons/STYLE.md` — it is the contract; its preamble records the diagnosed failures each rule traces to. To generate or regenerate a whole week, use the `teach-week` skill, not ad-hoc generation.
 - **Lesson ordering** strictly follows `curriculum/coursebook/week-<n>/README.md`; deviations only where the curriculum's ordering is broken for a solo learner, each logged in the week index's sequencing notes.
 - **Feedback protocol**: when the student reports lesson feedback (followability 1–5 + stuck-points), append it verbatim, dated, under the lesson's heading in `feedback/week-<n>.md`. Score ≤3 or any stuck-point ⇒ revise that lesson before the next student uses it. Feedback is append-and-keep: mark entries "addressed" with what changed, never delete them.
 - **Record keeping**: there is no separate decision-record directory — durable changes land directly in the living docs (student state/progress → `NOTES.md`, lesson-design rules → `lessons/STYLE.md`, process/infrastructure → this file). When recording student progress, always distinguish solo completion from mentor-assisted completion — completion ≠ followability.
 - **Agent-as-pair**: pair-workshop adaptations live in `<!-- agent-pair: ... -->` comments inside lesson HTML. When the student asks to pair or requests review, follow those instructions and the etiquette in `curriculum/coursebook/week-1/codereviewintro.md`.
 - Curriculum content is read-only source material — never edit `curriculum/`. Its references to upstream GSG-CA repos are intentional and stay.
+- **GitHub Pages**: the site is served from `main` at the repo root (`https://bootcamp-we-have-at-home.github.io/learning-code/`); the root `index.html` redirects to `lessons/index.html`, and `.nojekyll` keeps the deploy raw. All internal links must stay relative so pages work both over `file://` and on Pages.
 
 ## Workshop repo forks (week 2+)
 

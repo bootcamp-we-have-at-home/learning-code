@@ -1,12 +1,12 @@
 ---
 name: teach-week
-description: Generate one curriculum week's lessons (lessons/<n>-index.html + <n>-<k>-<title>.html) following STYLE.md and the full review gate. Use when the mentor asks to generate, regenerate, or revise a week's lessons. Takes the week number as argument.
+description: Generate one curriculum week's lessons (lessons/week-<n>/index.html + <k>-<title>.html) following STYLE.md and the full review gate. Use when the mentor asks to generate, regenerate, or revise a week's lessons. Takes the week number as argument.
 argument-hint: <week-number>
 ---
 
 # Generate a curriculum week
 
-Argument: the week number N. Produces `lessons/N-index.html` plus `lessons/N-<k>-<title>.html` files, flat under `lessons/`. The content contract is `lessons/STYLE.md` — read it first, follow it exactly; this skill only encodes the process around it.
+Argument: the week number N. Produces `lessons/week-N/index.html` plus `lessons/week-N/<k>-<title>.html`, and adds the week's row to the `lessons/index.html` hub. The content contract is `lessons/STYLE.md` — read it first, follow it exactly; this skill only encodes the process around it.
 
 ## Phase 1 — Absorb sources (never generate from memory of the topic)
 
@@ -49,5 +49,5 @@ Turn the README schedule into a lesson list, in schedule order:
 ## Link check snippet
 
 ```bash
-cd lessons && for f in N-*.html; do grep -oP '(?:href|src)="[^"#]+"' "$f" | sed 's/.*="//;s/"$//' | grep -v '^http' | while read -r p; do [ -e "$p" ] || echo "BROKEN: $f -> $p"; done; done
+cd lessons/week-N && for f in *.html; do grep -oP '(?:href|src)="[^"#]+"' "$f" | sed 's/.*="//;s/"$//' | grep -v '^http' | while read -r p; do [ -e "$p" ] || echo "BROKEN: $f -> $p"; done; done
 ```
