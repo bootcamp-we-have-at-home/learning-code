@@ -18,11 +18,18 @@ Protocol: after each lesson the student answers ① "Could you follow it alone? 
 
 ## 1-8 Array Methods
 
-## 1-9 Objects, Operators & the DOM
+## 1-9 Git Conflicts Workshop
 
-## 1-10 Week Project
+_Added 2026-07-27 in response to the week-overall feedback below; no student has run it yet._
+
+## 1-10 Objects, Operators & the DOM
+
+## 1-11 Week Project
 
 ## Week overall
+
+2026-07-27 — first cohort, end of week (addressed 2026-07-27, see `learning-records/0004-week-1-feedback-revision.md`):
+
 - We need more examples in the reading section (collapse them and keep them skippable in kind of <details> collapse)
 - Do not assume some pre-requisite information is already known. reference past lessons, or Explain the new needed info/thing and reference them with citation and sources.
 - Add a new git-conflict centered workshop so students can understand it

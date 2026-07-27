@@ -8,7 +8,7 @@
 <p><strong>Why this matters:</strong> the profile page you start here grows into your portfolio project at the end of this week. Semantic HTML is also a favorite interview topic.</p>
 
 <h2>Idea 1 — Tags that say what they mean</h2>
-<p>freeCodeCamp taught you the tags; the professional habit is choosing them for <em>meaning</em>. <code>&lt;div class="header"&gt;</code> and <code>&lt;header&gt;</code> look identical on screen — but only the second one is announced as a landmark by a <span class="term" data-tip="Software that reads a page aloud for blind and low-vision users. It navigates by semantic landmarks, not by looks.">screen reader</span>, understood by search engines, and instantly legible to the next developer.</p>
+<p><a href="https://www.freecodecamp.org/learn/2022/responsive-web-design/">freeCodeCamp's Responsive Web Design section</a> (your prerequisite) taught you the tags; the professional habit is choosing them for <em>meaning</em>. <code>&lt;div class="header"&gt;</code> and <code>&lt;header&gt;</code> look identical on screen — but only the second one is announced as a landmark by a <span class="term" data-tip="Software that reads a page aloud for blind and low-vision users. It navigates by semantic landmarks, not by looks.">screen reader</span>, understood by search engines, and instantly legible to the next developer.</p>
 
 <p>The skeleton to internalize — six tags plus one rule:</p>
 <pre><code>&lt;header&gt;   who/what this page is; usually contains &lt;nav&gt;
@@ -19,9 +19,45 @@
 &lt;footer&gt;   closing info: copyright, contact, small links</code></pre>
 
 <p><code>&lt;aside&gt;</code> (tangential content, e.g. a sidebar) exists too — it's on the <a href="../reference/html-flexbox-cheatsheet.html">cheat sheet</a>; look it up when you need it, don't memorize it now.</p>
+<details class="examples"><summary>More examples (optional)</summary>
+<p>The same news-article page, before and after the semantic habit:</p>
+<pre><code>&lt;!-- div soup: renders identically, means nothing --&gt;
+&lt;div class="top"&gt;
+  &lt;div class="menu"&gt;…links…&lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="content"&gt;
+  &lt;div class="story"&gt;
+    &lt;h2&gt;Storm hits the coast&lt;/h2&gt;
+    &lt;p&gt;…&lt;/p&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;div class="bottom"&gt;© 2026&lt;/div&gt;</code></pre>
+<pre><code>&lt;!-- semantic: a screen reader can jump straight to main or nav --&gt;
+&lt;header&gt;
+  &lt;nav&gt;…links…&lt;/nav&gt;
+&lt;/header&gt;
+&lt;main&gt;
+  &lt;article&gt;                     &lt;!-- would make sense on its own → article --&gt;
+    &lt;h2&gt;Storm hits the coast&lt;/h2&gt;
+    &lt;p&gt;…&lt;/p&gt;
+  &lt;/article&gt;
+&lt;/main&gt;
+&lt;footer&gt;© 2026&lt;/footer&gt;</code></pre>
+<p>Choosing between <code>&lt;section&gt;</code> and <code>&lt;article&gt;</code>: could you syndicate the block alone in an RSS feed and have it still make sense? Yes → <code>article</code> (a news story, a product card). No, it only groups things thematically → <code>section</code> (the "Projects" area of your profile).</p>
+</details>
+<p class="read-more"><strong>Read more:</strong> <a href="https://www.w3.org/WAI/tutorials/page-structure/">W3C WAI — page structure tutorial</a> · <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element">MDN — every HTML element</a> (the full menu you're choosing from)</p>
 
 <h2>Idea 2 — Accessibility is checkable, not vibes</h2>
 <p>Semantic structure is the first half of <span class="term" data-tip="Designing pages usable by everyone, including people using screen readers, keyboard-only navigation, or high zoom.">accessibility</span>. The second half is verifying it: browsers ship an auditor called <strong>Lighthouse</strong> that scores your page and lists concrete fixes. You'll run it on your own page in a few minutes.</p>
+<details class="examples"><summary>More examples (optional)</summary>
+<p>The three findings Lighthouse raises most often on beginner pages, and what each means for a real person:</p>
+<ol>
+  <li><strong>"Image elements do not have alt attributes"</strong> — a screen-reader user hears "image" and nothing else. Fix: <code>&lt;img src="me.jpg" alt="Portrait of Amjad at his desk"&gt;</code>; purely decorative images get an empty <code>alt=""</code> so they're skipped silently.</li>
+  <li><strong>"Background and foreground colors do not have sufficient contrast"</strong> — light-grey-on-white text that low-vision users (and anyone in sunlight) can't read. Fix: darker text or lighter background until the ratio passes.</li>
+  <li><strong>"&lt;html&gt; element does not have a lang attribute"</strong> — the screen reader doesn't know which language's pronunciation to use. Your base document from step 3 already has <code>lang="en"</code>; a page in Arabic would declare <code>lang="ar"</code>.</li>
+</ol>
+</details>
+<p class="read-more"><strong>Read more:</strong> <a href="https://www.w3.org/WAI/fundamentals/accessibility-intro/">W3C — what accessibility is and who it serves</a> · <a href="https://webaim.org/resources/contrastchecker/">WebAIM contrast checker</a> (paste two colors, get a pass/fail)</p>
 
 <h2>Do it for real (~35 min)</h2>
 <p>All in your editor and browser. (If you don't have an editor yet, install VS Code first — ask your teacher for help.)</p>
@@ -39,20 +75,20 @@
 
 &lt;/body&gt;
 &lt;/html&gt;</code></pre>
-  <em>Success check:</em> open the file in your browser (double-click it, or drag it onto a browser window). You see an empty page whose tab reads "My profile".</li>
+  <em>Success check:</em> save the file, then open it in your browser (double-click it, or drag it onto a browser window). You see an empty page whose tab reads "My profile".</li>
   <li>Inside <code>&lt;body&gt;</code>, add a <code>&lt;header&gt;</code> containing an <code>&lt;h1&gt;</code> with your name. Save, refresh the browser.
 <pre><code>&lt;header&gt;
   &lt;h1&gt;Your name&lt;/h1&gt;
 &lt;/header&gt;</code></pre>
   <em>You should see</em> your name.</li>
-  <li>Inside the header, below the <code>&lt;h1&gt;</code>, add a <code>&lt;nav&gt;</code> with three links. Refresh.
+  <li>Inside the header, below the <code>&lt;h1&gt;</code>, add a <code>&lt;nav&gt;</code> with three links. Save, refresh.
 <pre><code>&lt;nav&gt;
   &lt;a href="#about"&gt;About&lt;/a&gt;
   &lt;a href="#projects"&gt;Projects&lt;/a&gt;
   &lt;a href="#contact"&gt;Contact&lt;/a&gt;
 &lt;/nav&gt;</code></pre>
   <em>You should see</em> three links under your name.</li>
-  <li>After the header, add <code>&lt;main&gt;</code> containing one <code>&lt;section id="about"&gt;</code> with an <code>&lt;h2&gt;About&lt;/h2&gt;</code> and a paragraph about you. Refresh.
+  <li>After the header, add <code>&lt;main&gt;</code> containing one <code>&lt;section id="about"&gt;</code> with an <code>&lt;h2&gt;About&lt;/h2&gt;</code> and a paragraph about you. Save, refresh.
 <pre><code>&lt;main&gt;
   &lt;section id="about"&gt;
     &lt;h2&gt;About&lt;/h2&gt;
@@ -60,14 +96,14 @@
   &lt;/section&gt;
 &lt;/main&gt;</code></pre>
   <em>You should see</em> the About block under your nav.</li>
-  <li>Still inside <code>&lt;main&gt;</code>, add a <code>&lt;section id="projects"&gt;</code> with an <code>&lt;h2&gt;Projects&lt;/h2&gt;</code> and two <code>&lt;article&gt;</code>s, each holding an <code>&lt;h3&gt;</code> project name and a one-line description (freeCodeCamp projects count). Refresh.
+  <li>Still inside <code>&lt;main&gt;</code>, add a <code>&lt;section id="projects"&gt;</code> with an <code>&lt;h2&gt;Projects&lt;/h2&gt;</code> and two <code>&lt;article&gt;</code>s, each holding an <code>&lt;h3&gt;</code> project name and a one-line description (freeCodeCamp projects count). Save, refresh.
 <pre><code>&lt;section id="projects"&gt;
   &lt;h2&gt;Projects&lt;/h2&gt;
   &lt;article&gt;&lt;h3&gt;Project name&lt;/h3&gt;&lt;p&gt;One-line description.&lt;/p&gt;&lt;/article&gt;
   &lt;article&gt;&lt;h3&gt;Another project&lt;/h3&gt;&lt;p&gt;One-line description.&lt;/p&gt;&lt;/article&gt;
 &lt;/section&gt;</code></pre>
   <em>You should see</em> both project blocks below About.</li>
-  <li>Close the page with a <code>&lt;footer id="contact"&gt;</code> containing your email or GitHub link. Refresh.
+  <li>Close the page with a <code>&lt;footer id="contact"&gt;</code> containing your email or GitHub link. Save, refresh.
 <pre><code>&lt;footer id="contact"&gt;
   Your email or GitHub link
 &lt;/footer&gt;</code></pre>

@@ -8,7 +8,19 @@
 <p><strong>Why this matters:</strong> Flexbox is the workhorse layout tool for every page you'll build in this course, starting with the profile page from lesson 1-2.</p>
 
 <h2>Idea 1 — A container and its items, on two axes</h2>
-<p>Flexbox has exactly two roles: the <strong>flex container</strong> (the parent you give <code>display: flex</code>) and its <strong>flex items</strong> (the direct children, which the container arranges). The container lays items along its <strong>main axis</strong> — horizontal by default, set by <code>flex-direction</code> — and the <strong>cross axis</strong> runs perpendicular to it.</p>
+<p>Flexbox has exactly two roles: the <strong>flex container</strong> (the parent you give <code>display: flex</code>) and its <strong>flex items</strong> (the direct children, which the container arranges). The container lays items along its <strong>main axis</strong> — horizontal by default, set by <code>flex-direction</code> — and the <strong>cross axis</strong> runs perpendicular to it. (The CSS mechanics themselves — selectors, properties, the <code>&lt;style&gt;</code> block — are your <a href="https://www.freecodecamp.org/learn/2022/responsive-web-design/">freeCodeCamp prerequisite</a>; here you're only learning the flex layout model.)</p>
+<details class="examples"><summary>More examples (optional)</summary>
+<p><em>Only direct children become items</em> — the single most common beginner surprise:</p>
+<pre><code>&lt;nav style="display: flex"&gt;
+  &lt;a&gt;About&lt;/a&gt;          &lt;!-- flex item (direct child) --&gt;
+  &lt;a&gt;Projects&lt;/a&gt;       &lt;!-- flex item --&gt;
+  &lt;div&gt;
+    &lt;a&gt;Hidden&lt;/a&gt;       &lt;!-- NOT an item — grandchild; the div is the item --&gt;
+  &lt;/div&gt;
+&lt;/nav&gt;</code></pre>
+<p>And the axes flip together: with <code>flex-direction: row</code> the main axis runs left→right and the cross axis top→bottom; switch to <code>column</code> and main is now top→bottom, cross left→right. Every property in Idea 2 is defined in terms of these two axes, never in terms of "horizontal/vertical".</p>
+</details>
+<p class="read-more"><strong>Read more:</strong> <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_flexible_box_layout/Basic_concepts_of_flexbox">MDN — basic concepts of flexbox</a> (the axes, with diagrams)</p>
 
 <h2>Idea 2 — One property per question</h2>
 <table>
@@ -19,6 +31,24 @@
   <tr><td>May items wrap to more lines?</td><td><code>flex-wrap: nowrap | wrap</code></td></tr>
 </table>
 <p>And one property on an <em>item</em>: <code>flex-grow: 1</code> lets that item take a share of leftover space — all items with <code>flex-grow: 1</code> share it equally. The remaining item properties (<code>order</code>, <code>flex-shrink</code>, <code>align-self</code>, <code>align-content</code> for multi-line containers) are on the <a href="../reference/html-flexbox-cheatsheet.html">cheat sheet</a> — look up, don't memorize.</p>
+<details class="examples"><summary>More examples (optional)</summary>
+<p>Two layouts you'll build a hundred times, each three lines of flexbox:</p>
+<pre><code>/* 1 — the classic header: logo hugs left, links hug right */
+header {
+  display: flex;
+  justify-content: space-between;   /* free space goes BETWEEN the two ends */
+  align-items: center;              /* both vertically centered in the bar */
+}</code></pre>
+<pre><code>/* 2 — dead-center anything (a login card, a hero message) */
+.hero {
+  display: flex;
+  justify-content: center;   /* centered along the main axis */
+  align-items: center;       /* centered along the cross axis */
+  min-height: 100vh;         /* container must be tall for vertical centering to show */
+}</code></pre>
+<p>Read them through the axis lens from Idea 1: in example 2, if you flipped to <code>flex-direction: column</code>, the two centering properties would swap jobs — and the result would look identical.</p>
+</details>
+<p class="read-more"><strong>Read more:</strong> <a href="https://www.joshwcomeau.com/css/interactive-guide-to-flexbox/">An interactive guide to flexbox</a> (Josh Comeau — playgrounds for every property) · <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_flexible_box_layout/Typical_use_cases_of_flexbox">MDN — typical flexbox use cases</a></p>
 
 <h2>Prove it to yourself</h2>
 <p>Change one dropdown at a time and predict the result <em>before</em> it renders. In particular: set <code>align-items: center</code>, then flip <code>flex-direction</code> to <code>column</code> — watch which way "center" moves. The main axis follows the direction; <code>justify-content</code> follows the main axis.</p>
@@ -30,18 +60,18 @@
   <li>Make the nav a row with breathing room:
 <pre><code>nav { display: flex; gap: 1rem; }   /* row with breathing room */</code></pre>
   Save, refresh. <em>You should see</em> the three links side by side with even spacing.</li>
-  <li>Push the nav links to the right edge: add this to the same rule. Refresh.
+  <li>Push the nav links to the right edge: add this to the same rule. Save, refresh.
 <pre><code>justify-content: flex-end;   /* push links to the right */</code></pre>
   <em>You should see</em> them hug the right side.</li>
-  <li>Give the two project articles a shared container by wrapping them in this (inside the projects section). Refresh — <em>nothing visibly changes yet; that's expected.</em>
+  <li>Give the two project articles a shared container by wrapping them in this (inside the projects section). Save, refresh — <em>nothing visibly changes yet; that's expected.</em>
 <pre><code>&lt;div class="cards"&gt;
 &lt;/div&gt;</code></pre></li>
   <li>Lay the cards out:
 <pre><code>.cards { display: flex; gap: 1rem; flex-wrap: wrap; }   /* cards share a row and wrap */
 .cards article { flex-grow: 1; border: 1px solid #ccc; padding: 1rem; }   /* cards grow and get borders */</code></pre>
-  Refresh. <em>You should see</em> two bordered cards side by side.</li>
+  Save, refresh. <em>You should see</em> two bordered cards side by side.</li>
   <li>Shrink the browser window slowly. <em>Success check:</em> when the window gets narrow, the cards wrap into a single column — that's <code>flex-wrap</code> working; you'll control it precisely in lesson 1-6.</li>
-  <li>Optional but excellent practice: play <a href="https://flexboxfroggy.com/">Flexbox Froggy</a> (from the curriculum's Day 1 schedule) up to at least level 13.</li>
+  <li>Optional but excellent practice: play <a href="https://flexboxfroggy.com/">Flexbox Froggy</a> (from the curriculum's Day 1 schedule). <em>Success check:</em> you reach level 13 (where <code>flex-direction</code> and <code>justify-content</code> combine) without peeking at the property table above.</li>
 </ol>
 
 <h2>Check yourself — predict the output</h2>

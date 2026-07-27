@@ -1,8 +1,8 @@
 <meta charset="utf-8">
-<title>1-9 — Objects, Operators &amp; the DOM</title>
+<title>1-10 — Objects, Operators &amp; the DOM</title>
 <link rel="stylesheet" href="../assets/course.css">
 
-<h1>1-9 — Objects, Operators &amp; the DOM</h1>
+<h1>1-10 — Objects, Operators &amp; the DOM</h1>
 <p class="subtitle">~60 minutes · Week 1, Day 4 · Source: curriculum Day 4 (JavaScript objects, comparison &amp; logical operators, DOM morning challenge)</p>
 
 <p><strong>Why this matters:</strong> objects are how every API this course touches represents data; the operators decide every <code>if</code>; and the DOM exercise reconnects your freeCodeCamp knowledge to the profile page you actually own.</p>
@@ -18,12 +18,46 @@
 project.name          // "Profile page"   — dot access
 project["name"]       // same, bracket access — needed when the key is in a variable
 project.describe()    // "Profile page (html, css)"</code></pre>
+<p>(The backtick string in <code>describe()</code> is a <span class="term" data-tip="A string in backticks where ${…} slots in any expression: `Hello ${name}` — freeCodeCamp material; far more readable than quote-plus-quote concatenation.">template literal</span>, and <code>join(", ")</code> is an array method 1-8 didn't cover: it glues the array's items into one string with the separator between them — <code>["html","css"].join(", ")</code> → <code>"html, css"</code>.)</p>
+<details class="examples"><summary>More examples (optional)</summary>
+<p>Objects nest, and arrays of objects are how every API you'll ever call sends data:</p>
+<pre><code>const student = {
+  name: "Amjad",
+  contact: { github: "amjad-codes", city: "Gaza" },   // an object inside an object
+}
+student.contact.github        // "amjad-codes" — chain the dots level by level
+
+const projects = [
+  { name: "Profile page", done: true },
+  { name: "Quiz app",     done: false },
+]
+projects[0].name                             // "Profile page" — index in, then dot
+projects.map(p =&gt; p.name)                    // ["Profile page", "Quiz app"] — 1-8 meets objects
+projects.filter(p =&gt; !p.done).length         // 1 — how many are still open?</code></pre>
+<p>Bracket access earns its keep when the key lives in a variable: <code>const field = "name"; student[field]</code> works, <code>student.field</code> looks for a key literally called <code>field</code>.</p>
+</details>
+<p class="read-more"><strong>Read more:</strong> <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Working_with_objects">MDN — working with objects</a> · <a href="https://javascript.info/object">javascript.info — objects</a></p>
 
 <h2>Idea 2 — Comparisons that don't lie</h2>
 <p>Always compare with <code>===</code> / <code>!==</code> (no type conversion). The loose forms <code>==</code> / <code>!=</code> convert types before comparing (<code>"5" == 5</code> is <code>true</code>) — a classic bug source you'll see in older code but shouldn't write. Logical operators: <code>&amp;&amp;</code> (both), <code>||</code> (either), <code>!</code> (not) — and they <span class="term" data-tip="a && b returns a if a is falsy, else b. a || b returns a if a is truthy, else b. They return one of the operands, not just true/false.">return operands, not booleans</span>, which is why <code>name || "anonymous"</code> works as a fallback.</p>
+<details class="examples"><summary>More examples (optional)</summary>
+<p>The whole falsy list — six values; <em>everything</em> else is truthy:</p>
+<pre><code>false   0   ""   null   undefined   NaN            // the complete falsy family
+
+Boolean("0")        // true  — a non-empty string, even "0"
+Boolean([])         // true  — an empty array is still an object
+5 &gt; 3 &amp;&amp; "ok"       // "ok"  — && returns the last operand when all are truthy
+null || 0 || "hi"   // "hi"  — || returns the first truthy operand it meets</code></pre>
+<p>And the comparison traps worth seeing once, so <code>===</code> feels earned:</p>
+<pre><code>"10" &gt; "9"          // false — two strings compare alphabetically: "1" &lt; "9"
+"10" &gt; 9            // true  — mixed types: the string converts to a number
+null == undefined   // true  — loose equality's special case
+null === undefined  // false — strict says: different types, done</code></pre>
+</details>
+<p class="read-more"><strong>Read more:</strong> <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Equality_comparisons_and_sameness">MDN — equality comparisons</a> (the full == vs === conversion table) · <a href="https://javascript.info/logical-operators">javascript.info — logical operators</a></p>
 
 <h2>Do it for real (~35 min)</h2>
-<p><strong>Part A — console (~15 min).</strong></p>
+<p><strong>Part A — console (~15 min).</strong> The <kbd>F12</kbd> console from lesson 1-1, as in 1-7 and 1-8.</p>
 <ol class="steps">
   <li>Build a <code>me</code> object — same shape as the <code>project</code> example in Idea 1 — with your <code>name</code>, a <code>skills</code> array, and a <code>yearsOfCS</code> number:
 <pre><code>const me = {
@@ -59,7 +93,7 @@ document.querySelector("#about").append(p);</code></pre>
   <li>Make it permanent: in a terminal, type:
 <pre><code>cd ~/code/week-1
 git switch -c add-skill-counter</code></pre>
-  (the repo you published in 1-6). Then in your editor put the same code in a <code>&lt;script&gt;</code> tag just before <code>&lt;/body&gt;</code>. Refresh. <em>You should see</em> it survive reloads now.</li>
+  (the repo you published in 1-6). Then in your editor — open the <code>~/code/week-1</code> folder again if it still shows <code>workflow-practice</code> from 1-9 — put the same code in a <code>&lt;script&gt;</code> tag just before <code>&lt;/body&gt;</code>. Save, refresh. <em>You should see</em> it survive reloads now.</li>
   <li>Commit, push, open a PR, merge, and sync — the full 1-5 loop, from memory, in the same terminal (still in <code>~/code/week-1</code>). Use the commands you learned in 1-5. <em>Success check:</em> the PR shows exactly one changed file, and after syncing, <code>git branch</code> lists only <code>main</code>.</li>
 </ol>
 
@@ -86,7 +120,7 @@ console.log(user.name === undefined);</code></pre>
 
 <div class="footer-nav">
 Reference: <a href="../reference/javascript-cheatsheet.html">JavaScript cheat sheet</a> · Week map: <a href="1-index.html">Week 1 index</a><br>
-Previous: <a href="1-8-array-methods.html">1-8 Array Methods</a> · Next: <a href="1-10-project.html">1-10 Week Project</a><br>
+Previous: <a href="1-9-git-conflicts.html">1-9 Git Conflicts Workshop</a> · Next: <a href="1-11-project.html">1-11 Week Project</a><br>
 Stuck or curious? Ask your teacher (the agent). "What exactly is `this` inside describe()?" is a great follow-up.
 </div>
 

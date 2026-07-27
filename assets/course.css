@@ -92,6 +92,14 @@ th { font-variant: small-caps; color: var(--muted); }
 details.reveal { border: 1px solid var(--rule); border-radius: 8px; padding: 0.8rem 1.2rem; margin: 1rem 0; }
 details.reveal summary { cursor: pointer; color: var(--accent); }
 
+/* Optional extra worked examples, collapsed so the required path stays short */
+details.examples { border-left: 3px solid var(--rule); padding: 0.2rem 0 0.2rem 1rem; margin: 1rem 0; }
+details.examples summary { cursor: pointer; color: var(--muted); font-style: italic; }
+details.examples[open] summary { color: var(--accent); }
+
+/* Optional adjacent-topic links closing a section */
+.read-more { font-size: 0.92rem; color: var(--muted); margin: 0.8rem 0 0; }
+
 .feedback-ask {
   margin-top: 2rem; padding: 0.9rem 1.2rem;
   border: 1px dashed var(--accent); border-radius: 8px;

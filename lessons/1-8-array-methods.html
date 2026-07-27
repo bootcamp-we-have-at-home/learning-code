@@ -15,6 +15,18 @@
   <tr><td>Transformers</td><td><code>map</code> <code>filter</code> <code>reduce</code> (+ <code>forEach</code>)</td><td>Run your function per element; <strong>return a new array/value, original untouched</strong></td></tr>
   <tr><td>Askers</td><td><code>includes</code> <code>some</code> <code>every</code> <code>indexOf</code> <code>findIndex</code> <code>Array.isArray</code></td><td>Answer a question — boolean or index. Recognize; look up on the <a href="../reference/javascript-cheatsheet.html">cheat sheet</a></td></tr>
 </table>
+<details class="examples"><summary>More examples (optional)</summary>
+<p>One asker each, on data you'll actually have this week:</p>
+<pre><code>const skills = ["html", "css", "flexbox", "git"]
+
+skills.includes("git")             // true   — is this exact value in there?
+skills.some(s =&gt; s.length &gt; 5)     // true   — does at least ONE pass the test? ("flexbox")
+skills.every(s =&gt; s.length &gt; 2)    // true   — do ALL pass the test?
+skills.indexOf("css")              // 1      — where is it? (-1 means absent)
+skills.findIndex(s =&gt; s[0] === "g") // 3     — where is the first one passing a test?</code></pre>
+<p>Spot the pattern: <code>includes</code>/<code>indexOf</code> take a <em>value</em>; <code>some</code>/<code>every</code>/<code>findIndex</code> take a <em>function</em>, like the transformers do.</p>
+</details>
+<p class="read-more"><strong>Read more:</strong> <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array">MDN — Array</a> (the complete method reference)</p>
 
 <h2>Idea 2 — The transformers, one sentence each</h2>
 <pre><code>const nums = [3, 5, 4];
@@ -23,7 +35,22 @@ nums.map(n =&gt; n * 2)              // [6, 10, 8]   same length, each element t
 nums.filter(n =&gt; n % 2 === 0)     // [4]          keeps elements passing your test
 nums.reduce((acc, n) =&gt; acc + n, 0) // 12         folds everything into one value
 nums.forEach(n =&gt; console.log(n)) // prints each; returns nothing — side effects only</code></pre>
-<div class="aside">The coursebook writes these with <code>function (num) { return … }</code>; today we write arrow functions — same behavior, less noise. Both forms will appear in code you read.</div>
+<div class="aside">The coursebook writes these with <code>function (num) { return … }</code>; today we write arrow functions — same behavior, less noise. Both forms will appear in code you read. (Arrow syntax itself is freeCodeCamp material — <a href="https://javascript.info/arrow-functions-basics">javascript.info's two-minute refresher</a> if it's rusty.)</div>
+<details class="examples"><summary>More examples (optional)</summary>
+<p>The same three transformers on the data shape you'll use in the week project — an array of objects:</p>
+<pre><code>const projects = [
+  { name: "Profile page", hours: 6, done: true },
+  { name: "Quiz app",     hours: 9, done: false },
+  { name: "Todo list",    hours: 3, done: true },
+]
+
+projects.map(p =&gt; p.name)                       // ["Profile page", "Quiz app", "Todo list"]
+projects.filter(p =&gt; p.done)                    // the two finished project objects
+projects.reduce((sum, p) =&gt; sum + p.hours, 0)   // 18 — total hours
+projects.filter(p =&gt; p.done).map(p =&gt; p.name)   // ["Profile page", "Todo list"] — chained</code></pre>
+<p>That last chain is, almost line for line, how the portfolio project renders its project cards from data in lesson 1-11.</p>
+</details>
+<p class="read-more"><strong>Read more:</strong> <a href="https://javascript.info/array-methods">javascript.info — array methods</a> (with tasks) · <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/reduce">MDN — reduce, in depth</a></p>
 
 <h2>Do it for real (~35 min)</h2>
 <p>In the browser console. Type each, predicting the output first.</p>
@@ -78,7 +105,7 @@ const result = words.filter(w =&gt; w.length === 3).map(w =&gt; w.toUpperCase())
 
 <div class="footer-nav">
 Reference: <a href="../reference/javascript-cheatsheet.html">JavaScript cheat sheet</a> · Week map: <a href="1-index.html">Week 1 index</a><br>
-Previous: <a href="1-7-javascript-refresh.html">1-7 JavaScript Refresh</a> · Next: <a href="1-9-objects-operators-dom.html">1-9 Objects, Operators &amp; the DOM</a><br>
+Previous: <a href="1-7-javascript-refresh.html">1-7 JavaScript Refresh</a> · Next: <a href="1-9-git-conflicts.html">1-9 Git Conflicts Workshop</a><br>
 Stuck or curious? Ask your teacher (the agent). "When is forEach the wrong choice?" is a great follow-up.
 </div>
 

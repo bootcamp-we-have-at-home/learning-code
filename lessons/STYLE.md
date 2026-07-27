@@ -1,6 +1,6 @@
 # Lesson Design Standard
 
-Contract for every generated lesson. Written after the student reported the first three lessons "too hard to follow" — lessons 1–2 were attempted and failed in practice; a 4-reviewer audit found the root causes recorded in `learning-records/0003-lesson-redesign.md`. Every rule below traces to one of them.
+Contract for every generated lesson. Written after the student reported the first three lessons "too hard to follow" — lessons 1–2 were attempted and failed in practice; a 4-reviewer audit found the root causes recorded in `learning-records/0003-lesson-redesign.md`. Every rule below traces to one of them. Rules 9–11 were added after the first cohort finished week 1 (`feedback/week-1.md`, week-overall; `learning-records/0004-week-1-feedback-revision.md`).
 
 ## File layout & naming
 
@@ -30,6 +30,9 @@ lessons/<week>-<lesson>-<title>.html # e.g. lessons/1-4-terminal.html
 6. **Interactive commands get their interaction described** (what the prompt looks like, what to type, how to exit) in the body before the student runs them: `git add -p`, `man`, `less`, REPLs. Tooltips cover terms; prompt transcripts stay in the body.
 7. **Destructive commands** (`rm`, `>` redirect over existing files, force flags) are always preceded by a safety line and a verification step (`ls` / `cat` first), and the safer alternative is taught alongside (`gio trash`).
 8. **Code lives in blocks, never woven into prose.** Anything the student must type gets its own `<pre><code>` block inside the step — one command per line, with an aligned `//` or `#` comment saying what it does or what it returns. Inline `<code>` is only for *referring* to names, files, and values. A step's prose is at most one framing sentence before the block and one success check after it. A step whose commands wrap across multiple prose lines is a defect.
+9. **Extra worked examples, collapsed.** Each idea section carries at least one worked example beyond the minimum teaching path, inside `<details class="examples"><summary>More examples (optional)</summary>…</details>` so it is skippable and the required reading stays short. Nothing the steps or checks depend on may live inside a collapsed block (students reported wanting more examples without more required reading).
+10. **Cite what you assume.** Strengthens rule 1: it is not enough that a skill was taught earlier — its first use in a lesson *names the source inline* ("the F12 console from lesson 1-1"). Knowledge from outside the track (prerequisites included) gets a link to where it is explained (freeCodeCamp section, MDN page), or a one-line explanation in place. A bare "as you know" is a defect (students reported unexplained assumed knowledge).
+11. **Every idea section ends with a "Read more" line** — `<p class="read-more">` with 1–3 optional links to adjacent topics the section opens a door to but doesn't cover (e.g. media queries → mobile-first design). Chosen per section, clearly optional, never required by any step or check, and never a substitute for teaching in the body.
 
 ## Check yourself: active over passive
 
@@ -45,7 +48,7 @@ The curriculum is a fixed sequence but its snippets may be dated. Update code, k
 
 ## Lesson skeleton
 
-Every lesson file: shared `../assets/course.css`, then in order — title, subtitle (time estimate + curriculum slot), "why this matters" (≤ 2 sentences, tied to the mission/week project), 1–2 idea sections, "do it for real" steps (rules 3–7), a Check Yourself section (active format preferred), "go deeper" primary source, footer nav (cheat sheet, previous/next lesson, "ask your teacher" prompt, subtle agent-pair pointer where relevant).
+Every lesson file: shared `../assets/course.css`, then in order — title, subtitle (time estimate + curriculum slot), "why this matters" (≤ 2 sentences, tied to the mission/week project), 1–2 idea sections (each with a collapsed extra-examples block, rule 9, and closing with a read-more line, rule 11), "do it for real" steps (rules 3–7), a Check Yourself section (active format preferred), "go deeper" primary source, footer nav (cheat sheet, previous/next lesson, "ask your teacher" prompt, subtle agent-pair pointer where relevant).
 
 ## Student feedback protocol
 
