@@ -31,6 +31,16 @@ All existing class contracts, the config.html localStorage override mechanism
 (width/theme/text/font), and the CSS variables used by `flex-playground.js`
 (`--accent`, `--code-bg`, `--rule`) are preserved.
 
+## Addendum (same day): sans-serif is the default typeface
+
+The mentor found the serif body hard to read and asked for something closer to
+MDN. The default body font is now the MDN-style sans stack (Inter when
+installed, otherwise the system UI font) at 17px with 1.7 line-height, and
+headings are weight 600. Serif (Palatino/Georgia) remains available as the
+opt-in choice in display settings — the `lesson-font` toggle inverted from
+"serif default, sans opt-in" to "sans default, serif opt-in" (`html.font-serif`).
+A previously saved `lesson-font: sans` now simply matches the default.
+
 ## Incidental fix
 
 Lesson 2-3's second quiz never rendered: its `data-opts` JSON contained

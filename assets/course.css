@@ -17,7 +17,7 @@
   --bad: #b3362c;
   --bad-soft: rgba(179, 54, 44, 0.09);
   --shadow: 0 1px 3px rgba(93, 69, 30, 0.07);
-  --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --sans: Inter, "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", Arial, sans-serif;
   --serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
   --mono: ui-monospace, "SF Mono", "Cascadia Code", Consolas, Menlo, monospace;
 }
@@ -65,21 +65,21 @@ html.narrow body { max-width: 44rem; }
 html.wide body { max-width: min(85rem, 96vw); }
 html.ultrawide body { max-width: min(140rem, 94vw); }
 html.text-large body { font-size: 1.2rem; }
-html.font-sans body { font-family: var(--sans); }
+html.font-serif body { font-family: var(--serif); }
 body {
-  font-family: var(--serif);
+  font-family: var(--sans);
   color: var(--ink);
   background: var(--paper);
   max-width: min(62rem, 94vw);
   margin: 0 auto;
   padding: 3rem 1.25rem 6rem;
-  line-height: 1.65;
-  font-size: 1.05rem;
+  line-height: 1.7;
+  font-size: 1.0625rem;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
-h1, h2, h3 { font-weight: 400; line-height: 1.25; letter-spacing: -0.01em; }
-h1 { font-size: clamp(1.7rem, 3.2vw + 0.9rem, 2.35rem); margin: 0 0 0.35rem; }
+h1, h2, h3 { font-weight: 600; line-height: 1.25; letter-spacing: -0.015em; }
+h1 { font-size: clamp(1.6rem, 3vw + 0.85rem, 2.15rem); margin: 0 0 0.35rem; }
 h1::before {
   content: "";
   display: block;
@@ -90,12 +90,12 @@ h1::before {
   margin-bottom: 1.1rem;
 }
 h2 {
-  font-size: 1.45rem;
+  font-size: 1.35rem;
   margin-top: 3.2rem;
   padding-top: 1.3rem;
   border-top: 1px solid var(--rule);
 }
-h3 { font-size: 1.15rem; margin-top: 2rem; }
+h3 { font-size: 1.1rem; margin-top: 2rem; }
 .subtitle {
   font-family: var(--sans);
   font-size: 0.86rem;

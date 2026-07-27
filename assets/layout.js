@@ -4,7 +4,7 @@
 //   lesson-page-width: "narrow"/"wide"/"ultrawide" -> html.narrow / html.wide / html.ultrawide (default: medium column)
 //   lesson-theme:      "light"/"dark" -> html.theme-light / html.theme-dark (else follow system)
 //   lesson-text-size:  "large"       -> html.text-large
-//   lesson-font:       "sans"        -> html.font-sans
+//   lesson-font:       "serif"       -> html.font-serif (default: sans)
 try {
   var cls = document.documentElement.classList;
   var width = localStorage.getItem("lesson-page-width");
@@ -15,7 +15,7 @@ try {
   if (theme === "light") cls.add("theme-light");
   if (theme === "dark") cls.add("theme-dark");
   if (localStorage.getItem("lesson-text-size") === "large") cls.add("text-large");
-  if (localStorage.getItem("lesson-font") === "sans") cls.add("font-sans");
+  if (localStorage.getItem("lesson-font") === "serif") cls.add("font-serif");
 } catch (e) {}
 
 // Reading progress bar: a thin accent line along the top of the viewport
