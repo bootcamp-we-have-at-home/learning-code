@@ -8,31 +8,31 @@
 
 <h2>Page width</h2>
 <p>The default is a medium column sized for a laptop screen. Narrow reads like a book; wide fills most of the window if you keep the lesson side by side with a terminal or editor.</p>
-<p>
-  <label><input type="radio" name="lesson-page-width" value="narrow" data-class="narrow"> Narrow — compact reading column</label><br>
-  <label><input type="radio" name="lesson-page-width" value="medium" data-default> Medium — laptop-friendly (default)</label><br>
-  <label><input type="radio" name="lesson-page-width" value="wide" data-class="wide"> Wide — fill most of the window</label><br>
+<div class="choices">
+  <label><input type="radio" name="lesson-page-width" value="narrow" data-class="narrow"> Narrow — compact reading column</label>
+  <label><input type="radio" name="lesson-page-width" value="medium" data-default> Medium — laptop-friendly (default)</label>
+  <label><input type="radio" name="lesson-page-width" value="wide" data-class="wide"> Wide — fill most of the window</label>
   <label><input type="radio" name="lesson-page-width" value="ultrawide" data-class="ultrawide"> Ultrawide — for 3440×1440 monitors</label>
-</p>
+</div>
 
 <h2>Theme</h2>
-<p>
-  <label><input type="radio" name="lesson-theme" value="auto" data-default> Auto — follow the system setting (default)</label><br>
-  <label><input type="radio" name="lesson-theme" value="light" data-class="theme-light"> Light</label><br>
+<div class="choices">
+  <label><input type="radio" name="lesson-theme" value="auto" data-default> Auto — follow the system setting (default)</label>
+  <label><input type="radio" name="lesson-theme" value="light" data-class="theme-light"> Light</label>
   <label><input type="radio" name="lesson-theme" value="dark" data-class="theme-dark"> Dark</label>
-</p>
+</div>
 
 <h2>Text size</h2>
-<p>
-  <label><input type="radio" name="lesson-text-size" value="normal" data-default> Normal (default)</label><br>
+<div class="choices">
+  <label><input type="radio" name="lesson-text-size" value="normal" data-default> Normal (default)</label>
   <label><input type="radio" name="lesson-text-size" value="large" data-class="text-large"> Large</label>
-</p>
+</div>
 
 <h2>Font</h2>
-<p>
-  <label><input type="radio" name="lesson-font" value="serif" data-default> Serif — Georgia (default)</label><br>
+<div class="choices">
+  <label><input type="radio" name="lesson-font" value="serif" data-default> Serif — Georgia (default)</label>
   <label><input type="radio" name="lesson-font" value="sans" data-class="font-sans"> Sans-serif — your system font</label>
-</p>
+</div>
 
 <p id="status" class="subtitle"></p>
 

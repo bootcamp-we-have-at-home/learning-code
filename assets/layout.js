@@ -17,3 +17,18 @@ try {
   if (localStorage.getItem("lesson-text-size") === "large") cls.add("text-large");
   if (localStorage.getItem("lesson-font") === "sans") cls.add("font-sans");
 } catch (e) {}
+
+// Reading progress bar: a thin accent line along the top of the viewport
+// showing how far through the page you've scrolled (styled in course.css).
+document.addEventListener("DOMContentLoaded", function () {
+  var bar = document.createElement("div");
+  bar.className = "progress-bar";
+  document.body.appendChild(bar);
+  var update = function () {
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    bar.style.width = max > 0 ? (100 * window.scrollY) / max + "%" : "0";
+  };
+  window.addEventListener("scroll", update, { passive: true });
+  window.addEventListener("resize", update);
+  update();
+});

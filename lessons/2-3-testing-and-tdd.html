@@ -182,8 +182,8 @@ test("greets by name", () =&gt; {
 
 <div class="quiz"
   data-q="A function returns { name: &quot;Amjad&quot;, hours: 6 }. Which assertion passes?"
-  data-opts='["expect(result).toEqual({ name: &quot;Amjad&quot;, hours: 6 })",
-              "expect(result).toBe({ name: &quot;Amjad&quot;, hours: 6 })",
+  data-opts='["expect(result).toEqual({ name: \&quot;Amjad\&quot;, hours: 6 })",
+              "expect(result).toBe({ name: \&quot;Amjad\&quot;, hours: 6 })",
               "expect(result).toBeNull()"]'
   data-answer="0"
   data-why="toEqual compares contents; toBe is === , and two separately-created objects are never === (the reference comparison from 1-7). toBeNull only passes for literal null."></div>

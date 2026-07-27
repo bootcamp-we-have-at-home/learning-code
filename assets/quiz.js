@@ -3,7 +3,13 @@
 //             data-answer="1" data-why="Explanation shown after answering"></div>
 // Then: <script src="../assets/quiz.js"></script> at end of body.
 document.querySelectorAll(".quiz[data-q]").forEach((el) => {
-  const opts = JSON.parse(el.dataset.opts);
+  let opts;
+  try {
+    opts = JSON.parse(el.dataset.opts);
+  } catch (e) {
+    console.error("quiz.js: bad data-opts JSON", el, e);
+    return;
+  }
   const answer = Number(el.dataset.answer);
   const q = document.createElement("p");
   q.className = "q";
