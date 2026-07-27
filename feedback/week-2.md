@@ -5,7 +5,11 @@ Protocol: after each lesson the student answers ① "Could you follow it alone? 
 ## 2-1 Functions, First-Class: Callbacks & Higher-Order Functions
 
 ## 2-2 npm: Node's Package Manager
-
+- the node introduction is pretty dense it jump strait to comapring node and browser running js and then strait ahead to npm 
+ease in and change the pace 
+i feel like we are forgetting these are new/fresh programmer to all programming languages 
+when u said "node is the same " that feels like it should be a seprate line 
+the 5-6 pragraph lines are too dence for a new topic
 ## 2-3 Testing & TDD: Your First Jest Test
 
 ## 2-4 FizzBuzz: TDD Workshop (Ping-Pong)
