@@ -33,6 +33,7 @@ html.theme-dark {
    Default (no class) is the medium column set on body below. */
 html.narrow body { max-width: 42rem; }
 html.wide body { max-width: min(85rem, 96vw); }
+html.ultrawide body { max-width: min(140rem, 94vw); }
 html.text-large body { font-size: 1.2rem; }
 html.font-sans body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
 body {
