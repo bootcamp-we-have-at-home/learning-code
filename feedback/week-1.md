@@ -23,3 +23,7 @@ Protocol: after each lesson the student answers ① "Could you follow it alone? 
 ## 1-10 Week Project
 
 ## Week overall
+- We need more examples in the reading section (collapse them and keep them skippable in kind of <details> collapse)
+- Do not assume some pre-requisite information is already known. reference past lessons, or Explain the new needed info/thing and reference them with citation and sources.
+- Add a new git-conflict centered workshop so students can understand it
+- At end of each section, add a Read more: with new topics sections, for example, in semantic htmll and media queries, you can add link about mobile-first design and how it helps in dealing with media queries, this is an example, be creative.
