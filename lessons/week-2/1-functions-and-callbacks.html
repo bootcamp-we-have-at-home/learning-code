@@ -1,0 +1,201 @@
+<meta charset="utf-8">
+<title>2-1 — Functions, First-Class: Callbacks &amp; Higher-Order Functions</title>
+<link rel="stylesheet" href="../../assets/course.css">
+<script src="../../assets/layout.js"></script>
+
+<h1>2-1 — Functions, First-Class: Callbacks &amp; Higher-Order Functions</h1>
+<p class="subtitle">~45 minutes · Week 2, Day 1, 09:00–11:00 (session 1 of 2) · Source: curriculum <a href="../../curriculum/coursebook/week-2/intro-to-functions-slides.md">intro-to-functions-slides.md</a>, first half</p>
+
+<p><strong>Why this matters:</strong> everything week 2 tests is a function, and everything week 3 does with APIs is "here's a function, run it when the data arrives".</p>
+<p>Today you name the thing you already did in lesson <a href="../week-1/8-array-methods.html">1-8</a>: the arrow you handed to <code>map</code> was a <em>callback</em>.</p>
+
+<h2>Idea 1 — Anatomy refresh: calling vs referencing, return vs side effect</h2>
+<p>You've written functions in <a href="https://www.freecodecamp.org/learn/javascript-algorithms-and-data-structures/">freeCodeCamp's JavaScript section</a> and used them in lessons 1-7 and 1-8. So this section is a refresh, not new material.</p>
+<p>A function has a <strong>name</strong>, <strong>parameters</strong>, and a <strong>body</strong>.</p>
+<p>The values you hand it when you call it are its <strong>arguments</strong>:</p>
+<pre><code>const myFunction = (argument1, argument2) =&gt; {
+  console.log("first argument:", argument1);    // a side effect — it prints
+  console.log("second argument:", argument2);   // still no return statement
+};
+
+myFunction("hello", "world")   // prints both lines, then evaluates to undefined</code></pre>
+<div class="aside">The coursebook writes <code>function myFunction(a, b) { … }</code>; today we write <code>const myFunction = (a, b) =&gt; { … }</code> — same behavior here, less noise. Both forms appear in code you read. (Arrow syntax is freeCodeCamp material, introduced in 1-8 — <a href="https://javascript.info/arrow-functions-basics">javascript.info's two-minute refresher</a> if it's rusty.)</div>
+<p>Three distinctions do all the work today:</p>
+<ul>
+  <li><strong>Side effect vs return value.</strong> <code>console.log</code> is a side effect: something happened in the world (text on screen), but the function handed nothing back. A <code>return</code> hands a value back to whoever called it.</li>
+  <li><strong>Every function returns something.</strong> With no <code>return</code> statement, the function returns <code>undefined</code>. That's not an error — it's the default.</li>
+  <li><strong>Calling vs referencing.</strong> <code>myFunction()</code> — with parentheses — <em>runs</em> it and evaluates to its return value. <code>myFunction</code> — no parentheses — is the function <em>itself</em>, the value, unrun. That one pair of parentheses is the whole lesson.</li>
+</ul>
+<details class="examples"><summary>More examples (optional)</summary>
+<p>What each expression evaluates to, when <code>double</code> returns and <code>shout</code> only prints:</p>
+<pre><code>const double = (n) =&gt; n * 2;              // implicit return: no braces, no return keyword
+const shout  = (word) =&gt; { console.log(word.toUpperCase()); };   // side effect only
+
+double(4)              // 8            — the returned value
+double                 // (n) =&gt; n * 2 — the function itself, not run
+shout("hi")            // prints HI, then evaluates to undefined
+const x = shout("hi")  // prints HI; x is undefined — nothing was returned
+double(4) + 1          // 9            — you can do maths with a return value
+shout("hi") + 1        // NaN          — undefined + 1; the classic "forgot to return" bug</code></pre>
+<p>And the arrow shorthand: <code>(n) =&gt; n * 2</code> is exactly <code>(n) =&gt; { return n * 2; }</code>. The braces buy you multiple statements; the price is writing <code>return</code> yourself.</p>
+</details>
+<p class="read-more"><strong>Read more:</strong> <a href="https://javascript.info/function-basics">javascript.info — function basics</a> · <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/Arrow_functions">MDN — arrow functions</a></p>
+
+<h2>Idea 2 — Functions are first-class values</h2>
+<p>In lesson 1-8 you handed an arrow function straight to <code>map</code>, the way you'd hand it a number or a string. That worked on purpose.</p>
+<p>In JavaScript a function is a <span class="term" data-tip="First-class: a value the language lets you store in variables, put in objects and arrays, pass as an argument, and return from a function — exactly like a number or a string.">first-class</span> value.</p>
+<p><strong>Anywhere you can put a number, you can put a function.</strong></p>
+<p>Below are five places it can go. You already know four of the containers — variables, objects (1-10), arrays (1-8), and arguments:</p>
+<pre><code>// 1 — in a variable
+const sayHi = () =&gt; console.log("Hello world");
+const alias = sayHi;        // note: NO parentheses — copying the function, not its result
+alias();                    // "Hello world"
+
+// 2 — in an object, where a function-valued property is called a METHOD (1-10)
+const doggo = {
+  name: "Mackerel",
+  bark: () =&gt; console.log("woof!"),
+};
+doggo.bark();               // "woof!"     — with parens, it runs
+doggo.bark;                 // the function itself — no bark
+
+// 3 — in an array, reached by index like any element (1-8)
+const actions = [() =&gt; console.log("first"), () =&gt; console.log("second")];
+actions[1]();               // "second"    — index in, THEN call
+
+// 4 — as an argument to another function
+const run = (fun) =&gt; fun();
+run(sayHi);                 // "Hello world" — pass sayHi, let run decide when to call it
+
+// 5 — as the RETURN VALUE of another function
+const greetSomeone = (greeting) =&gt; (name) =&gt; console.log(greeting, name);
+const sayHello = greetSomeone("hello");   // sayHello is now a function
+sayHello("world");                        // "hello world"</code></pre>
+<div class="aside">The coursebook writes #5 as <code>function greetSomeone(greeting) { return function (name) {…} }</code>; the arrow version above returns the inner arrow implicitly. Same thing, and the inner function remembers the <code>greeting</code> it was born with.</div>
+<p>Two words name what you just read, and the slide deck flags both with a JARGON ALERT.</p>
+<p>They are also the vocabulary of week 3:</p>
+<ul>
+  <li>A function passed as an argument to another function is a <span class="term" data-tip="Callback: a function you hand to another function so that other function can call it — at the right time, or for each item, or when data arrives.">callback function</span>. In #4, <code>sayHi</code> is the callback.</li>
+  <li>A function that takes a function as an argument <em>and/or</em> returns one is a <span class="term" data-tip="Higher-order function: a function that operates on other functions — taking them as arguments, returning them, or both.">higher-order function</span>. In #4, <code>run</code> is higher-order; in #5, <code>greetSomeone</code> is too.</li>
+</ul>
+<p>Which makes lesson 1-8 retroactively make sense.</p>
+<p><strong>The arrow you passed to <code>map</code> was a callback, and <code>map</code> is a higher-order function.</strong></p>
+<p><code>nums.map(n =&gt; n * 2)</code> hands <code>map</code> a function and lets <code>map</code> call it once per element.</p>
+<p>Same for <code>filter</code>, <code>find</code> and <code>forEach</code> — you have been writing callbacks for a week without the word.</p>
+<details class="examples"><summary>More examples (optional)</summary>
+<p>Callbacks stop looking academic the moment the caller decides <em>when</em> to run them:</p>
+<pre><code>// A higher-order function you could write today: run something twice
+const twice = (fn) =&gt; { fn(); fn(); };
+twice(() =&gt; console.log("ping"));      // "ping" "ping" — an ANONYMOUS callback, defined inline
+
+// The DOM version from 1-10 — the browser calls your function when the click happens
+document.querySelector("h1")
+  .addEventListener("click", () =&gt; console.log("clicked!"));
+
+// A returned function that pre-loads an argument (same shape as greetSomeone)
+const multiplyBy = (factor) =&gt; (n) =&gt; n * factor;
+const triple = multiplyBy(3);
+triple(5);         // 15
+[1, 2, 3].map(triple);  // [3, 6, 9] — a returned function, used as a callback
+// (the semicolons matter here: a line starting with [ continues the line above it)</code></pre>
+<p>Note <code>addEventListener("click", fn)</code>: you never call <code>fn</code> yourself. You hand it over and the browser calls it later — the exact pattern week 3 uses for network responses.</p>
+</details>
+<p class="read-more"><strong>Read more:</strong> <a href="https://developer.mozilla.org/en-US/docs/Glossary/Callback_function">MDN — callback function</a> · <a href="https://eloquentjavascript.net/05_higher_order.html">Eloquent JavaScript ch. 5 — higher-order functions</a></p>
+
+<h2>Do it for real (~20 min)</h2>
+<p>The deck's own sequence, rebuilt in the browser console — <kbd>F12</kbd> → Console, from lesson <a href="../week-1/1-intro-to-web.html">1-1</a>, as in 1-7, 1-8 and 1-10. No files, no folders today.</p>
+<p><strong>Predict the output before you press Enter on every step.</strong> The prediction is the exercise; the typing is just bookkeeping.</p>
+<ol class="steps">
+  <li>Define the deck's function and call it:
+<pre><code>const myFunction = (a, b) =&gt; { console.log("first:", a); console.log("second:", b); }
+myFunction("hello", "world")</code></pre>
+  <em>You should see</em> two printed lines, then <code>undefined</code> in a different colour — that last line is the <em>return value</em>, and there's no <code>return</code>, so it's <code>undefined</code>.</li>
+  <li>Give it something to return:
+<pre><code>const myReturner = (a, b) =&gt; { console.log("first:", a); return 0; }
+myReturner("hello", "world")</code></pre>
+  <em>Check:</em> one printed line, then <code>0</code>. The print is the side effect; the <code>0</code> is the output.</li>
+  <li>Calling vs referencing — the difference in one screen:
+<pre><code>myFunction("a", "b")   // runs it:  prints, then undefined
+myFunction             // the function VALUE itself: prints nothing</code></pre>
+  <em>You should see</em> the second line echo the function's source code back at you, with nothing printed.</li>
+  <li>Store it in a variable and in an object (the object shape is from 1-10):
+<pre><code>const alias = myFunction          // no parens — copying the function
+alias("via", "alias")             // prints, exactly as myFunction would
+
+const doggo = { name: "Mackerel", bark: () =&gt; console.log("woof!") }
+doggo.bark()                      // "woof!"
+doggo.bark                        // the function itself — nothing printed</code></pre>
+  <em>Success check:</em> <code>alias("via", "alias")</code> prints the same two lines, and only <code>doggo.bark()</code> barks.</li>
+  <li>Store one in an array and call it by index (zero-indexed, as in 1-8):
+<pre><code>const mixed = [0, 1, 2, 3, 4, () =&gt; console.log("hello from index 5!")]
+mixed[5]                          // the function value
+mixed[5]()                        // runs it</code></pre>
+  <em>You should see</em> <code>hello from index 5!</code> only on the last line.</li>
+  <li>Pass a function as an argument — your first hand-written higher-order function:
+<pre><code>const foo = (fun) =&gt; { fun(); }
+foo(myFunction)                   // myFunction runs INSIDE foo, with no arguments</code></pre>
+  <em>You should see</em> <code>first: undefined</code> and <code>second: undefined</code> — <code>foo</code> called it without passing anything along.</li>
+  <li>Two ways to break it, on purpose — run them <strong>one line at a time</strong> (pasted together, the first throw stops the second line from running), and predict each error before pressing Enter:
+<pre><code>foo("a string")                   // TypeError: fun is not a function
+foo(myFunction())                 // prints first, THEN the same TypeError</code></pre>
+  <em>Success check:</em> both raise <code>TypeError: fun is not a function</code>. On the second, <code>myFunction()</code> ran <em>before</em> <code>foo</code> did and handed <code>foo</code> its return value, <code>undefined</code> — and <code>undefined()</code> is not callable. That is the whole trap: <code>foo(myFunction)</code> passes the function, <code>foo(myFunction())</code> passes its result.</li>
+  <li>Pass an anonymous function instead — no name, defined at the point of use, exactly like the arrows in 1-8:
+<pre><code>foo(() =&gt; console.log("hello anon"))</code></pre>
+  <em>Check:</em> <code>hello anon</code>.</li>
+  <li>Return a function from a function — the deck's <code>greetSomeone</code>:
+<pre><code>const greetSomeone = (greeting) =&gt; (name) =&gt; console.log(greeting, name)
+greetSomeone("hello")             // a FUNCTION, not a greeting
+const sayHello = greetSomeone("hello")
+sayHello("world")                 // "hello world"
+sayHello("Amjad")                 // "hello Amjad" — the greeting stuck</code></pre>
+  <em>Success check:</em> <code>greetSomeone("hello")</code> alone prints nothing and echoes a function; <code>sayHello</code> greets everyone you pass it with "hello". You just built a function factory.</li>
+  <li>Say the words out loud, pointing at your own console history: in step 6, which value was the callback and which function was higher-order? Then find the same two roles in <code>[1, 2, 3].map(n =&gt; n * 2)</code>.
+<pre><code>[1, 2, 3].map(n =&gt; n * 2)         // callback: n =&gt; n * 2   ·   higher-order: map</code></pre>
+  <em>Check:</em> in step 6 the callback is <code>myFunction</code> and the higher-order function is <code>foo</code> — same shape, different names.</li>
+</ol>
+
+<h2>Check yourself — predict the output</h2>
+<p>Given these two definitions, what does <em>each</em> of the last two lines do?</p>
+<pre><code>const myFunction = () =&gt; { console.log("Hello world"); return 0; };
+const foo = (fun) =&gt; { fun(); };
+
+foo(myFunction);
+foo(myFunction());</code></pre>
+<details class="reveal"><summary>Reveal</summary>
+<p><code>foo(myFunction)</code> → prints <code>Hello world</code> once. The function itself was passed in; <code>foo</code> called it. (<code>foo</code> ignores the returned <code>0</code>, and <code>foo</code> itself returns <code>undefined</code> — it has no <code>return</code>.)</p>
+<p><code>foo(myFunction())</code> → prints <code>Hello world</code> once, then throws <code>TypeError: fun is not a function</code>. The parentheses ran <code>myFunction</code> <em>first</em>; its return value <code>0</code> was passed to <code>foo</code>; <code>foo</code> tried <code>0()</code>. This is the deck's own "Oops!" moment — and it's the same mistake as writing <code>button.addEventListener("click", handleClick())</code>.</p>
+</details>
+
+<div class="quiz"
+  data-q="Which statement describes a higher-order function?"
+  data-opts='["A function passed as an argument to another function, so it can be called later",
+              "A function that takes a function as an argument and/or returns a function — map, filter and your foo all qualify",
+              "A function declared with an arrow instead of the function keyword"]'
+  data-why="The one passed in is the callback; the one that takes or returns it is higher-order. Arrow vs function keyword is only syntax — either form can be either role."
+  data-answer="1"></div>
+
+<div class="quiz"
+  data-q="const later = greetSomeone(&quot;hi&quot;) — what is stored in later?"
+  data-opts='["The string \"hi\", ready to be printed",
+              "undefined, because greetSomeone only logs and never returns",
+              "A function that still expects a name, and already remembers the greeting \"hi\""]'
+  data-why="greetSomeone returns the inner function without calling it. Nothing prints until you call later(\"world\")."
+  data-answer="2"></div>
+
+<h2>Go deeper</h2>
+<p><strong>Primary source:</strong> the curriculum's <a href="../../curriculum/coursebook/week-2/intro-to-functions-slides.md">intro-to-functions slide deck</a> — read it up to the JARGON ALERT slides and you'll recognize every step you just ran. (The deck's repl.it links are long dead; your browser console replaces them.) Then <a href="https://eloquentjavascript.net/05_higher_order.html">Eloquent JavaScript ch. 5</a> for why this style takes over real codebases.</p>
+
+<p><strong>Deliberately not covered today:</strong> the call stack, nesting callbacks more than one layer deep, and <code>setTimeout</code>/asynchronous code. That's the deck's second half, and it runs on Day 2 in lesson <a href="7-callbacks-async.html">2-7</a> — you need today's "a function is just a value" reflex first.</p>
+
+<p><strong>Next:</strong> before we can <em>test</em> functions, we need the tool that installs and runs the test runner — <a href="2-npm.html">2-2 npm</a>.</p>
+
+<div class="feedback-ask">Finished? Tell your teacher (the agent) two things: ① Could you follow this lesson alone — 1 to 5? ② Where did you get stuck, if anywhere? Answers are recorded in <code>feedback/week-2.md</code> and improve the lesson for the next student.</div>
+
+<div class="footer-nav">
+Reference: <a href="../../reference/javascript-cheatsheet.html">JavaScript cheat sheet</a> (new: functions &amp; callbacks section) · Week map: <a href="index.html">Week 2 index</a><br>
+Previous: <a href="index.html">Week 2 index</a> · Next: <a href="2-npm.html">2-2 npm: Node's Package Manager</a><br>
+Stuck or curious? Ask your teacher (the agent). "Why does the inner function still remember <code>greeting</code>?" is a great follow-up.
+</div>
+
+<script src="../../assets/quiz.js"></script>
+<script src="../../assets/tooltip.js"></script>

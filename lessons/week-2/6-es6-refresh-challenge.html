@@ -1,0 +1,279 @@
+<meta charset="utf-8">
+<title>2-6 — ES6 Features Refresh &amp; the ES6→ES5 Challenge</title>
+<link rel="stylesheet" href="../../assets/course.css">
+<script src="../../assets/layout.js"></script>
+
+<h1>2-6 — ES6 Features Refresh &amp; the ES6→ES5 Challenge</h1>
+<p class="subtitle">~60 minutes (15 reading + 45 challenge) · Week 2, Day 2, 09:00–10:30 morning challenge · Source: curriculum <a href="https://github.com/bootcamp-we-have-at-home/mc-es6-challenge">bootcamp-we-have-at-home/mc-es6-challenge</a>, part 1</p>
+
+<p><strong>Why this matters:</strong> Half the JavaScript you'll read this year is ES5 and half is ES6.</p>
+<p>Translating between them by hand is the fastest way to stop guessing what the newer syntax actually does.</p>
+<p>Spread and destructuring in particular come back in the week project (2-10) and in week 3's API work.</p>
+
+<h2>Checkpoint — try to skip the reading</h2>
+<p>Open the browser console (<kbd>F12</kbd> → Console, from lesson 1-1) and predict every result <em>before</em> typing it. Then ask yourself the harder second question: <em>could I write the ES5 equivalent of each one?</em></p>
+<pre><code>let x = 1; { let x = 2; } x
+const c = [1]; c.push(2); c
+[1, 2, 3].map(n =&gt; n * 2)
+`sum: ${1 + 1}`
+const greet = (m = "hi") =&gt; m; greet()
+[...[1, 2], ...[3]]
+const [a, ...rest] = [1, 2, 3]; rest
+new Set([1, 1, 2]).size
+class T { constructor(n) { this.n = n } } ; new T(5).n</code></pre>
+<details class="reveal"><summary>Reveal expected results</summary>
+<pre><code>1                        // inner let is a separate, block-scoped binding
+[1, 2]                   // const blocks reassignment, not mutation
+[2, 4, 6]                // arrow function passed to map (1-8)
+"sum: 2"                 // template literal evaluates the ${…} expression
+"hi"                     // default parameter fires when the argument is undefined
+[1, 2, 3]                // spread pours both arrays into a new one
+[2, 3]                   // rest collects "everything left" into an array
+2                        // a Set stores each unique value once
+5                        // class is a constructor function in nicer clothes</code></pre>
+<p><strong>All nine right <em>and</em> you could write ES5 for each?</strong> Jump straight to <a href="#challenge">Do it for real</a> — or, if you've done this exact challenge before, to <a href="7-callbacks-async.html">2-7 The Call Stack, Sync vs Async &amp; setTimeout</a> with a clear conscience. Any miss, or any "I know what it does but not how to undo it": the two sections below cover exactly those nine, in the same order.</p>
+</details>
+
+<h2>Idea 1 — Nine ES6 features and their ES5 undo</h2>
+<p>You have been writing ES6 since week 1 without the label: every <code>const</code>, every arrow you passed to <code>map</code>, every backtick string.</p>
+<p>Three of the nine features below are exactly those. One row each, then move on:</p>
+<table>
+  <tr><th>Feature</th><th>Taught in</th><th>ES5 equivalent</th></tr>
+  <tr><td><code>let</code> / <code>const</code></td><td><a href="../week-1/7-javascript-refresh.html">1-7</a> (const-by-default, <code>var</code> as legacy)</td><td><code>var</code> — looser scoping, see Idea 2</td></tr>
+  <tr><td>arrow functions</td><td><a href="../week-1/8-array-methods.html">1-8</a> (the arrows you passed to <code>map</code>)</td><td><code>function (x) { return … }</code></td></tr>
+  <tr><td>template literals</td><td><a href="../week-1/10-objects-operators-dom.html">1-10</a> (the backtick string in <code>describe()</code>)</td><td><code>"a " + b + " c"</code> concatenation</td></tr>
+</table>
+<p>The other six are new here.</p>
+<p>Each one below is a code block plus its ES5 undo — the older way of writing the same thing:</p>
+
+<p><strong>Default parameter values</strong> — a value used when the argument is <code>undefined</code>:</p>
+<pre><code>const greet = (message = "HI THERE") =&gt; message;   // ES6
+greet()               // "HI THERE"
+greet("Morning")      // "Morning"
+
+function greet(message) {                          // ES5 undo
+  if (message === undefined) message = "HI THERE"; // check-and-assign, first line of the body
+  return message;
+}</code></pre>
+
+<p><strong>Spread</strong> (<code>...</code> in a value position) — pours an array's elements out into a new array or an argument list:</p>
+<pre><code>const a = [1, 2], b = [3];
+[...a, ...b]          // [1, 2, 3]         — a new array, originals untouched
+Math.max(...a)        // 2                 — elements become arguments
+
+a.concat(b)           // ES5 undo for the array case — same [1, 2, 3]
+Math.max.apply(null, a)  // ES5 undo for the arguments case</code></pre>
+
+<p><strong>Rest</strong> (the same <code>...</code>, but in a <em>binding</em> position) — collects the leftovers instead of spreading them.</p>
+<p>Same three dots, opposite direction. You saw it in the checkpoint as <code>const [a, ...rest] = [1, 2, 3]</code>.</p>
+
+<p><strong>Destructuring</strong> — pull keys or positions straight out into variables:</p>
+<pre><code>const config = { expected: 1, actual: 2 };
+const { expected, actual } = config;      // ES6 object destructuring
+const [first, second] = [10, 20];         // ES6 array destructuring — by position
+
+var expected = config.expected;           // ES5 undo: one manual assignment per name
+var actual = config.actual;</code></pre>
+
+<p><strong>Set</strong> — an object like an array, except every value appears at most once:</p>
+<pre><code>const s = new Set([1, 1, 2]);
+s.size                                    // 2
+s.forEach(v =&gt; console.log(v))            // 1 then 2 — Sets have forEach like arrays
+
+[1, 1, 2].filter(function (v, i, all) {   // ES5 undo: [1, 2] — note the ES5 undo uses
+  return all.indexOf(v) === i;            // a function expression, not an arrow:
+});                                       // keep a value only at its FIRST index</code></pre>
+
+<p><strong>class</strong> — a <span class="term" data-tip="Sugar: syntax that compiles down to something that already existed. class produces the same constructor-function-plus-prototype object graph you'd write by hand.">syntax sugar</span> layer over the constructor function + prototype pattern JavaScript always had.</p>
+<p>The one thing to notice: nothing new was added to the language. Both versions below build the same object.</p>
+<pre><code>class Test {                              // ES6
+  constructor(name) { this.name = name; }
+  run() { return this.name; }
+}
+
+function Test(name) { this.name = name; } // ES5 undo — the constructor
+Test.prototype.run = function () {        // methods hang off the prototype
+  return this.name;
+};
+new Test("a").run()                       // "a" — identical either way</code></pre>
+
+<details class="examples"><summary>More examples (optional)</summary>
+<p>Destructuring earns its keep hardest in <em>parameter lists</em> — the exact shape you'll meet in the challenge file:</p>
+<pre><code>const show = ({ name, city = "unknown" }) =&gt; `${name} — ${city}`;   // destructure + default
+show({ name: "Amjad" })                    // "Amjad — unknown"
+
+function show(user) {                      // ES5 undo: unpack manually, then default
+  var name = user.name;
+  var city = user.city;
+  if (city === undefined) city = "unknown";
+  return name + " — " + city;
+}</code></pre>
+<p>Spread also copies objects (ES2018), which is how the 2-10 project will make a changed copy of a cart item without mutating the original:</p>
+<pre><code>const item = { id: 1, qty: 1 };
+const bumped = { ...item, qty: 2 };        // { id: 1, qty: 2 } — item is untouched
+item.qty                                   // 1</code></pre>
+<p>And the classic Set one-liner you will see everywhere — deduplicate an array:</p>
+<pre><code>[...new Set(["a", "b", "a"])]              // ["a", "b"] — Set removes, spread re-flattens</code></pre>
+</details>
+<p class="read-more"><strong>Read more:</strong> <a href="https://javascript.info/destructuring-assignment">javascript.info — destructuring assignment</a> · <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Set">MDN — Set</a> · <a href="https://javascript.info/class">javascript.info — classes and what they desugar to</a></p>
+
+<h2>Idea 2 — Reading ES5 without flinching</h2>
+<p>Idea 1 gave you the undo for each feature one at a time. The challenge asks you to write a whole file in that older dialect on purpose.</p>
+<p>Four things to have straight before you do.</p>
+<p><strong><code>var</code> is function-scoped, not block-scoped.</strong> Lesson 1-7 called it "the legacy form with looser scoping". This is what that means in practice.</p>
+<p>A <code>var</code> inside an <code>if</code> or a <code>for</code> leaks to the whole surrounding function. Re-declaring it silently reuses the same binding.</p>
+<pre><code>let greeting = "say Hi";
+if (true) { let greeting = "say Hello"; }
+greeting                       // "say Hi"    — the inner let was its own variable
+
+var greeting = "say Hi";
+if (true) { var greeting = "say Hello"; }
+greeting                       // "say Hello" — same variable, overwritten</code></pre>
+<p>So <code>let</code> → <code>var</code> is a safe swap <em>only</em> when no block re-declares the same name.</p>
+<p>That is true almost everywhere — and famously untrue inside loops that create functions (see the collapsed examples below).</p>
+<p><strong>String concatenation</strong> replaces template literals: <code>`Expected ${a}, found ${b}`</code> becomes <code>"Expected " + a + ", found " + b</code>.</p>
+<p>Mind the spaces. They move inside the quotes, and losing one is the most common way to break output in this challenge.</p>
+<p><strong><code>.concat()</code></strong> is the array-joining method spread replaced: <code>a.concat(b)</code> returns a new array with <code>b</code>'s items appended, leaving both originals alone (a transformer, in 1-8's vocabulary).</p>
+<p><strong>Constructor functions + prototype</strong> are what <code>class</code> compiles to, shown above.</p>
+<p>Read <code>Thing.prototype.method = function () {…}</code> as "every object made by <code>new Thing(…)</code> can call <code>.method()</code>".</p>
+<details class="examples"><summary>More examples (optional)</summary>
+<p>The loop case, because it's the one that actually bites — the curriculum's bonus question asks exactly this:</p>
+<pre><code>for (let i = 0; i &lt; 3; i++) setTimeout(() =&gt; console.log(i));   // 0 1 2
+for (var i = 0; i &lt; 3; i++) setTimeout(() =&gt; console.log(i));   // 3 3 3</code></pre>
+<p><code>let</code> makes a fresh <code>i</code> per iteration; <code>var</code> makes one <code>i</code> for the whole function, and by the time the callbacks run it is 3. (Why the callbacks run <em>after</em> the loop finishes at all is 2-7's subject — park it for now.)</p>
+<p>Arrow functions are not <em>always</em> a drop-in for <code>function</code> either: an arrow takes <code>this</code> from the surrounding scope, a <code>function</code> gets its own. It doesn't bite in this challenge's file — none of the arrows there use <code>this</code> — but it is the reason "replace all arrows with functions" is not a blind find-and-replace in general.</p>
+</details>
+<p class="read-more"><strong>Read more:</strong> <a href="https://javascript.info/var">javascript.info — the old <code>var</code></a> · <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/concat">MDN — Array.concat</a> · the ES6↔ES5 table in the <a href="../../reference/javascript-cheatsheet.html">JavaScript cheat sheet</a></p>
+
+<h2 id="challenge">Do it for real (~45 min) — ship it for Internet Explorer</h2>
+<p>The curriculum's scenario: as part of a job application you wrote an <code>assertEquals</code> function using every ES6 feature you could.</p>
+<p>An hour before the deadline you re-read the brief — <em>it must run in Internet Explorer</em>, which supports none of it.</p>
+<p>Your job: replace as many ES6 features as possible with ES5 <strong>without changing a single character of the program's output</strong>.</p>
+<p>The repo is explicit that this is not a race: <em>a variety of different features attempted beats complete coverage of one</em>.</p>
+<p>Timebox it at 45 minutes and stop where you stop.</p>
+<ol class="steps">
+  <li>Confirm Node is there (installed in lesson <a href="2-npm.html">2-2</a>) and go to your code folder:
+<pre><code>node -v          # v20 or v22 — if this errors, do 2-2 first
+cd ~/code        # the workspace folder from 1-4</code></pre>
+  <em>You should see</em> a version number, and no error from <code>cd</code>.</li>
+
+  <li>Clone the challenge repo (<code>git clone</code> from lesson 1-5) and step into it:
+<pre><code>git clone https://github.com/bootcamp-we-have-at-home/mc-es6-challenge.git
+cd mc-es6-challenge
+ls ES6-ES5       # README.md  assertEquals.js</code></pre>
+  <em>You should see</em> both files listed.</li>
+
+  <li>Run the program <em>before</em> touching it — this output is the contract you must not break:
+<pre><code>node ES6-ES5/assertEquals.js</code></pre>
+  <em>You should see</em> exactly these six lines:
+<pre><code>Comparing an object with an additional key: Found .b, none expected
+Comparing an object missing a key: Expected .a, but was not found
+Comparing different types: Expected type number, but found type null
+Comparing objects with different values: Expected .a 5, but found 6
+Comparing arrays of different lengths: Expected array length 3, but found 4
+Comparing nested objects: Expected .a.b 5, but found 6</code></pre>
+  Those lines are the six deliberately-failing assertions being reported — the program is working correctly.</li>
+
+  <li>Freeze that output into a file so you can compare against it after every edit. <strong>Safety:</strong> <code>&gt;</code> overwrites its target silently, so check the name is free first:
+<pre><code>ls baseline.txt                              # "No such file or directory" = safe to write
+node ES6-ES5/assertEquals.js &gt; baseline.txt  # capture the six lines
+cat baseline.txt                             # verify they landed</code></pre>
+  <em>You should see</em> the same six lines inside <code>baseline.txt</code>.</li>
+
+  <li>Learn the one-command safety net you'll use after every conversion. <code>diff</code> compares two files and prints only the differences; <code>-</code> means "the second file is whatever is being piped in":
+<pre><code>node ES6-ES5/assertEquals.js | diff baseline.txt -   # silence = identical output</code></pre>
+  <em>You should see</em> <strong>no output at all</strong>. Silence is the pass. Any <code>&lt;</code> / <code>&gt;</code> lines mean you changed behavior — undo the last edit and look again.</li>
+
+  <li>Open the working folder in your editor: <strong>File → Open Folder → <code>~/code/mc-es6-challenge</code></strong> (it probably still shows a week-1 folder), then open <code>ES6-ES5/assertEquals.js</code>. Read it top to bottom once — it's about 100 lines and the comments above each feature tell you what to replace. Autosave is off: <strong>save the file before every re-run</strong>, or you'll be testing the old version.
+  <em>You should see</em> comments like <code>// Replace default parameter values</code> sitting above the lines they describe.</li>
+
+  <li>Easiest first — <code>const</code> and <code>let</code> → <code>var</code>, everywhere in the file. Save, then:
+<pre><code>node ES6-ES5/assertEquals.js | diff baseline.txt -</code></pre>
+  <em>Check:</em> silence. (Idea 2's loop example is the case where this swap <em>would</em> break — there is no such loop here.)</li>
+
+  <li>Arrow functions → <code>function</code> expressions. Convert one, re-run, then the next — small steps make a broken diff easy to attribute:
+<pre><code>var getType = function (x) { … };            // was: const getType = x =&gt; { … }
+var buildTrace = function (element, key) {   // was a one-line arrow: add an explicit return
+  return element instanceof Array ? "[" + key + "]" : "." + key;
+};</code></pre>
+  <em>Check:</em> silence after each save. Remember a body-less arrow returns its expression; a <code>function</code> needs the word <code>return</code>.</li>
+
+  <li>Template literals → concatenation, one throw at a time:
+<pre><code>throw new Error("Found " + trace + ", none expected");   // was: `Found ${trace}, none expected`</code></pre>
+  <em>Check:</em> silence — and if <code>diff</code> shows a line missing a space, that's the space that used to live inside the backticks.</li>
+
+  <li>The default parameter on <code>deepEquals</code> — drop <code>trace=''</code> from the parameter list and restore it in the body:
+<pre><code>function deepEquals(a, b, trace) {
+  if (trace === undefined) trace = '';
+  …</code></pre>
+  <em>Check:</em> silence. Get this one wrong and the traces come out as <code>undefined.a</code> — the diff will show you immediately.</li>
+
+  <li>Now the harder three, in the repo's order — spread, then Set, then class. All three live in these two places:
+<pre><code>new Set([...Object.keys(a), ...Object.keys(b)]).forEach(…)   // spread + Set
+class Test { constructor({expected, actual, description}) … } // class + destructuring</code></pre>
+  Use the ES5 undos from Idea 1: <code>.concat()</code> for the spread, the <code>filter</code>-by-first-index idiom for the Set (written as a <code>function</code> expression, not an arrow — an arrow here would put the ES6 straight back), a constructor function with <code>Test.prototype.run = function () {…}</code> for the class, and manual <code>config.expected</code> assignments for the destructuring.
+  <em>Check:</em> silence after each one. Anything that stays silent is done; anything you don't reach is fine — variety beats completeness here.</li>
+
+  <li>Stop at 45 minutes wherever you are, and take stock:
+<pre><code>node ES6-ES5/assertEquals.js | diff baseline.txt -   # final confirmation: silence
+grep -nE "=&gt;|const |let |\`|\.\.\.|class |new Set|\{ *[a-z]+ *(, *[a-z]+ *)*\}" ES6-ES5/assertEquals.js
+# covers all nine: arrows, const/let, template literals, spread/rest,
+# class, Set, and destructuring patterns. Read the remaining default
+# parameters by eye — an = inside a parameter list is the tell.</code></pre>
+  <em>Success check:</em> the diff is silent and you can name each remaining ES6 construct <code>grep</code> found and say what its ES5 form would be — that, not a fully converted file, is the outcome this challenge is graded on.</li>
+</ol>
+
+<h2>Check yourself — predict the output</h2>
+<p>Someone converted this ES6 function to ES5. Predict what each version prints for <code>label({ id: 7 })</code>:</p>
+<pre><code>const label = ({ id, tag = "item" }) =&gt; `${tag}-${id}`;      // ES6
+
+function label(opts) {                                       // their ES5 attempt
+  var id = opts.id;
+  var tag = opts.tag;
+  return tag + "-" + id;
+}</code></pre>
+<details class="reveal"><summary>Reveal</summary>
+<p>ES6: <code>"item-7"</code>. Their ES5: <code>"undefined-7"</code> — they translated the destructuring but dropped the default value. The fix is the check-and-assign from Idea 1: <code>if (tag === undefined) tag = "item";</code> before the return. This is exactly the class of bug the <code>diff</code> safety net catches in step 5.</p>
+</details>
+
+<div class="quiz"
+  data-q="You replace [...arrayA, ...arrayB] with ES5. Which line is the faithful undo?"
+  data-opts='["arrayA.push(arrayB) — appends the second array to the first",
+              "arrayA + arrayB — the + operator joins arrays",
+              "arrayA.concat(arrayB) — returns a new array with both sets of items, originals untouched"]'
+  data-answer="2"
+  data-why="concat returns a NEW array, which is what spread-into-a-literal does. push mutates arrayA and nests the whole second array as one element; + stringifies both arrays."></div>
+
+<div class="quiz"
+  data-q="Why does this challenge insist you run the file and compare output after every single conversion?"
+  data-opts='["The conversions must be behavior-neutral — the original output is the only definition of correct",
+              "Node caches ES6 syntax, so it must be restarted between edits",
+              "Because Internet Explorer cannot be tested locally, so Node output is a substitute for it"]'
+  data-answer="0"
+  data-why="This is a refactor: the output is the specification. Node happily runs mixed ES5/ES6, so you can check after every small step instead of converting everything blind."></div>
+
+<h2>Go deeper</h2>
+<p><strong>Primary source:</strong> the challenge's own <a href="https://github.com/bootcamp-we-have-at-home/mc-es6-challenge/blob/master/ES6-ES5/README.md">ES6→ES5 README</a> (the feature list you just worked, with a quick-fix note per feature) and the repo's <a href="https://github.com/bootcamp-we-have-at-home/mc-es6-challenge">top-level ES6 overview</a>. Part 2 of the repo (<code>ES5-ES6/</code>) runs the conversion in the other direction — good optional reps if you finish early.</p>
+<p class="read-more"><strong>Read more:</strong> <a href="https://babeljs.io/">Babel</a> — the transpiler that does this conversion automatically for entire projects (the repo's own closing recommendation) · <a href="https://caniuse.com/">caniuse.com</a> — which browsers support which feature, so "will this run for my users?" stops being a guess</p>
+
+<p><strong>Next:</strong> back to the functions material for its second half — what the machine is actually doing when functions call functions, and why a <code>setTimeout</code> callback runs after code written below it.</p>
+
+<!-- agent-pair: this is individual work in the cohort too, so no partner role is required.
+     Optional adaptation if the student asks: the agent plays the "IE-using client" — the student
+     pastes each converted snippet, the agent spot-checks it for ES6 leftovers and behavior drift
+     (missing default, lost space in concatenation, push-vs-concat, prototype method attached to the
+     wrong object) and replies in codereviewintro.md etiquette: questions, exact lines, one main point.
+     The agent should NOT hand over converted code — only point at the line and ask what it does.
+     Second rep if wanted: agent asks the student to justify each remaining const→var swap
+     (the repo's bonus question: when would that swap break?). -->
+
+<div class="feedback-ask">Finished (or skipped via the checkpoint)? Tell your teacher (the agent) two things: ① Could you follow this lesson alone — 1 to 5? ② Where did you get stuck, if anywhere? Answers are recorded in <code>feedback/week-2.md</code> and improve the lesson for the next student. <em>Want your conversions spot-checked as you go? The agent has pair instructions hidden in this page's source.</em></div>
+
+<div class="footer-nav">
+Reference: <a href="../../reference/javascript-cheatsheet.html">JavaScript cheat sheet</a> · Week map: <a href="index.html">Week 2 index</a><br>
+Previous: <a href="5-roman-numerals-tdd.html">2-5 Roman Numerals TDD</a> · Next: <a href="7-callbacks-async.html">2-7 The Call Stack, Sync vs Async &amp; setTimeout</a><br>
+Stuck or curious? Ask your teacher (the agent). "If Babel converts this automatically, why do it by hand?" is a great follow-up.
+</div>
+
+<script src="../../assets/quiz.js"></script>
+<script src="../../assets/tooltip.js"></script>

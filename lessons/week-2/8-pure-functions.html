@@ -1,0 +1,257 @@
+<meta charset="utf-8">
+<title>2-8 — Pure Functions: Easy Testing Workshop</title>
+<link rel="stylesheet" href="../../assets/course.css">
+<script src="../../assets/layout.js"></script>
+
+<h1>2-8 — Pure Functions: Easy Testing Workshop</h1>
+<p class="subtitle">~70 minutes · Week 2, Day 2, 14:00–16:00 · Source: curriculum workshop <a href="https://github.com/bootcamp-we-have-at-home/pure-functions-easy-testing-ws">pure-functions-easy-testing-ws</a>, adapted solo</p>
+
+<p><strong>Why this matters:</strong> the week project brief (<a href="../../curriculum/coursebook/week-2/project.md">project.md</a>) says in plain text: "You should have a pure functions" and "You should write a test for every function you have".</p>
+<p>This workshop is where you learn what makes that possible — a function you can't test easily is almost always a function that isn't pure.</p>
+
+<h2>Idea 1 — What makes a function pure</h2>
+<p>In lesson 2-3 you wrote your first Jest test: call a function with an argument, expect a particular value back. That worked because the function you tested did nothing except return that value.</p>
+<p>There is a name for functions that behave that way. A function is <span class="term" data-tip="Same arguments in, same value out, and it disturbs nothing outside itself.">pure</span> when both of these hold:</p>
+<ol>
+  <li><strong>Same arguments → same return value, every time.</strong></li>
+  <li><strong>No side effects</strong> — it does nothing but compute its return value. No writing to variables outside itself, no HTTP requests, no touching the DOM (the <code>document.querySelector</code>/<code>textContent</code> work from lesson 1-10).</li>
+</ol>
+<pre><code>const stringLength = (str) =&gt; str.length;   // PURE   — "hello" is always 5
+
+const randomAdd = (x) =&gt; Math.random() + x; // IMPURE — rule 1 broken, a new answer each call</code></pre>
+<p>And the classic rule-2 break — a function that reaches outside itself and edits a variable it doesn't own:</p>
+<pre><code>let age = 1;                       // lives outside the function
+
+const howOldNextBirthday = (a) =&gt; {
+  age = a + 1;                     // side effect: it EDITS the outer variable
+  return age;
+};
+
+howOldNextBirthday(age)            // 2
+howOldNextBirthday(age)            // 3  ← the SAME line typed twice, different answer,
+                                   //     because the side effect moved `age` underneath it</code></pre>
+<h3>Why this decides how testable your code is</h3>
+<p>The job of a test is to tell you <em>which</em> function is broken.</p>
+<p>Suppose one test covers a big impure function that mutates three outer variables and repaints the page. A red test then says only "something in here is wrong" — barely more useful than the bug report you started from.</p>
+<p>Small pure functions give you the opposite: a failure names the one function to open.</p>
+<p>That's the whole argument, and it's why the workshop is called <em>pure functions for easy testing</em>.</p>
+<div class="aside">The workshop's own snippets use <code>var</code> and <code>function (x) { … }</code>, and link to repl.it pages that no longer load; today we write <code>const</code>/<code>let</code> and arrow functions (1-7, 1-8) and run everything in Node or Jest instead.</div>
+<details class="examples"><summary>More examples (optional)</summary>
+<p>Four functions. Two are pure, two are not — and the reason differs each time:</p>
+<pre><code>const total = (items) =&gt;                       // PURE
+  items.reduce((sum, i) =&gt; sum + i.price, 0);  // reads only its argument, returns a number
+                                               // (reduce = 1-8's fold-into-one-value method)
+
+const addTax = (price) =&gt; price * 1.16;        // PURE — arithmetic on the argument only
+
+let cart = [];
+const addToCart = (item) =&gt; {                  // IMPURE — mutates the outer `cart`
+  cart.push(item);
+  return cart;
+};
+
+const stamp = (note) =&gt;                        // IMPURE — Date.now() changes every call,
+  `${note} @ ${Date.now()}`;                   // so same argument ≠ same result</code></pre>
+<p>Note what is <em>not</em> on the impure list: <code>console.log</code> is technically a side effect (it writes to a terminal), but nobody counts it against you while debugging. The ones that bite are mutation, I/O, and the DOM.</p>
+</details>
+<p class="read-more"><strong>Read more:</strong> <a href="https://developer.mozilla.org/en-US/docs/Glossary/Pure_function">MDN — pure function</a> · <a href="https://en.wikipedia.org/wiki/Referential_transparency">referential transparency</a> (the formal name for rule 1: an expression can be replaced by its value without changing the program)</p>
+
+<h2>Idea 2 — When the side effect is the point: split the function in two</h2>
+<p>In lesson 1-10 you changed a page with <code>document.querySelector</code> and <code>textContent</code>. By Idea 1's definition, every one of those lines was a side effect.</p>
+<p>That is fine — real apps have to write to the page and to <code>localStorage</code>. You can't ban side effects.</p>
+<p>What you can do is <em>relocate</em> them. Split one function into two: a <strong>pure function that decides</strong>, and a <strong>thin impure function that acts</strong>.</p>
+<p>Then you test the decision, and the action stays small enough to confirm by eye.</p>
+<p>The workshop's Example 2 is an image whose opacity toggles. Here is the impure version — it reads an outer variable, writes the DOM, then writes that variable back:</p>
+<pre><code>let changeTransition = true;
+
+const visionChange = () =&gt; {
+  const img = document.getElementById("visionimage");
+  if (changeTransition === true)  img.style.opacity = 0;
+  if (changeTransition === false) img.style.opacity = 1;
+  changeTransition = !changeTransition;        // outer variable, edited
+};                                             // no arguments, no return value — nothing to test</code></pre>
+<p>Split in two. The decision becomes an argument in, a value out:</p>
+<pre><code>let isVisible = true;                             // the state lives out here, not inside a function
+
+const visionChange = (visible) =&gt; !visible;       // PURE: the decision. true → false, false → true
+
+const updateDom = (visible) =&gt; () =&gt; {            // returns a FUNCTION that does the effect
+  const img = document.getElementById("visionimage");
+  img.style.opacity = visible ? 1 : 0;            // show when visible, hide when not
+};
+
+isVisible = visionChange(isVisible);              // decide the next state (pure)
+const applyIt = updateDom(isVisible);             // build the effect for that state
+applyIt();                                        // ← the DOM is touched only here</code></pre>
+<div class="aside">The workshop README writes the same split but feeds <code>updateDom</code> the <em>flipped</em> value while keeping the original's <code>opacity = 0</code> branch, which inverts the toggle, and it never writes the new state back to <code>changeTransition</code> — so the image never alternates. The version above fixes both. If you spotted it in the README before reading this, that is exactly the kind of eye the tests are meant to give you.</div>
+<p>Now both halves are testable, and neither test needs a browser:</p>
+<pre><code>test("visionChange flips the boolean", () =&gt; {
+  expect(visionChange(true)).toBe(false);
+});
+
+test("updateDom hands back a function", () =&gt; {
+  expect(typeof updateDom(true)).toBe("function");
+});</code></pre>
+<p>Hold this shape in mind for the ecommerce project (2-10). Three of its functions are pure and get tests: <code>filterByCategory(products, category)</code>, <code>cartTotal(items)</code> and <code>removeItem(cart, id)</code>.</p>
+<p>Two are the thin impure edges that write to the page and to <code>localStorage</code>: <code>renderProducts(list)</code> and <code>saveCart(cart)</code>.</p>
+<p>That split is what makes "a test for every function" achievable instead of miserable.</p>
+<div class="aside">One trap the workshop calls out in <code>object-pass-by-reference.js</code>: objects and arrays are handed to functions <em>by reference</em> (the reference-vs-value comparison from 1-7). So <code>obj.x = 1</code> inside a function edits the caller's object — an invisible side effect. Copy first: <code>const copy = { ...obj }</code> or <code>const copy = [...arr]</code>, using the spread operator from 2-6. That copy is shallow — objects nested <em>inside</em> the object are still shared — but nothing this week nests that deep.</div>
+<details class="examples"><summary>More examples (optional)</summary>
+<p>The same decide/act split on a cart button, in the shape the project will need:</p>
+<pre><code>// PURE — takes the current cart, returns the NEXT cart. Original untouched.
+const addItem = (cart, item) =&gt; [...cart, item];
+
+// PURE — a number out of an array in, nothing else happens
+const cartTotal = (cart) =&gt; cart.reduce((sum, i) =&gt; sum + i.price, 0);
+
+// IMPURE, and deliberately boring: three lines, no decisions inside
+const renderTotal = (cart) =&gt; {
+  document.querySelector("#total").textContent = cartTotal(cart);
+};</code></pre>
+<p>And the mutation trap, shown rather than described:</p>
+<pre><code>const badAdd = (cart, item) =&gt; { cart.push(item); return cart; };
+
+const original = [{ price: 5 }];
+const next = badAdd(original, { price: 9 });
+original.length      // 2  ← the caller's array grew. Nobody asked for that.
+next === original    // true — they are the same array, not two versions</code></pre>
+</details>
+<p class="read-more"><strong>Read more:</strong> <a href="https://javascript.info/object-copy">javascript.info — object references and copying</a> · <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign">MDN — Object.assign</a> (the pre-spread way to copy, which you'll meet in older code)</p>
+
+<h2>Do it for real (~45 min)</h2>
+<p>You'll clone the curriculum workshop and refactor five impure functions until its five failing tests go green. <strong>The workshop's hard rule: you may not edit the test file.</strong> The tests define "pure" for you — make the code satisfy them.</p>
+<ol class="steps">
+  <li>Clone the workshop into your code workspace (<code>git clone</code> is from 1-5; <code>~/code/</code> is the workspace convention from 1-4):
+<pre><code>cd ~/code
+git clone https://github.com/bootcamp-we-have-at-home/pure-functions-easy-testing-ws.git
+cd pure-functions-easy-testing-ws
+ls                       # exercises  test  object-pass-by-reference.js
+                         # plus README.md, LICENSE, package.json, package-lock.json</code></pre>
+  <em>Success check:</em> <code>ls</code> lists an <code>exercises</code> folder and a <code>test</code> folder.</li>
+
+  <li>Install the dependencies — this repo already has a <code>package.json</code> listing Jest, so <code>npm install</code> just fetches what it names (2-2):
+<pre><code>npm install              # creates node_modules/
+                         # "19 high severity vulnerabilities" again — the 2-3 audit note</code></pre>
+  <em>You should see</em> a line like <code>added 300+ packages</code>, a new <code>node_modules</code> folder in <code>ls</code>, and the same audit summary lesson 2-3 explained: the advisories sit inside Jest's own dependencies, and <strong>you must not run the <code>npm audit fix --force</code> npm suggests</strong> — it can swap Jest for a different major version and break the suite this workshop is about.</li>
+
+  <li>Run the tests before changing anything, so you know your starting line (<code>npm test</code> runs the <code>"test": "jest"</code> script from <code>package.json</code>, as in 2-3):
+<pre><code>npm test</code></pre>
+  <em>You should see</em> <code>Tests: 5 failed, 5 total</code> — five red tests named "Refactor our <em>x</em> function so it is pure". All five failing is the correct starting state.</li>
+
+  <li>Open this folder in your editor — File → Open Folder → <code>~/code/pure-functions-easy-testing-ws</code>, since your editor is probably still on last lesson's project. Then read both files that matter:
+<pre><code>cat exercises/exercise1.js      # the five impure functions — you edit THIS
+cat test/exercise1.test.js      # what "pure" must mean — you do NOT edit this</code></pre>
+  <em>You should see</em> a pattern repeated in every test: it calls your function, checks the return value, <em>then</em> checks that <code>constantNumber</code>/<code>constantArray</code>/<code>constantObject</code> is unchanged, then calls your function a second time expecting the same answer. That's rules 1 and 2 of Idea 1, written as assertions.</li>
+
+  <li>Start Jest in <span class="term" data-tip="Jest stays running and re-runs the tests every time you save a file.">watch mode</span> in a second terminal tab (from 2-4) so every save re-runs the suite. The new tab starts in your home folder, so <code>cd</code> into the repo first (1-4) or npm/Jest will find no project here. It stays running and takes single-key commands — <code>a</code> re-runs all tests, <code>q</code> quits:
+<pre><code>cd ~/code/pure-functions-easy-testing-ws   # the new tab starts in ~, not in the repo
+npx jest --watchAll                        # stays running; press q to quit when you're done</code></pre>
+  <em>You should see</em> the five failures, then a menu line <code>Watch Usage: Press a to run all tests…</code> and no prompt returning. Leave it open for the rest of the workshop. (Autosave is off — a save is what triggers the re-run.)</li>
+
+  <li>Function 1, <code>addOne</code>. It currently takes no arguments and mutates the module-level <code>constantNumber</code>:
+<pre><code>const addOne = () =&gt; {
+  constantNumber += 1;     // side effect: edits a variable it doesn't own
+  return constantNumber;
+};</code></pre>
+  The test calls <code>addOne(4)</code> and expects <code>5</code>, and calls <code>addOne(constantNumber)</code> twice expecting <code>6</code> both times. Rewrite it to take a number and return a number, touching nothing outside. Save. <em>Success check:</em> the watcher flips test 1 to <code>✓ Refactor our addOne function so it is pure.</code> and reports <code>4 failed, 1 passed</code>.</li>
+
+  <li>Function 2, <code>timesTwo</code> — the same disease, same cure: take the number as an argument, return the doubled value, leave <code>constantNumber</code> alone. Save. <em>Success check:</em> <code>3 failed, 2 passed</code>.</li>
+
+  <li>Function 3, <code>incrementArray</code>. This one <em>does</em> take an argument, but writes into it:
+<pre><code>const incrementArray = (array) =&gt; {
+  array.forEach((x, i) =&gt; {
+    array[i] = x + 1;      // side effect: the CALLER's array is modified
+  });
+  return array;
+};</code></pre>
+  The test proves the mutation by calling it on <code>constantArray</code> twice and demanding <code>[6, 8, 24, 5]</code> both times. Use the method that returns a <strong>new</strong> array instead of editing one — <code>map</code>, from 1-8. Save. <em>Success check:</em> <code>2 failed, 3 passed</code>.</li>
+
+  <li>Function 4, <code>addNumberArray</code>, uses <code>array.push(number)</code> — a mutator (1-8's first family). Return a new array containing the old elements plus the new one; spread (2-6) does it in one expression. Save. <em>Success check:</em> <code>1 failed, 4 passed</code>.</li>
+
+  <li>Function 5, <code>incrementObject</code>, mutates the object it was handed. Copy it first — the shallow copy from Idea 2's aside — then increment every value on the <em>copy</em> and return that:
+<pre><code>const incrementObject = (object) =&gt; {
+  const copy = { ...object };     // your own object now; the caller's is untouched
+  // …increment each value on `copy` (Object.keys + forEach, or build it fresh)…
+  return copy;
+};</code></pre>
+  Save. <em>Success check:</em> <code>Tests: 5 passed, 5 total</code> — the whole suite green, with the test file never opened for editing.</li>
+
+  <li>Prove to yourself the win is real: with the watcher still running, break one function on purpose (make <code>addOne</code> return <code>n + 2</code>) and save.
+<pre><code># no command — just edit and save, and read the watcher output</code></pre>
+  <em>You should see</em> exactly one red test, naming exactly one function. Undo the break, save, and confirm you're back to <code>5 passed</code>. That precision is what purity bought you.</li>
+
+  <li>Quit the watcher and record the work (git from 1-5). This is your clone of someone else's repo — there's no remote of yours to push to and no PR to open, so this is the one place this week where committing straight to <code>main</code> is right; the branch-and-PR rule from 1-5 is about repos you own. <strong>Check what you're about to commit before you commit it:</strong>
+<pre><code># in the watcher tab: press q
+git status               # modified: exercises/exercise1.js  — and NOTHING else
+git add exercises/exercise1.js
+git commit -m "Refactor exercise 1 functions to be pure"</code></pre>
+  <em>Success check:</em> <code>git status</code> shows a clean tree, and the only file in the commit is <code>exercises/exercise1.js</code>. If that first <code>git status</code> lists <code>test/exercise1.test.js</code> as modified, you broke the workshop's one rule — restore it before committing:
+<pre><code>git checkout -- test/exercise1.test.js   # throw away your edits, back to the shipped version
+npm test                                 # must still be 5 passed</code></pre>
+  (Already committed it by mistake? <code>git checkout</code> would only give you back your own version, since it is now what <code>HEAD</code> holds — reach one commit further back instead: <code>git checkout HEAD~1 -- test/exercise1.test.js</code>, then commit that restore.)</li>
+</ol>
+
+<h2>Check yourself — spot the side effect</h2>
+<p>Which of these four are pure, and for the impure ones, name the exact side effect:</p>
+<pre><code>const a = (arr) =&gt; arr.slice().sort();
+
+const b = (arr) =&gt; arr.sort();
+
+let count = 0;
+const c = (n) =&gt; { count += n; return count; };
+
+const d = (products, term) =&gt;
+  products.filter((p) =&gt; p.name.includes(term));</code></pre>
+<details class="reveal"><summary>Reveal</summary>
+<p><strong>a — pure.</strong> <code>slice()</code> with no arguments copies the array first, so <code>sort</code> reorders the copy. Same input, same output, caller untouched.</p>
+<p><strong>b — impure.</strong> <code>sort</code> mutates in place: the caller's array comes back reordered. (It's the sneakiest one on this list — <code>sort</code> looks like a transformer and isn't.)</p>
+<p><strong>c — impure.</strong> It edits the outer <code>count</code>, so <code>c(1)</code> returns 1, then 2, then 3. Both rules broken at once.</p>
+<p><strong>d — pure.</strong> <code>filter</code> returns a new array (1-8) and nothing outside is touched — and it's exactly the search function the week project needs.</p>
+</details>
+
+<div class="quiz"
+  data-q="Your renderCart() reads the cart, calculates the total, formats the currency, and writes it into the page — and its test is failing. Why is that test hard to act on?"
+  data-opts='["The failure could be in any of four responsibilities; splitting the calculation into a pure function would name the culprit",
+              "Jest cannot test functions that return undefined, so the test is invalid",
+              "DOM code can never be tested, so the function should not have a test at all"]'
+  data-answer="0"
+  data-why="A red test is only useful if it points at one small thing. Jest can test functions returning undefined, and DOM code is testable — it is just easier when the decision-making has been pulled out into a pure function first."></div>
+
+<div class="quiz"
+  data-q="A function receives an object and needs to return a version with one field changed, without disturbing the caller's object. What is the first line?"
+  data-opts='["const copy = obj — assignment duplicates the object",
+              "const copy = { ...obj } — spread makes your own shallow copy to modify",
+              "obj.field = newValue — assigning to a property is local to the function"]'
+  data-answer="1"
+  data-why="Objects are passed by reference: obj.field = … edits the caller's object, and const copy = obj just makes a second name for the same object. Spread creates a new object."></div>
+
+<h2>Go deeper</h2>
+<p><strong>Primary source:</strong> the workshop's own <a href="https://github.com/bootcamp-we-have-at-home/pure-functions-easy-testing-ws#readme">README</a> — reread the "Why test with pure functions?" section now that the exercises are green; it lands differently on the second pass. Its <code>object-pass-by-reference.js</code> file is runnable with <code>node object-pass-by-reference.js</code> in the repo you just cloned (the Node REPL and <code>node file.js</code> are from 2-2) and is the clearest 40 lines on why copying matters.</p>
+<p>Worth knowing before this afternoon's research: green tests are not proof of correctness. <a href="https://martinfowler.com/bliki/TestCoverage.html">Martin Fowler on test coverage</a> makes the case that coverage tells you where you <em>haven't</em> looked, never that the code is right.</p>
+
+<!-- agent-pair: solo adaptation of pure-functions-easy-testing-ws (originally a pair workshop).
+     On request, the agent acts as reviewer, not solver.
+     1) After each refactor the student commits, the agent reviews that one function for hidden
+        side effects: mutation of an argument (push/sort/splice/property assignment), reads of or
+        writes to outer-scope variables, Date.now()/Math.random(), any DOM or storage access.
+        Etiquette per curriculum/coursebook/week-1/codereviewintro.md — ask questions rather than
+        assert, point at exact lines, lead with one main point, never paste the fixed code first.
+     2) Never edit test/exercise1.test.js, and don't hand over a working exercises/exercise1.js;
+        if the student is stuck, name the family of method that helps (from 1-8) and stop.
+     3) Extra rep when asked: the agent writes ONE deliberately impure function into a scratch file
+        (e.g. a discount calculator that mutates its products argument and reads an outer taxRate),
+        the student writes its Jest test FIRST — including an assertion that the input is unchanged,
+        the shape used throughout exercise1.test.js — then purifies it until red goes green.
+     4) Cohort variant: two students swap impure functions and race to purify; the test each wrote
+        first is the acceptance criterion. -->
+
+<div class="feedback-ask">Finished? Tell your teacher (the agent) two things: ① Could you follow this lesson alone — 1 to 5? ② Where did you get stuck, if anywhere? Answers are recorded in <code>feedback/week-2.md</code> and improve the lesson for the next student. <em>Want your refactors reviewed line by line, or an extra impure function to purify? The agent has pair instructions hidden in this page's source.</em></div>
+
+<div class="footer-nav">
+Reference: <a href="../../reference/npm-jest-tdd-cheatsheet.html">npm, Jest &amp; TDD cheat sheet</a> · <a href="../../reference/javascript-cheatsheet.html">JavaScript cheat sheet</a> · Week map: <a href="index.html">Week 2 index</a><br>
+Previous: <a href="7-callbacks-async.html">2-7 The Call Stack, Sync vs Async &amp; setTimeout</a> · Next: <a href="9-traffic-lights.html">2-9 Traffic Lights: Callbacks Morning Challenge</a><br>
+Next up: one more callback workout tomorrow morning (2-9), then the week project. Stuck or curious? Ask your teacher (the agent). "Is <code>localStorage.setItem</code> a side effect I should be worried about?" is a great follow-up.
+</div>
+
+<script src="../../assets/quiz.js"></script>
+<script src="../../assets/tooltip.js"></script>

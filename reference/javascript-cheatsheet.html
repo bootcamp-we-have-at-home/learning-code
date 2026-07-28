@@ -1,9 +1,10 @@
 <meta charset="utf-8">
 <title>JavaScript Cheat Sheet</title>
 <link rel="stylesheet" href="../assets/course.css">
+<script src="../assets/layout.js"></script>
 
 <h1>JavaScript Cheat Sheet</h1>
-<p class="subtitle">Week 1 scope: values, variables, operators, arrays, objects. Look up, don't memorize.</p>
+<p class="subtitle">Week 1–2 scope: values, variables, operators, arrays, objects, functions &amp; callbacks, async, ES6↔ES5, web storage. Look up, don't memorize.</p>
 
 <h2>Declarations</h2>
 <table>
@@ -70,6 +71,76 @@
 <tr><td>create + attach</td><td><code>const p = document.createElement("p"); parent.append(p)</code></td></tr>
 </table>
 
+<h2>Functions &amp; callbacks (week 2)</h2>
+<table>
+<tr><th>Form</th><th>Example</th><th>Note</th></tr>
+<tr><td>declaration</td><td><code>function add(a, b) { return a + b; }</code></td><td>the coursebook's style; hoisted</td></tr>
+<tr><td>expression</td><td><code>const add = function (a, b) { return a + b; };</code></td><td>an anonymous function stored in a variable</td></tr>
+<tr><td>arrow</td><td><code>const add = (a, b) =&gt; a + b;</code></td><td>no braces ⇒ implicit return; braces ⇒ write <code>return</code> yourself</td></tr>
+<tr><td>return value</td><td><code>add(1, 2)</code> → <code>3</code></td><td>what the call evaluates to</td></tr>
+<tr><td>side effect</td><td><code>console.log(x)</code></td><td>something happened; nothing handed back</td></tr>
+<tr><td>no <code>return</code></td><td><code>(() =&gt; { console.log("hi"); })()</code> → <code>undefined</code></td><td>every function returns <code>undefined</code> by default</td></tr>
+<tr><td>call vs reference</td><td><code>fn()</code> vs <code>fn</code></td><td>parens run it; bare name <em>is</em> the function value</td></tr>
+</table>
+
+<p>First-class = a function is a value, storable anywhere a number is:</p>
+<table>
+<tr><th>Where</th><th>Store</th><th>Call</th></tr>
+<tr><td>variable</td><td><code>const alias = fn;</code></td><td><code>alias()</code></td></tr>
+<tr><td>object (method)</td><td><code>const o = { bark: () =&gt; console.log("woof") };</code></td><td><code>o.bark()</code></td></tr>
+<tr><td>array</td><td><code>const a = [0, 1, () =&gt; "hi"];</code></td><td><code>a[2]()</code></td></tr>
+<tr><td>argument</td><td><code>run(fn)</code> — no parens on <code>fn</code></td><td>the receiver calls it</td></tr>
+<tr><td>return value</td><td><code>const greet = (g) =&gt; (n) =&gt; `${g} ${n}`;</code></td><td><code>greet("hi")("world")</code></td></tr>
+</table>
+
+<table>
+<tr><th>Term</th><th>Means</th><th>One-liner</th></tr>
+<tr><td>callback function</td><td>a function passed as an argument, for the receiver to call</td><td><code>nums.map(n =&gt; n * 2)</code> — the arrow is the callback</td></tr>
+<tr><td>higher-order function</td><td>takes a function as an argument and/or returns one</td><td><code>map</code>, <code>filter</code>, <code>forEach</code>, <code>addEventListener</code>, <code>setTimeout</code></td></tr>
+<tr><td>the classic trap</td><td><code>foo(fn)</code> passes the function; <code>foo(fn())</code> passes its <em>result</em></td><td><code>foo(fn())</code> → <code>TypeError: fun is not a function</code></td></tr>
+</table>
+
+<h2>Call stack &amp; async (week 2)</h2>
+<p>Call stack: JavaScript keeps a stack of "who called whom" — each call is pushed on, and pops off when it returns, so the innermost call finishes first. Endless recursion overflows it: <code>RangeError: Maximum call stack size exceeded</code>.</p>
+<table>
+<tr><th>Idea</th><th>Meaning</th></tr>
+<tr><td>synchronous</td><td>each line finishes before the next starts — JavaScript's default</td></tr>
+<tr><td>asynchronous</td><td>the work is handed off (timer, network) and your code continues; your callback runs later</td></tr>
+<tr><td><code>setTimeout(fn, ms)</code></td><td>run <code>fn</code> after at least <code>ms</code> milliseconds; returns a timer id, not <code>fn</code>'s result</td></tr>
+<tr><td><code>setTimeout(fn, 0)</code></td><td>still <em>after</em> all the currently running synchronous code — 0 means "as soon as the stack is empty", not "now"</td></tr>
+<tr><td>nesting callbacks</td><td>to go more than one layer deep, wrap in an anonymous function: <code>third(() =&gt; second(first))</code>, never <code>third(second(first))</code></td></tr>
+</table>
+<pre><code>const asyncAddOne = (n, callback) =&gt; {
+  setTimeout(() =&gt; callback(n + 1), 1000);   // returns undefined immediately; callback runs later
+};
+asyncAddOne(10, (result) =&gt; console.log(result));   // 11, one second later</code></pre>
+
+<h2>ES6 ↔ ES5 (the nine conversion-challenge features)</h2>
+<table>
+<tr><th>ES6</th><th>ES5 equivalent</th><th>Example</th></tr>
+<tr><td><code>let</code></td><td><code>var</code></td><td><code>let i = 0</code> → <code>var i = 0</code> (var is function-scoped, not block-scoped)</td></tr>
+<tr><td><code>const</code></td><td><code>var</code></td><td>no reassignment protection survives the conversion</td></tr>
+<tr><td>arrow function</td><td><code>function</code> expression</td><td><code>(a) =&gt; a * 2</code> → <code>function (a) { return a * 2; }</code></td></tr>
+<tr><td>template literal</td><td>string concatenation</td><td><code>`hi ${n}`</code> → <code>"hi " + n</code></td></tr>
+<tr><td>default parameter</td><td>undefined-check in the body</td><td><code>(a = 1) =&gt; …</code> → <code>if (a === undefined) { a = 1; }</code></td></tr>
+<tr><td>spread</td><td><code>.concat()</code></td><td><code>[...a, ...b]</code> → <code>a.concat(b)</code></td></tr>
+<tr><td>destructuring</td><td>manual assignment</td><td><code>const { x, y } = o</code> → <code>var x = o.x; var y = o.y;</code></td></tr>
+<tr><td><code>Set</code></td><td>array + filter-dedupe</td><td><code>[...new Set(a)]</code> → <code>a.filter(function (v, i) { return a.indexOf(v) === i; })</code></td></tr>
+<tr><td><code>class</code></td><td>constructor function + prototype</td><td><code>class A { hi() {} }</code> → <code>function A() {}; A.prototype.hi = function () {};</code></td></tr>
+</table>
+
+<h2>Web storage</h2>
+<table>
+<tr><th>Call</th><th>Does</th></tr>
+<tr><td><code>localStorage.setItem("key", "value")</code></td><td>saves a <strong>string</strong>, surviving reloads and browser restarts</td></tr>
+<tr><td><code>localStorage.getItem("key")</code></td><td>returns the string, or <code>null</code> if the key was never set</td></tr>
+<tr><td><code>localStorage.removeItem("key")</code></td><td>deletes one key (<code>localStorage.clear()</code> wipes the whole origin)</td></tr>
+<tr><td><code>sessionStorage</code></td><td>identical API, but cleared when the tab closes</td></tr>
+</table>
+<p>Storage only holds strings, so objects and arrays make a JSON round trip:</p>
+<pre><code>localStorage.setItem("cart", JSON.stringify(cart));            // object → string
+const cart = JSON.parse(localStorage.getItem("cart")) || [];    // string → object; || [] covers the first visit</code></pre>
+
 <div class="footer-nav">
-Used by lessons <a href="../lessons/1-7-javascript-refresh.html">1-7</a>, <a href="../lessons/1-8-array-methods.html">1-8</a>, <a href="../lessons/1-9-objects-operators-dom.html">1-9</a> · Week map: <a href="../lessons/1-index.html">Week 1 index</a>
+Used by lessons <a href="../lessons/week-1/7-javascript-refresh.html">1-7</a>, <a href="../lessons/week-1/8-array-methods.html">1-8</a>, <a href="../lessons/week-1/10-objects-operators-dom.html">1-10</a>, <a href="../lessons/week-2/1-functions-and-callbacks.html">2-1</a> · Week maps: <a href="../lessons/week-1/index.html">Week 1 index</a> · <a href="../lessons/week-2/index.html">Week 2 index</a>
 </div>

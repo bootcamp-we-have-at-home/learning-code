@@ -1,0 +1,70 @@
+<meta charset="utf-8">
+<title>Display settings</title>
+<link rel="stylesheet" href="../assets/course.css">
+<script src="../assets/layout.js"></script>
+
+<h1>Display settings</h1>
+<p class="subtitle">Applies to every lesson and reference page. Saved in your browser (localStorage) — changes take effect here immediately, and on other pages when you open or reload them.</p>
+
+<h2>Page width</h2>
+<p>The default is a medium column sized for a laptop screen. Narrow reads like a book; wide fills most of the window if you keep the lesson side by side with a terminal or editor.</p>
+<div class="choices">
+  <label><input type="radio" name="lesson-page-width" value="narrow" data-class="narrow"> Narrow — compact reading column</label>
+  <label><input type="radio" name="lesson-page-width" value="medium" data-default> Medium — laptop-friendly (default)</label>
+  <label><input type="radio" name="lesson-page-width" value="wide" data-class="wide"> Wide — fill most of the window</label>
+  <label><input type="radio" name="lesson-page-width" value="ultrawide" data-class="ultrawide"> Ultrawide — for 3440×1440 monitors</label>
+</div>
+
+<h2>Theme</h2>
+<div class="choices">
+  <label><input type="radio" name="lesson-theme" value="auto" data-default> Auto — follow the system setting (default)</label>
+  <label><input type="radio" name="lesson-theme" value="light" data-class="theme-light"> Light</label>
+  <label><input type="radio" name="lesson-theme" value="dark" data-class="theme-dark"> Dark</label>
+</div>
+
+<h2>Text size</h2>
+<div class="choices">
+  <label><input type="radio" name="lesson-text-size" value="normal" data-default> Normal (default)</label>
+  <label><input type="radio" name="lesson-text-size" value="large" data-class="text-large"> Large</label>
+</div>
+
+<h2>Font</h2>
+<div class="choices">
+  <label><input type="radio" name="lesson-font" value="sans" data-default> Sans-serif — Inter / your system font (default)</label>
+  <label><input type="radio" name="lesson-font" value="serif" data-class="font-serif"> Serif — Palatino / Georgia, book-like</label>
+</div>
+
+<p id="status" class="subtitle"></p>
+
+<script>
+(function () {
+  var status = document.getElementById("status");
+  var groups = {};
+  document.querySelectorAll('input[type="radio"]').forEach(function (r) {
+    (groups[r.name] = groups[r.name] || []).push(r);
+  });
+
+  Object.keys(groups).forEach(function (key) {
+    var saved = null;
+    try { saved = localStorage.getItem(key); } catch (e) {}
+    groups[key].forEach(function (r) {
+      var isDefault = r.hasAttribute("data-default");
+      r.checked = saved === r.value || (isDefault && !groups[key].some(function (o) { return o.value === saved; }));
+      r.addEventListener("change", function () {
+        try {
+          if (r.hasAttribute("data-default")) localStorage.removeItem(key);
+          else localStorage.setItem(key, r.value);
+        } catch (e) {}
+        // Apply to this page immediately: clear the group's classes, add the chosen one.
+        groups[key].forEach(function (o) {
+          var c = o.getAttribute("data-class");
+          if (c) document.documentElement.classList.remove(c);
+        });
+        var cls = r.getAttribute("data-class");
+        if (cls) document.documentElement.classList.add(cls);
+        status.textContent = "Saved. Every lesson page will use this from its next load.";
+      });
+    });
+  });
+})();
+</script>

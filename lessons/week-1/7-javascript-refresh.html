@@ -1,11 +1,12 @@
 <meta charset="utf-8">
 <title>1-7 — JavaScript Refresh: Values &amp; Variables</title>
-<link rel="stylesheet" href="../assets/course.css">
+<link rel="stylesheet" href="../../assets/course.css">
+<script src="../../assets/layout.js"></script>
 
 <h1>1-7 — JavaScript Refresh: Values &amp; Variables</h1>
 <p class="subtitle">~30 minutes · Week 1, Day 3 · Source: curriculum Day 3 (intro to JS, variables &amp; constants, data types)</p>
 
-<p><strong>Why this matters:</strong> Day 3 of the curriculum re-grounds JavaScript before array methods. You've done freeCodeCamp, so this is a <em>refresh with a skip door</em>, not a re-teach.</p>
+<p><strong>Why this matters:</strong> Day 3 of the curriculum re-grounds JavaScript before array methods. You've done <a href="https://www.freecodecamp.org/learn/javascript-algorithms-and-data-structures/">freeCodeCamp's JavaScript section</a>, so this is a <em>refresh with a skip door</em>, not a re-teach.</p>
 
 <h2>Checkpoint — try to skip this lesson</h2>
 <p>Open the browser console (<kbd>F12</kbd> → Console, from lesson 1-1) and predict each result <em>before</em> typing it:</p>
@@ -22,14 +23,40 @@ typeof null</code></pre>
 TypeError                // const does not
 false                    // arrays compare by reference, not content
 "object"                 // a famous historical quirk — see below</code></pre>
-<p><strong>All six right (including the last two)?</strong> Skip ahead to <a href="1-8-array-methods.html">1-8 Array Methods</a> with a clear conscience. Any misses — the sections below cover exactly those.</p>
+<p><strong>All six right (including the last two)?</strong> Skip ahead to <a href="8-array-methods.html">1-8 Array Methods</a> with a clear conscience. Any misses — the sections below cover exactly those.</p>
 </details>
 
 <h2>Idea 1 — Values have types; variables are labels</h2>
 <p>JavaScript's primitive types you'll actually meet daily: <code>string</code>, <code>number</code>, <code>boolean</code>, <code>undefined</code> (nothing assigned yet), <code>null</code> (deliberately nothing). Everything else — objects and arrays — is compared <em>by reference</em>: two arrays with the same content are still two different arrays. <code>typeof value</code> asks a value its type.</p>
+<details class="examples"><summary>More examples (optional)</summary>
+<p>A quick console tour of the corners — predict each before running:</p>
+<pre><code>typeof true              // "boolean"
+typeof undefined         // "undefined"
+typeof (1 + 1)           // "number"    — typeof asks the RESULT, not the expression
+typeof []                // "object"    — arrays are objects; use Array.isArray([]) → true
+"5" + 5                  // "55"        — + with a string means concatenate
+"5" - 5                  // 0           — - only means math, so the string converts</code></pre>
+<p>The last two are why type-aware comparison matters so much in lesson 1-10: operators quietly convert types, and <code>===</code> is how you opt out of the guessing.</p>
+</details>
+<p class="read-more"><strong>Read more:</strong> <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures">MDN — JavaScript data types</a> · <a href="https://javascript.info/types">javascript.info — data types</a></p>
 
 <h2>Idea 2 — const by default</h2>
 <p>Modern JS declares with <code>const</code> unless reassignment is genuinely needed, then <code>let</code>. You will still see <code>var</code> in older curriculum snippets — it's the legacy form with looser scoping; don't write new code with it. Note the nuance the console showed you: <code>const</code> stops <em>reassignment</em> of the label, not mutation of the object it points to — <code>const arr = []; arr.push(1)</code> is legal.</p>
+<details class="examples"><summary>More examples (optional)</summary>
+<p>Where the line between reassignment and mutation actually falls:</p>
+<pre><code>const user = { name: "Amjad" }
+user.name = "Amjad S."     // fine       — mutating the object the label points to
+user = { name: "Other" }   // TypeError  — re-pointing the label itself
+
+let count = 0
+count = count + 1          // fine       — let exists exactly for labels that move
+
+const wins = 0
+wins = wins + 1            // TypeError  — and that error is USEFUL: it tells you
+                           // this value was never meant to change</code></pre>
+<p>Practical rule: write <code>const</code>, and let the error upgrade it to <code>let</code> only when reassignment is truly the design — most variables never are.</p>
+</details>
+<p class="read-more"><strong>Read more:</strong> <a href="https://javascript.info/variables">javascript.info — variables</a> · <a href="https://javascript.info/var">javascript.info — the old var</a> (why legacy code scoped so strangely)</p>
 
 <h2>Do it for real (~15 min)</h2>
 <p>In the console:</p>
@@ -63,10 +90,10 @@ skills                    // ["html", "css", "git"]</code></pre>
 <div class="feedback-ask">Finished (or skipped via the checkpoint)? Tell your teacher (the agent) two things: ① Could you follow this lesson alone — 1 to 5? ② Where did you get stuck, if anywhere? Answers are recorded in <code>feedback/week-1.md</code>.</div>
 
 <div class="footer-nav">
-Reference: <a href="../reference/javascript-cheatsheet.html">JavaScript cheat sheet</a> · Week map: <a href="1-index.html">Week 1 index</a><br>
-Previous: <a href="1-6-responsive-design.html">1-6 Responsive Design</a> · Next: <a href="1-8-array-methods.html">1-8 Array Methods</a><br>
+Reference: <a href="../../reference/javascript-cheatsheet.html">JavaScript cheat sheet</a> · Week map: <a href="index.html">Week 1 index</a><br>
+Previous: <a href="6-responsive-design.html">1-6 Responsive Design</a> · Next: <a href="8-array-methods.html">1-8 Array Methods</a><br>
 Stuck or curious? Ask your teacher (the agent). "Why does typeof null say object?" is a great follow-up.
 </div>
 
-<script src="../assets/quiz.js"></script>
-<script src="../assets/tooltip.js"></script>
+<script src="../../assets/quiz.js"></script>
+<script src="../../assets/tooltip.js"></script>

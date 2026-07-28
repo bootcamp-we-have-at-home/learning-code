@@ -1,0 +1,212 @@
+<meta charset="utf-8">
+<title>2-9 — Traffic Lights: Callbacks Morning Challenge</title>
+<link rel="stylesheet" href="../../assets/course.css">
+<script src="../../assets/layout.js"></script>
+
+<h1>2-9 — Traffic Lights: Callbacks Morning Challenge</h1>
+<p class="subtitle">~60 minutes · Week 2, Day 3 (09:00–10:00 morning challenge) · Source: curriculum <a href="https://github.com/bootcamp-we-have-at-home/morning-challenge-traffic-lights">bootcamp-we-have-at-home/morning-challenge-traffic-lights</a></p>
+
+<p><strong>Why this matters:</strong> in lesson 2-7 you predicted the order of <code>setTimeout</code> chains on paper. Here the same kind of chain drives something you can watch, so "the callback runs later" stops being a rule you memorised and becomes a light you can see turn on.</p>
+
+<p>Week 3 opens by asking "what is a callback and why would you use one?" — after this hour you answer it with a working animation.</p>
+
+<h2>Idea 1 — A function that hands you the "when I'm done" slot</h2>
+<p>Lesson 2-1 defined <span class="term" data-tip="Functions are values: you can store one in a variable, pass it to another function, and return it from a function.">first-class functions</span>: a function is a value you can store, pass around, and return.</p>
+
+<p>The challenge repo ships one helper built on that idea, <code>blinkLight</code>. You must <em>not</em> edit it.</p>
+
+<p>What makes it unusual is that it returns <em>another function</em>. Read it once; you only ever <em>use</em> it:</p>
+<pre><code>// this block ships in script.js — read it, don't edit it
+var time = 1000;                                  // every blink lasts 1 second
+
+var red    = blinkLight(get('light-top'),    'red');     // red, yellow, green are FUNCTIONS
+var yellow = blinkLight(get('light-middle'), 'yellow');  // built once, called many times
+var green  = blinkLight(get('light-bottom'), 'green');
+
+var red2    = blinkLight(get('light-top2'),    'red');   // the SECOND traffic light,
+var yellow2 = blinkLight(get('light-middle2'), 'yellow');// already built for you —
+var green2  = blinkLight(get('light-bottom2'), 'green'); // you only need these in Part 4
+
+function blinkLight(element, colour) {
+  var blink = function (callback) {
+    element.classList.add(colour);                // light ON  (the DOM class trick from 1-10)
+    setTimeout(function () {                      // the timer from 2-7
+      element.classList.remove(colour);           // light OFF, one second later
+      if (callback) {
+        callback();                               // ...then run whatever you passed in
+      }
+    }, time);
+  };
+  return blink;                                   // returns a function, not a colour
+}
+
+function get(id) {                                // a one-line alias for the 1-10 DOM lookup
+  return document.getElementById(id);
+}</code></pre>
+<p>So <code>red</code> is not a colour value. It is a function you call.</p>
+
+<p><code>red()</code> means "red on for a second, then off, then nothing". <code>red(green)</code> means "red on for a second, then off, then run <code>green</code>".</p>
+
+<p>Notice that <code>green</code> is passed <em>without</em> parentheses — you are handing over the function itself, not its result. That is 2-1's most-repeated warning, and it is the mistake to watch for all morning.</p>
+<div class="aside">The repo writes <code>var</code> and <code>function (callback) { … }</code>; today we write <code>const</code> and arrow functions. Leave the shipped block exactly as it is — it's the "don't change anything between here / and here" zone — and write <em>your own</em> code below it in modern style.</div>
+<details class="examples"><summary>More examples (optional)</summary>
+<p>The same shape, stripped of traffic lights — a function whose one job is to do something and then call your function:</p>
+<pre><code>const after = (label) =&gt; (callback) =&gt; {          // build a "step" function
+  console.log(label);
+  setTimeout(callback, 1000);                     // ...then run the callback a second later
+};
+
+const first  = after("first");
+const second = after("second");
+
+first(second)          // logs "first", waits 1s, logs "second"
+first()                // logs "first", waits 1s, does nothing — no callback passed
+first(second)          // NOTE: second, no parentheses. first(second()) would run it NOW</code></pre>
+<p>And the mistake worth making once on purpose, so you recognise it in your own code tonight:</p>
+<pre><code>red(green())    // WRONG: green() runs immediately, and its return value (undefined)
+                //        is what red receives — so nothing happens after red
+red(green)      // RIGHT: red receives the function and calls it when it's done</code></pre>
+</details>
+<p class="read-more"><strong>Read more:</strong> <a href="https://developer.mozilla.org/en-US/docs/Web/API/Element/classList">MDN — Element.classList</a> · <a href="https://javascript.info/closure">javascript.info — closures</a> (why the returned <code>blink</code> still remembers its <code>element</code> and <code>colour</code>)</p>
+
+<h2>Idea 2 — Chaining, and the anonymous-wrapper trick</h2>
+<p>You can already do two lights in a row: <code>red(green)</code>, from Idea 1.</p>
+
+<p>Three lights is where beginners stall, because both obvious guesses are wrong:</p>
+<pre><code>red(green, yellow)          // WRONG: blinkLight takes ONE callback; the second is ignored
+red(green(yellow))          // WRONG: green runs immediately (see Idea 1)</code></pre>
+<p>The fix is the takeaway of this whole challenge: <strong>when the next step needs an argument of its own, wrap it in an <span class="term" data-tip="A function with no name, written inline — here an arrow function, from lesson 2-1.">anonymous function</span></strong>.</p>
+
+<p>That wrapper is a function value, so it can be passed. And its body doesn't run until it's called:</p>
+<pre><code>red(() =&gt; green(yellow))    // red → (1s) → green → (1s) → yellow</code></pre>
+<p>Read it inside-out. <code>() =&gt; green(yellow)</code> is a function that, <em>when someone calls it</em>, starts green with yellow queued behind it.</p>
+
+<p><code>red</code> is that someone, one second later. Longer chains nest the same way — and yes, the parentheses pile up on the right.</p>
+
+<p>That pyramid has a name you'll meet in week 3 ("callback hell") and a cure you'll meet there too (promises, <code>async</code>/<code>await</code>). For one hour, embrace it.</p>
+
+<h3>Two lights at the same time</h3>
+<p><strong>Two lights at the <em>same</em> time is a different move</strong>, and you need it below for the red-and-yellow stage.</p>
+
+<p>You don't nest. You call both in one tick, and let only <em>one</em> of them carry the chain onward:</p>
+<pre><code>const bothThenGreen = () =&gt; {
+  red();               // starts now, no callback — this one just lights up and stops
+  yellow(green);       // starts now too, and carries the sequence onward after 1s
+};</code></pre>
+<p>Both classes get added in the same tick, so the browser paints them together: one second of red-and-yellow, then green.</p>
+
+<p>Which of the two carries the callback doesn't matter. What matters is that only one does — otherwise you fork the sequence into two chains running side by side.</p>
+<details class="examples"><summary>More examples (optional)</summary>
+<p>Four steps, built up one at a time so the nesting never surprises you:</p>
+<pre><code>red(green)                                  // 2 steps
+red(() =&gt; green(yellow))                    // 3 steps: wrap step 2
+red(() =&gt; green(() =&gt; yellow(red)))         // 4 steps: wrap step 2 AND step 3</code></pre>
+<p>And the wrapper is not magic — it is the same thing as naming the step, which is often more readable once a chain gets long:</p>
+<pre><code>const thenYellow = () =&gt; green(yellow);     // a named function value...
+red(thenYellow)                             // ...passed exactly like the anonymous one</code></pre>
+</details>
+<p class="read-more"><strong>Read more:</strong> <a href="http://callbackhell.com/">callbackhell.com</a> (the pyramid, and why week 3 escapes it) · <a href="https://javascript.info/settimeout-setinterval">javascript.info — setTimeout and setInterval</a></p>
+
+<h2>Do it for real (~45 min)</h2>
+<p>Four parts, exactly as the challenge repo states them. Parts 1–3 are the challenge; Part 4 is a clearly-marked stretch goal.</p>
+
+<p>Finishing Part 3 is a good morning. All your work happens in one file, <code>script.js</code>, below the shipped block.</p>
+<ol class="steps">
+  <li>Clone the challenge into your code folder (<code>git clone</code> is from lesson 1-5; <code>cd</code> from 1-4):
+<pre><code>cd ~/code
+git clone https://github.com/bootcamp-we-have-at-home/morning-challenge-traffic-lights.git
+cd morning-challenge-traffic-lights
+ls                    # index.html  script.js  style.css  package.json  README.md</code></pre>
+  <em>You should see</em> those five files listed.</li>
+  <li>Install the one dependency and start the dev server. <code>npm i</code> and <code>npm run &lt;script&gt;</code> are from lesson 2-2 — <code>live</code> is a script defined in this repo's <code>package.json</code>, and it runs <a href="https://www.npmjs.com/package/live-server">live-server</a>: a tiny local web server that reloads the browser tab every time you save a file.
+<pre><code>npm i                 # installs live-server into node_modules/
+                      # deprecation warnings + "8 vulnerabilities" are expected here
+npm run live          # starts the server AND opens your browser</code></pre>
+  <em>You should see</em> a browser tab open with two grey traffic lights, and then the <strong>bottom lamp of the first light blinking green forever</strong> — one second on, one second off. That is the repo's example code (<code>light()</code> at the bottom of <code>script.js</code>) calling itself again after every blink; the second traffic light stays grey because its example function is an empty placeholder. The terminal is now <strong>busy running the server</strong> — it won't give you a prompt back. Leave it running in its own terminal window; press <kbd>Ctrl</kbd>+<kbd>C</kbd> when you're done for the day to stop it. If the browser didn't open by itself, visit the address the terminal printed (usually <code>http://127.0.0.1:8080</code>).
+  <div class="aside">live-server is an old package, so <code>npm i</code> prints a wall of deprecation warnings and ends with <code>8 vulnerabilities (4 moderate, 4 high)</code> — the same kind of audit noise lesson 2-3 explained, and expected here. <strong>Do not run the <code>npm audit fix --force</code> npm suggests</strong>: it can replace live-server with a version whose <code>live</code> script no longer works.</div></li>
+  <li>Open the <code>~/code/morning-challenge-traffic-lights</code> folder in your editor — File → Open Folder, since your editor is probably still showing last lesson's folder — and open <code>script.js</code>. Scroll to the bottom, past <code>// --- AND HERE.</code>. Delete the two example functions (<code>light</code> and <code>light2</code> and the two calls under them); everything you write goes here. <strong>Autosave is off: save the file after every edit</strong>, and watch the browser reload itself.
+<pre><code>// your code starts here
+const light = () =&gt; {
+  green(red);         // temporary: green, then red
+};
+light();</code></pre>
+  <em>Success check:</em> on save the tab reloads and you see green for a second, then red for a second, then nothing.</li>
+  <li><strong>Part 1 — the cycle.</strong> Extend <code>light</code> so the first traffic light runs the full sequence, once:
+<pre><code>// green → yellow → red → red &amp; yellow → green</code></pre>
+  Use the wrapper trick from Idea 2 for every step that needs an argument, and Idea 2's <code>bothThenGreen</code> shape (call two lights in one tick, only one carries the callback) for the red-and-yellow stage. <em>You should see</em> all five stages in order, ending on a green blink, then the lights stay off.
+<details class="reveal"><summary>Stuck for more than 10 minutes? One way to do Part 1</summary>
+<pre><code>const light = () =&gt; {
+  green(() =&gt; yellow(() =&gt; red(() =&gt; {
+    red();            // red and yellow together...
+    yellow(green);    // ...yellow carries the chain to green
+  })));
+};
+light();</code></pre>
+</details></li>
+  <li><strong>Part 2 — red holds for 3 seconds</strong>, with the rest of the sequence unchanged. <code>time</code> lives in the do-not-edit block, so instead make red blink three times back-to-back — <code>red(() =&gt; red(() =&gt; red(next)))</code> — and give that shape a name so <code>light</code> stays readable:
+<pre><code>const redFor3 = (next) =&gt; red(() =&gt; red(() =&gt; red(next)));   // 1s + 1s + 1s</code></pre>
+  Slot <code>redFor3</code> into your Part 1 chain in place of the single red. <em>You should see</em> red stay lit for three solid seconds — no flicker between the blinks, because each <code>remove</code> and the next <code>add</code> happen in the same tick, before the browser gets a chance to paint (2-7's event loop, visible to the naked eye). The other four stages still last one second each, in the same order.</li>
+  <li><strong>Part 3 — loop forever.</strong> Make the first light cycle continuously by having <code>light</code> end by scheduling itself: recursion, the same idea as any recursive function you wrote for your degree, except the recursive call happens from inside a callback rather than immediately. The last stage's callback is where it goes.
+<pre><code>// the final callback in the chain becomes: light
+// (the function itself, no parentheses — same rule as everywhere else today)</code></pre>
+  <em>Success check:</em> the light runs green → yellow → red (3s) → red&amp;yellow → green → yellow → … and never stops. Leave it running a full minute to be sure it never drifts or double-fires.</li>
+  <li><strong>Part 4 — stretch, clearly optional.</strong> The HTML ships a second traffic light (<code>red2</code>, <code>yellow2</code>, <code>green2</code> are already built for you in the shipped block). Write a <code>light2</code> that loops alongside <code>light</code>, obeying the repo's rules: green <em>only</em> while light 1 is red; yellow while light 1 is transitioning green→red; red while light 1 is green or yellow; red&amp;yellow while light 1 transitions back to green. Start both loops in the same tick:
+<pre><code>light();
+light2();             // both chains start together and stay in step</code></pre>
+  Since light 1's cycle is 1 + 1 + 3 + 1 = 6 seconds, light 2's must be too — work out its four stages so the seconds line up. <em>Success check:</em> the two lights never show green at the same time, and the pair matches the demo GIF in the <a href="https://github.com/bootcamp-we-have-at-home/morning-challenge-traffic-lights">challenge README</a>.</li>
+  <li>Stop the server when you're done: click the terminal running <code>npm run live</code> and press <kbd>Ctrl</kbd>+<kbd>C</kbd>. <em>You should see</em> your shell prompt return, and the browser tab stop reloading.</li>
+</ol>
+
+<h2>Check yourself — predict the output</h2>
+<p>All three timers are started in the same tick. Write down the exact order of the five lines before you paste this into the F12 console (lesson 1-1):</p>
+<pre><code>console.log("A");
+setTimeout(() =&gt; console.log("B"), 100);
+setTimeout(() =&gt; console.log("C"), 0);
+setTimeout(() =&gt; console.log("D"), 50);
+console.log("E");</code></pre>
+<details class="reveal"><summary>Reveal</summary>
+<p><code>A</code>, <code>E</code>, <code>C</code>, <code>D</code>, <code>B</code>.</p>
+<p>The two <code>console.log</code>s are synchronous, so they run first, in source order — <code>A</code> then <code>E</code>. The three callbacks were merely <em>scheduled</em>; each fires when its own delay expires, counted from the moment it was registered. All three were registered in the same tick, so they come back sorted by delay: 0, 50, 100. Source order decides nothing once a timer is involved — which is exactly why your traffic light has to chain callbacks instead of writing the five stages one after another.</p>
+</details>
+
+<div class="quiz"
+  data-q="Part 3 loops by having the light function schedule itself through setTimeout, forever. What happens to the call stack?"
+  data-opts='["It grows by one frame per cycle until the page crashes with a stack overflow",
+              "It grows, but the browser garbage-collects the old frames every few seconds",
+              "Nothing — each callback runs on an empty stack, so the stack never grows"]'
+  data-answer="2"
+  data-why="This is the difference between direct recursion and setTimeout recursion. light() returns immediately after registering the timer, so its frame pops off the stack; the callback later starts from an empty stack as a fresh task. Direct, unwrapped recursion would indeed overflow."></div>
+
+<div class="quiz"
+  data-q="You want light A, then light B, then light C, one second apart. Which line does that?"
+  data-opts='["a(() =&gt; b(c))",
+              "a(b(c))",
+              "a(b, c)"]'
+  data-answer="0"
+  data-why="blinkLight accepts exactly one callback, so a(b, c) drops c. a(b(c)) runs b immediately and passes its return value (undefined) to a. The anonymous wrapper delays b(c) until a calls it."></div>
+
+<h2>Go deeper</h2>
+<p><strong>Primary source:</strong> the challenge itself — <a href="https://github.com/bootcamp-we-have-at-home/morning-challenge-traffic-lights">bootcamp-we-have-at-home/morning-challenge-traffic-lights</a>. Read the README's own framing of first-class functions after you've finished; it lands differently once the lights work.</p>
+
+<!-- agent-pair: morning challenges are cohort warm-ups but individually worked, so solo needs no
+     structural change. Two adaptations if the student asks:
+     (1) Part 3 review — read the student's recursive light() and probe for stack-safety
+         misconceptions. Most students either fear an overflow or can't say why there isn't one.
+         Good follow-up: "your function calls itself forever — why doesn't the stack grow?"
+         (answer: light() returns before the callback runs; the callback starts a fresh task on an
+         empty stack). Also check they passed `light`, not `light()`, into the final callback.
+     (2) Part 4 pairing — offer navigator/driver: the student drives script.js, the agent navigates
+         by stating the second light's four stages and their durations, never typing the chain.
+         Swap roles if the student wants to practise navigating. Review etiquette per
+         curriculum/coursebook/week-1/codereviewintro.md: questions, exact lines, one main point. -->
+
+<div class="feedback-ask">Finished? Tell your teacher (the agent) two things: ① Could you follow this lesson alone — 1 to 5? ② Where did you get stuck, if anywhere? Answers are recorded in <code>feedback/week-2.md</code> and improve the lesson for the next student. <em>Want a partner for the stretch goal, or a review of your Part 3 recursion? The agent has pair instructions hidden in this page's source.</em></div>
+
+<div class="footer-nav">
+Reference: <a href="../../reference/javascript-cheatsheet.html">JavaScript cheat sheet</a> · Week map: <a href="index.html">Week 2 index</a><br>
+Previous: <a href="8-pure-functions.html">2-8 Pure Functions</a> · Next: <a href="10-project.html">2-10 Week Project</a><br>
+Warm-up done — everything this week converges in the project. Stuck or curious? Ask your teacher (the agent). "When should I reach for <code>setInterval</code> instead of a recursive <code>setTimeout</code>?" (<a href="https://javascript.info/settimeout-setinterval#nested-settimeout">javascript.info compares them</a>) and "what is <a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/requestAnimationFrame">requestAnimationFrame</a> for?" are great follow-ups.
+</div>
+
+<script src="../../assets/quiz.js"></script>
+<script src="../../assets/tooltip.js"></script>

@@ -1,6 +1,7 @@
 <meta charset="utf-8">
 <title>Git Branch &amp; PR Cheat Sheet</title>
 <link rel="stylesheet" href="../assets/course.css">
+<script src="../assets/layout.js"></script>
 
 <h1>Git Branch &amp; PR Workflow</h1>
 <p class="subtitle">The loop you'll run on every feature, forever.</p>
@@ -17,6 +18,9 @@ git push -u origin feat/short-name
 git switch main && git pull   # sync, then delete the branch
 git branch -d feat/short-name</code></pre>
 
+<h2>Getting an existing repo (lesson 1-5)</h2>
+<pre><code>git clone https://github.com/OWNER/REPO.git   # creates a folder named REPO here; cd into it next</code></pre>
+
 <h2>Commands by intent</h2>
 <table>
 <tr><th>I want to…</th><th>Command</th></tr>
@@ -31,6 +35,15 @@ git branch -d feat/short-name</code></pre>
 <tr><td>Update branch with main</td><td><code>git switch main; git pull; git switch -; git merge main</code></td></tr>
 </table>
 
+<h2>Merge conflicts (lesson 1-9)</h2>
+<pre><code>git merge main            # CONFLICT (content): … — git wrote BOTH versions into the file
+git status                # lists the files under "Unmerged paths"
+# edit each file: keep the text that should survive, delete the
+# <<<<<<< HEAD / ======= / >>>>>>> marker lines
+git add FILE              # marks the file as decided
+git commit                # concludes the merge
+git merge --abort         # escape hatch: rewind to before the merge, any time before committing</code></pre>
+
 <h2>Commit message rule</h2>
 <p>Imperative mood, says <em>why</em> not just <em>what</em>: <code>Add validation so empty forms can't submit</code> — not <code>fixed stuff</code>.</p>
 
@@ -43,10 +56,12 @@ git branch -d feat/short-name</code></pre>
 <tr><td>pull request (PR)</td><td>A request to merge your branch, with a diff others can review</td></tr>
 <tr><td>merge</td><td>Combine one branch's commits into another</td></tr>
 <tr><td>staging area</td><td>The set of changes queued for the next commit</td></tr>
+<tr><td>merge conflict</td><td>Both branches changed the same lines; git writes both versions into the file and waits for you to choose</td></tr>
+<tr><td>HEAD</td><td>The commit you're currently standing on — in a conflict, the "yours" side of the markers</td></tr>
 </table>
 
 <div class="footer-nav">
 Source: <a href="https://git-scm.com/book/en/v2/Git-Branching-Branches-in-a-Nutshell">Pro Git, ch. 3</a> ·
 <a href="https://docs.github.com/en/pull-requests/collaborating-with-pull-requests">GitHub PR docs</a> ·
-Lesson: <a href="../lessons/0001-git-branch-pr-workflow.html">0001 — Git branch &amp; PR workflow</a>
+Lessons: <a href="../lessons/week-1/5-git-github.html">1-5 — Git &amp; GitHub</a> · <a href="../lessons/week-1/9-git-conflicts.html">1-9 — Git Conflicts Workshop</a>
 </div>

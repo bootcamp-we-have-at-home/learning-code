@@ -1,19 +1,19 @@
 ---
 name: teach-week
-description: Generate one curriculum week's lessons (lessons/<n>-index.html + <n>-<k>-<title>.html) following STYLE.md and the full review gate. Use when the mentor asks to generate, regenerate, or revise a week's lessons. Takes the week number as argument.
+description: Generate one curriculum week's lessons (lessons/week-<n>/index.html + <k>-<title>.html) following STYLE.md and the full review gate. Use when the mentor asks to generate, regenerate, or revise a week's lessons. Takes the week number as argument.
 argument-hint: <week-number>
 ---
 
 # Generate a curriculum week
 
-Argument: the week number N. Produces `lessons/N-index.html` plus `lessons/N-<k>-<title>.html` files, flat under `lessons/`. The content contract is `lessons/STYLE.md` — read it first, follow it exactly; this skill only encodes the process around it.
+Argument: the week number N. Produces `lessons/week-N/index.html` plus `lessons/week-N/<k>-<title>.html`, and adds the week's row to the `lessons/index.html` hub. The content contract is `lessons/STYLE.md` — read it first, follow it exactly; this skill only encodes the process around it.
 
 ## Phase 1 — Absorb sources (never generate from memory of the topic)
 
 1. Read `lessons/STYLE.md` in full.
 2. Read ALL of `curriculum/coursebook/week-N/`: README schedule, learning-outcomes, every locally linked .md (workshops, exercises, project briefs). For externally linked GSG workshop repos, read enough (WebFetch the README) to represent them faithfully.
 3. Skim week N-1 and N+1 README + learning-outcomes: week N must end ready for N+1's assumptions.
-4. Read `MISSION.md`, `NOTES.md`, the latest `learning-records/`, and `feedback/week-<N-1>.md` if it exists — student-reported stuck-points from the previous week change how much scaffolding this week needs.
+4. Read `MISSION.md`, `NOTES.md` (including its student-history section), `AGENTS.md` (workshop-fork and review-gate notes), and `feedback/week-<N-1>.md` if it exists — student-reported stuck-points from the previous week change how much scaffolding this week needs.
 
 ## Phase 2 — Map the week
 
@@ -43,11 +43,11 @@ Turn the README schedule into a lesson list, in schedule order:
 
 ## Phase 5 — Record and hand off
 
-- If diagnosis or design decisions changed anything reusable, append a `learning-records/` entry (numbered, dated, Context/Decision/Consequences).
+- If diagnosis or design decisions changed anything reusable, fold it into the living docs: student state → `NOTES.md`, lesson-design rules → `lessons/STYLE.md`, process/infrastructure → `AGENTS.md`.
 - Report to the mentor: lesson list with curriculum-slot mapping, sequencing notes, review rounds summary (found → fixed → overruled), open questions. Commit only when the mentor says so.
 
 ## Link check snippet
 
 ```bash
-cd lessons && for f in N-*.html; do grep -oP '(?:href|src)="[^"#]+"' "$f" | sed 's/.*="//;s/"$//' | grep -v '^http' | while read -r p; do [ -e "$p" ] || echo "BROKEN: $f -> $p"; done; done
+cd lessons/week-N && for f in *.html; do grep -oP '(?:href|src)="[^"#]+"' "$f" | sed 's/.*="//;s/"$//' | grep -v '^http' | while read -r p; do [ -e "$p" ] || echo "BROKEN: $f -> $p"; done; done
 ```

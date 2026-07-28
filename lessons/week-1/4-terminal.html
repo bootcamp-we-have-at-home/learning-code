@@ -1,9 +1,10 @@
 <meta charset="utf-8">
 <title>1-4 — Terminal</title>
-<link rel="stylesheet" href="../assets/course.css">
+<link rel="stylesheet" href="../../assets/course.css">
+<script src="../../assets/layout.js"></script>
 
 <h1>1-4 — Terminal</h1>
-<p class="subtitle">~60 minutes · Week 1, Day 2 · Source: curriculum <a href="../curriculum/coursebook/week-1/terminal-ws/README.md">terminal workshop</a> · No prior terminal experience assumed</p>
+<p class="subtitle">~60 minutes · Week 1, Day 2 · Source: curriculum <a href="../../curriculum/coursebook/week-1/terminal-ws/README.md">terminal workshop</a> · No prior terminal experience assumed</p>
 
 <p><strong>Why this matters:</strong> the next lesson (git) and everything from Node onward lives in the terminal. One hour here removes friction from the entire course.</p>
 
@@ -14,9 +15,28 @@
 command   flag      argument
 (what)    (how)     (on what)</code></pre>
 <div class="aside">Two habits that make beginners look experienced: press <kbd>Tab</kbd> to autocomplete paths (if nothing completes, your path is wrong <em>before</em> you run it), and press <kbd>↑</kbd> to recall previous commands.</div>
+<details class="examples"><summary>More examples (optional)</summary>
+<p>The same anatomy on commands you'll meet later this hour — name the parts before reading the answer:</p>
+<pre><code>mkdir -p code/practice     # command=mkdir  flag=-p             argument=code/practice
+cp -r week-1 backup        # command=cp     flag=-r             arguments=week-1 (source), backup (destination)
+echo "hello" &gt; notes.md    # command=echo   argument="hello"    &gt; redirects the output into notes.md
+git status                 # command=git    argument=status     (git's "flags" come after the subcommand)</code></pre>
+<p>Flags are just switches the command's author defined — <code>-p</code> means nothing to <code>cp</code> and something to <code>mkdir</code>. That's why the anatomy matters more than memorizing: you can read any command by asking <em>what, how, on what</em>.</p>
+</details>
+<p class="read-more"><strong>Read more:</strong> <a href="https://explainshell.com/">explainshell.com</a> (paste any command, get every part labeled) · <a href="https://tldr.sh/">tldr pages</a> (community cheat sheets: the 5 most-used forms of any command)</p>
 
 <h2>Idea 2 — You are always somewhere</h2>
 <p>All files live in one tree that starts at the <span class="term" data-tip="The topmost folder of the whole system, written as a single slash: /">root</span>. Your shell always sits at one spot in that tree — the <span class="term" data-tip="The folder your shell is 'in' right now; every relative path is read starting from here.">working directory</span>. Three shorthands do most of the work: <code>~</code> is your home folder, <code>.</code> is <em>here</em>, <code>..</code> is one level up. A path starting with <code>/</code> is <strong>absolute</strong> (works from anywhere); anything else is <strong>relative</strong> to where you are.</p>
+<details class="examples"><summary>More examples (optional)</summary>
+<p>You are in <code>~/code/week-1</code> (your home is <code>/home/yourname</code>, whatever <code>whoami</code> says). Where does each land? Predict, then read:</p>
+<pre><code>cd ..              # /home/yourname/code   — one level up
+cd ../..           # /home/yourname        — two levels up in one go
+cd ~/code          # /home/yourname/code   — absolute via ~, works from ANYWHERE
+cd /etc            # /etc                  — absolute, straight from the root
+cd code            # error! — relative: looks for week-1/code, which doesn't exist</code></pre>
+<p>The last line is the classic trip-up: a relative path is glued to where you're standing. The fix is either to go home first (<code>cd ~/code</code>) or to check where you are (<code>pwd</code>) before trusting a relative path.</p>
+</details>
+<p class="read-more"><strong>Read more:</strong> <a href="https://en.wikipedia.org/wiki/Filesystem_hierarchy_standard">The filesystem hierarchy standard</a> (what <code>/etc</code>, <code>/usr</code>, <code>/var</code> actually are) · <a href="https://linuxcommand.org/lc3_learning_the_shell.php">LinuxCommand — learning the shell</a> (a gentle full walk-through of everything this lesson compressed)</p>
 
 <h2>Do it for real (~40 min)</h2>
 <p>Type every command — no copy-paste; typing builds the recall. Predict each output <em>before</em> Enter.</p>
@@ -24,7 +44,8 @@ command   flag      argument
 <p><strong>Part A — Orient (pwd, ls, cd)</strong></p>
 <ol class="steps">
   <li>Open a terminal. Type these commands:
-<pre><code>pwd          # your home folder's absolute path
+<pre><code>cd           # go to your home folder — some terminals open elsewhere; this makes sure (cd is explained below)
+pwd          # your home folder's absolute path
 whoami       # your username, if unsure</code></pre>
   <em>You should see</em> your home folder's absolute path — something like <code>/home/yourname</code>.</li>
   <li>Type this command:
@@ -100,7 +121,7 @@ ls code                         # verify cleanup; week-1 is untouched</code></pr
 
 <div class="aside">You'll eventually meet <code>rm -rf</code> in the wild. The curriculum's own warning applies: it deletes without asking and without mercy — never run it on a path you haven't just <code>ls</code>'d, and never anywhere near <code>/</code>. When in doubt, <code>gio trash</code>.</div>
 
-<p>More commands (<code>man</code>, <code>xdg-open</code>, <code>cp -r</code>, quoting names with spaces) live on the <a href="../reference/terminal-cheatsheet.html">terminal cheat sheet</a> — look up, don't memorize.</p>
+<p>More commands (<code>man</code>, <code>xdg-open</code>, <code>cp -r</code>, quoting names with spaces) live on the <a href="../../reference/terminal-cheatsheet.html">terminal cheat sheet</a> — look up, don't memorize.</p>
 
 <h2>Check yourself — predict the output</h2>
 <p>You are in your home folder (where step 13 left you — confirm with <code>pwd</code>). What does <code>cd code/terminal-practice</code> try to do, and what happens right now?</p>
@@ -117,15 +138,15 @@ ls code                         # verify cleanup; week-1 is untouched</code></pr
   data-why="One arrow replaces, two arrows append. Redirecting with &gt; onto a file you care about silently destroys it."></div>
 
 <h2>Go deeper</h2>
-<p><strong>Primary source:</strong> the curriculum's <a href="../curriculum/coursebook/week-1/terminal-ws/README.md">terminal workshop</a> — you now have the context to skim it fast. Superb free deep-dive: <a href="https://missing.csail.mit.edu/2020/course-shell/">MIT's Missing Semester — the shell</a>.</p>
+<p><strong>Primary source:</strong> the curriculum's <a href="../../curriculum/coursebook/week-1/terminal-ws/README.md">terminal workshop</a> — you now have the context to skim it fast. Superb free deep-dive: <a href="https://missing.csail.mit.edu/2020/course-shell/">MIT's Missing Semester — the shell</a>.</p>
 
 <div class="feedback-ask">Finished? Tell your teacher (the agent) two things: ① Could you follow this lesson alone — 1 to 5? ② Where did you get stuck, if anywhere? Answers are recorded in <code>feedback/week-1.md</code> and improve the lesson for the next student.</div>
 
 <div class="footer-nav">
-Reference: <a href="../reference/terminal-cheatsheet.html">Terminal cheat sheet</a> · Week map: <a href="1-index.html">Week 1 index</a><br>
-Previous: <a href="1-3-flexbox.html">1-3 Flexbox</a> · Next: <a href="1-5-git-github.html">1-5 Git &amp; GitHub</a><br>
+Reference: <a href="../../reference/terminal-cheatsheet.html">Terminal cheat sheet</a> · Week map: <a href="index.html">Week 1 index</a><br>
+Previous: <a href="3-flexbox.html">1-3 Flexbox</a> · Next: <a href="5-git-github.html">1-5 Git &amp; GitHub</a><br>
 Stuck or curious? Ask your teacher (the agent). "What do the columns in ls -l mean?" is a great follow-up.
 </div>
 
-<script src="../assets/quiz.js"></script>
-<script src="../assets/tooltip.js"></script>
+<script src="../../assets/quiz.js"></script>
+<script src="../../assets/tooltip.js"></script>

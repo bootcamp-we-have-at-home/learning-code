@@ -1,0 +1,163 @@
+<meta charset="utf-8">
+<title>1-9 — Git Conflicts Workshop</title>
+<link rel="stylesheet" href="../../assets/course.css">
+<script src="../../assets/layout.js"></script>
+
+<h1>1-9 — Git Conflicts Workshop</h1>
+<p class="subtitle">~60 minutes · Week 1, Day 3 · Source: curriculum Day 3 <a href="https://github.com/GSG-CA/git-workflow-workshop-for-two">git workflow workshop for two</a>, adapted solo</p>
+
+<p><strong>Why this matters:</strong> the first time two branches disagree, git stops and asks <em>you</em> to decide — and it happens on every real team, usually in your first week. This workshop makes you cause a conflict on purpose, so the first one at a job is a chore, not a crisis.</p>
+
+<h2>Idea 1 — Where conflicts come from</h2>
+<p>You know from lesson 1-5 that work happens on branches and reaches <code>main</code> through pull requests. When git merges two branches, it combines their changes automatically — <em>as long as they touched different lines</em>. A <span class="term" data-tip="The state where git cannot pick between two competing versions and stops the merge until a human decides.">merge conflict</span> happens when the two branches made <em>incompatible</em> changes — by far the most common case, and the one this workshop causes, is both branches editing the <strong>same lines</strong> of the same file since they split: git has two versions and no way to know which one you meant, so it refuses to guess.</p>
+<details class="examples"><summary>More examples (optional)</summary>
+<p>Which of these merge cleanly? All three start from the same commit:</p>
+<ol>
+  <li>Branch A edits <code>index.html</code>, branch B edits <code>style.css</code> → <strong>no conflict</strong>: different files.</li>
+  <li>Branch A edits the <code>&lt;h1&gt;</code> on line 9, branch B adds a <code>&lt;footer&gt;</code> on line 14 of the same file → <strong>no conflict</strong>: git merges line by line, and these lines don't overlap.</li>
+  <li>Branch A and branch B both rewrite the <code>&lt;h1&gt;</code> on line 9 → <strong>conflict</strong>: two versions of one line.</li>
+  <li>Bonus case you'll meet eventually: branch A edits a file that branch B <em>deleted</em> → also a conflict ("modify/delete") — git can't both keep and remove it.</li>
+</ol>
+</details>
+<p class="read-more"><strong>Read more:</strong> <a href="https://git-scm.com/book/en/v2/Git-Branching-Basic-Branching-and-Merging">Pro Git — basic branching &amp; merging</a> · <a href="https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/addressing-merge-conflicts/about-merge-conflicts">GitHub — about merge conflicts</a></p>
+
+<h2>Idea 2 — Anatomy of a conflict, and the way out</h2>
+<p>A conflicted file is not broken — git <em>writes both versions into it</em>, fenced by markers, and waits:</p>
+<pre><code>&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD
+&lt;h1 class="page-heading"&gt;GIT WORKFLOW WORKSHOW&lt;/h1&gt;     ← your current branch's version
+=======
+&lt;h1 class="some-heading"&gt;GIT WORKFLOW WORKSHOP&lt;/h1&gt;     ← the incoming branch's version
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; main</code></pre>
+<p>Everything between <code>&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD</code> and <code>=======</code> is the version on <em>your</em> branch (<code>HEAD</code> — the commit you're standing on); between <code>=======</code> and <code>&gt;&gt;&gt;&gt;&gt;&gt;&gt;</code> is the version you're merging in. Resolving means: edit the file to the text that should survive (yours, theirs, or a combination), delete all three marker lines, then <code>git add</code> and <code>git commit</code> — staging the file is how you tell git "decided". And if you ever open a conflict and panic: <code>git merge --abort</code> rewinds to the moment before the merge, losing nothing.</p>
+<details class="examples"><summary>More examples (optional)</summary>
+<p>The same shape in CSS — you centered the heading, your teammate enlarged it:</p>
+<pre><code>&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD
+h1 { text-align: center; }
+=======
+h1 { font-size: 3rem; }
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; main</code></pre>
+<p>Both changes are wanted, so the resolution keeps both declarations and no markers:</p>
+<pre><code>h1 { text-align: center; font-size: 3rem; }</code></pre>
+<p>Editor note: VS Code detects the markers and shows "Accept Current / Accept Incoming / Accept Both" buttons above them — convenient, but it's doing exactly the edit-and-delete-markers routine you're learning by hand here.</p>
+</details>
+<p class="read-more"><strong>Read more:</strong> <a href="https://learngitbranching.js.org/">Learn Git Branching</a> (visual, game-like practice) · <a href="https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/addressing-merge-conflicts/resolving-a-merge-conflict-on-github">resolving small conflicts in GitHub's web editor</a></p>
+
+<h2>Do it for real (~40 min)</h2>
+<p>You'll replay the curriculum workshop's scenario solo: a page ships with two bugs, two branches fix one bug each, and the second branch to land has to resolve the collision. Work in the <code>workflow-practice</code> repo you created and published in lesson 1-5, exercise 3.</p>
+<ol class="steps">
+  <li>Start clean and current (the sync moves from 1-5):
+<pre><code>cd ~/code/workflow-practice
+git switch main
+git pull                 # start from the latest main
+git status               # nothing to commit, working tree clean</code></pre>
+  <em>Check:</em> <code>git status</code> reports a clean tree on <code>main</code>.</li>
+  <li>Set the stage — run the full 1-5 loop from memory (branch <code>add-workshop-page</code> → commit → push → PR → merge on GitHub → sync main; peek at the <a href="../../reference/git-branch-pr-cheatsheet.html">cheat sheet</a> only if stuck). First open the <code>~/code/workflow-practice</code> folder in your editor (File → Open Folder — it may still show <code>week-1</code> from earlier lessons), then create and save this page there, with both bugs exactly as the workshop ships them — <code>index.html</code>:
+<pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+  &lt;meta charset="utf-8"&gt;
+  &lt;title&gt;Git workflow workshop&lt;/title&gt;
+  &lt;style&gt;h1 { text-shadow: 2px 2px 5px grey; }&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;h1 class="some-heading"&gt;GIT WORKFLOW WORKSHOW&lt;/h1&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+  Bug 1: the heading says <code>WORKSHOW</code>. Bug 2: the client wants the class named <code>page-heading</code>, not <code>some-heading</code>. <em>Success check:</em> after your merge and sync, <code>cat index.html</code> on <code>main</code> shows the page, bugs and all.</li>
+  <li>Create <em>both</em> fix branches now, from this same commit — that shared starting point is what makes them collide later. <code>git branch NAME</code> is new: it creates a branch without switching to it (1-5's <code>git switch -c</code> does both at once):
+<pre><code>git branch fix-typo-heading        # create branch 1, stay on main
+git branch update-class-heading    # create branch 2, also from this commit
+git branch                          # lists main + both, * marks where you are</code></pre>
+  <em>You should see</em> three branches listed, with <code>*</code> on <code>main</code>.</li>
+  <li>Land the typo fix first:
+<pre><code>git switch fix-typo-heading</code></pre>
+  In your editor, fix only the typo: <code>WORKSHOW</code> → <code>WORKSHOP</code>. Save, then:
+<pre><code>git add index.html
+git commit -m "Fix typo in page heading"
+git push -u origin fix-typo-heading</code></pre>
+  Open the PR on GitHub and merge it, as in 1-5. <em>Success check:</em> the PR shows one changed line; after merging, <code>index.html</code> on GitHub says <code>WORKSHOP</code>.</li>
+  <li>Sync your local <code>main</code>:
+<pre><code>git switch main
+git pull                 # brings down the merged typo fix
+cat index.html           # heading now says WORKSHOP</code></pre>
+  <em>Check:</em> the typo is gone on local <code>main</code>.</li>
+  <li>Now the second fix — on the branch that <em>never saw</em> the first one:
+<pre><code>git switch update-class-heading
+cat index.html           # the typo is BACK — this branch split before the fix</code></pre>
+  <em>You should see</em> <code>WORKSHOW</code> again. Nothing is lost — this branch is simply a snapshot from before the typo fix landed. In your editor, change only the class: <code>some-heading</code> → <code>page-heading</code>. Save, then:
+<pre><code>git add index.html
+git commit -m "Update class name in heading"
+git log --oneline -1     # your class commit sits on top</code></pre>
+  <em>Success check:</em> the newest commit is "Update class name in heading", and <code>git status</code> is clean.</li>
+  <li>Bring <code>main</code>'s progress into this branch — this is the collision, caused on purpose:
+<pre><code>git merge main           # CONFLICT (content): Merge conflict in index.html</code></pre>
+  <em>You should see</em> "Automatic merge failed; fix conflicts and then commit the result." That message is the workshop working, not you failing. (Escape hatch, any time before committing: <code>git merge --abort</code>.)</li>
+  <li>Look before you touch — the safety ritual from 1-4 applies to merges too:
+<pre><code>git status               # "Unmerged paths: both modified: index.html"
+cat index.html           # see the conflict markers from Idea 2</code></pre>
+  <em>You should see</em> your <code>page-heading</code> version fenced under <code>&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD</code> and main's <code>WORKSHOP</code> version under <code>&gt;&gt;&gt;&gt;&gt;&gt;&gt; main</code>.</li>
+  <li>Resolve it in your editor: both fixes are wanted, so the heading line becomes exactly
+<pre><code>&lt;h1 class="page-heading"&gt;GIT WORKFLOW WORKSHOP&lt;/h1&gt;</code></pre>
+  and the three marker lines are deleted. Save, then tell git you've decided:
+<pre><code>git add index.html
+git commit -m "Merge main, keeping both heading fixes"
+git status               # clean again, back on update-class-heading</code></pre>
+  <em>Success check:</em> <code>cat index.html</code> shows the one correct heading line and no <code>&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code> anywhere.</li>
+  <li>Ship it and close the loop:
+<pre><code>git push -u origin update-class-heading</code></pre>
+  Open the PR — <em>you should see</em> GitHub report it has no conflicts (you already paid that bill locally). Merge it, then sync and tidy:
+<pre><code>git switch main
+git pull
+git branch -d fix-typo-heading update-class-heading
+git log --oneline --graph   # the diamond: two branches leaving main and rejoining</code></pre>
+  <em>Success check:</em> GitHub's <code>index.html</code> has both fixes, and <code>git branch</code> lists only <code>main</code>.</li>
+</ol>
+
+<h2>Check yourself — predict the output</h2>
+<p>You're on branch <code>polish-footer</code> and run <code>git merge main</code>. The conflicted file shows:</p>
+<pre><code>&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD
+&lt;footer&gt;© 2026 — built with coffee&lt;/footer&gt;
+=======
+&lt;footer id="contact"&gt;© 2026&lt;/footer&gt;
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; main</code></pre>
+<p>Which version is yours, which came from <code>main</code>, and what should the resolved line be if both changes matter?</p>
+<details class="reveal"><summary>Reveal</summary>
+<p>The <code>HEAD</code> side (top) is yours — <code>HEAD</code> is the branch you're standing on, <code>polish-footer</code>. The bottom side arrived from <code>main</code>. Keeping both changes: <code>&lt;footer id="contact"&gt;© 2026 — built with coffee&lt;/footer&gt;</code> — and all three marker lines deleted, then <code>git add</code> + <code>git commit</code>.</p>
+</details>
+
+<div class="quiz"
+  data-q="Two branches both changed README.md since they split — one edited line 3, the other edited line 20. What happens on merge?"
+  data-opts='["It merges cleanly — conflicts need overlapping lines, not just the same file",
+              "A conflict — two branches touching one file always conflicts",
+              "Git picks the more recent commit&apos;s version of the whole file"]'
+  data-answer="0"
+  data-why="Git merges line by line. Same file is fine; same lines is the conflict condition."></div>
+
+<div class="quiz"
+  data-q="Mid-conflict, the markers confuse you and you want to start the merge over. Safest command?"
+  data-opts='["git merge --abort — rewinds to the state before the merge began",
+              "rm the conflicted file and git pull a fresh copy",
+              "git push --force to make the remote match your branch"]'
+  data-answer="0"
+  data-why="--abort is the designed undo for an in-progress merge. Deleting files or force-pushing destroys work instead of rewinding cleanly."></div>
+
+<h2>Go deeper</h2>
+<p><strong>Primary source:</strong> the curriculum's <a href="https://github.com/GSG-CA/git-workflow-workshop-for-two">git workflow workshop for two</a> — skim the original two-programmer choreography and notice you just played both roles. Then <a href="https://git-scm.com/book/en/v2/Git-Branching-Basic-Branching-and-Merging">Pro Git ch. 3.2</a> shows the same conflict with diagrams of the commits underneath.</p>
+
+<!-- agent-pair: this replays git-workflow-workshop-for-two with the agent as Programmer 2 when asked.
+     Full pair mode: the student creates the repo and issues; the agent (via its tools) pushes the
+     update-class-heading branch itself while the student lands fix-typo-heading, so the conflict
+     arrives from a genuinely foreign commit the student didn't write. Agent reviews the student's
+     resolution PR per codereviewintro.md etiquette (questions, exact lines, one main point).
+     Extra rep if asked: agent manufactures a modify/delete conflict next. -->
+
+<div class="feedback-ask">Finished? Tell your teacher (the agent) two things: ① Could you follow this lesson alone — 1 to 5? ② Where did you get stuck, if anywhere? Answers are recorded in <code>feedback/week-1.md</code> and improve the lesson for the next student. <em>Want a real partner causing the conflict? The agent has pair instructions hidden in this page's source.</em></div>
+
+<div class="footer-nav">
+Reference: <a href="../../reference/git-branch-pr-cheatsheet.html">Git branch &amp; PR cheat sheet</a> · Week map: <a href="index.html">Week 1 index</a><br>
+Previous: <a href="8-array-methods.html">1-8 Array Methods</a> · Next: <a href="10-objects-operators-dom.html">1-10 Objects, Operators &amp; the DOM</a><br>
+Stuck or curious? Ask your teacher (the agent). "What does git actually do during a three-way merge?" is a great follow-up.
+</div>
+
+<script src="../../assets/quiz.js"></script>
+<script src="../../assets/tooltip.js"></script>

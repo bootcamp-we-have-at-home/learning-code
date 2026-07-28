@@ -1,0 +1,87 @@
+<meta charset="utf-8">
+<title>Week 2 — Testing, Functions &amp; TDD</title>
+<link rel="stylesheet" href="../../assets/course.css">
+<script src="../../assets/layout.js"></script>
+
+<h1>Week 2 — Testing, Functions &amp; TDD</h1>
+<p class="subtitle">Curriculum source: <a href="../../curriculum/coursebook/week-2/README.md">coursebook/week-2</a> · ~20 hours including the project</p>
+
+<h2>What this week leaves you with</h2>
+<p>From the curriculum's <a href="../../curriculum/coursebook/week-2/learning-outcomes.md">learning outcomes</a>: what testing is and why we do it, unit vs integration tests, the TDD methodology and its red–green–refactor cycle, setting up and using npm and Jest, why pure functions are easy to test, what callbacks are and how to use them, and how to ping-pong code in pairs (adapted here to ping-pong with the agent). The week ends with a tested, pure-function, localStorage-backed ecommerce app (<a href="../../curriculum/coursebook/week-2/project.md">project brief</a>). Week 3 (APIs and async) assumes all of that is muscle memory — it opens by asking "what is a callback and why would you use one?" and moves straight into asynchronous and parallel functions, which is why 2-1, 2-7 and 2-9 are the load-bearing lessons of this week.</p>
+
+<h2>Prerequisites</h2>
+<ul>
+  <li><strong>Week 1, lessons 1-1 to 1-11.</strong> Specifically: the terminal (1-4 — <code>cd</code>, <code>ls</code>, <code>mkdir</code>, the safety ritual, the <code>~/code/</code> workspace convention), git and GitHub including <code>git clone</code> (1-5 — workshops this week clone repos), JS values and <code>const</code>/<code>let</code> (1-7), array methods with arrow functions passed as arguments (1-8 — those arrows were callbacks, and 2-1 says so out loud), objects, <code>===</code> and template literals (1-10).</li>
+  <li><strong>Soft prerequisite:</strong> lesson <a href="../week-1/9-git-conflicts.html">1-9 Git Conflicts</a> was added after the first pass through week 1. The week-2 project merges a PR per user story, but you are its only committer and each branch merges before the next starts — so no <em>conflicting</em> merge is expected, and 1-9 is not a blocker. Still, do 1-9 as catch-up before the week-2 project if you haven't run it yet.</li>
+  <li><strong>Not required in advance:</strong> Node.js and npm. Week 1 never installed them; lesson 2-2 checks for Node and installs it before anything else this week needs it. Do not install ahead of time — 2-2 wants to see the "not found" case.</li>
+  <li>Same machine setup as week 1: browser, editor (VS Code recommended, autosave off — <strong>save before you run, stage or refresh</strong>), git, GitHub account.</li>
+</ul>
+
+<h2>Lessons, in order</h2>
+<table>
+  <tr><th>#</th><th>Lesson</th><th>Time (this lesson)</th><th>Curriculum slot</th></tr>
+  <tr><td>1</td><td><a href="1-functions-and-callbacks.html">Functions, First-Class: Callbacks &amp; Higher-Order Functions</a></td><td>~45 min</td><td>Day 1 09:00 — Intro to Functions (first half)</td></tr>
+  <tr><td>2</td><td><a href="2-npm.html">npm: Node's Package Manager</a></td><td>~35 min</td><td>Day 1 11:00 — Intro to NPM</td></tr>
+  <tr><td>3</td><td><a href="3-testing-and-tdd.html">Testing &amp; TDD: Your First Jest Test</a></td><td>~45 min</td><td>Day 1 11:30 — Intro to testing and TDD</td></tr>
+  <tr><td>4</td><td><a href="4-fizzbuzz-tdd-workshop.html">FizzBuzz: TDD Workshop (Ping-Pong)</a></td><td>~60–90 min</td><td>Day 1 13:00 — Jest (TDD) workshop</td></tr>
+  <tr><td>5</td><td><a href="5-roman-numerals-tdd.html">Roman Numerals: TDD Code-Along</a></td><td>~75 min</td><td>Day 1 15:00 — Roman numerals code-along</td></tr>
+  <tr><td>6</td><td><a href="6-es6-refresh-challenge.html">ES6 Features Refresh &amp; the ES6→ES5 Challenge</a> <em>(skippable body via checkpoint)</em></td><td>~60 min</td><td>Day 2 09:00 — ES6 morning challenge</td></tr>
+  <tr><td>7</td><td><a href="7-callbacks-async.html">The Call Stack, Sync vs Async &amp; setTimeout</a></td><td>~60 min</td><td>Day 2 10:30 — Intro to Functions (second half) + event-loop video</td></tr>
+  <tr><td>8</td><td><a href="8-pure-functions.html">Pure Functions: Easy Testing Workshop</a></td><td>~70 min</td><td>Day 2 14:00 — Pure functions workshop</td></tr>
+  <tr><td>9</td><td><a href="9-traffic-lights.html">Traffic Lights: Callbacks Morning Challenge</a></td><td>~60 min</td><td>Day 3 09:00 — Traffic light callbacks</td></tr>
+  <tr><td>10</td><td><a href="10-project.html">Week Project: Ecommerce App (Tested, Pure, Persistent)</a></td><td>~2.5 days</td><td>Days 3–5 — project, code review, presentation</td></tr>
+</table>
+<p><em>The Time column is this track's adapted estimate (it matches each lesson's own subtitle), not the cohort's scheduled slot length — the slot is in the last column. Solo lessons are usually shorter than the cohort session they replace.</em></p>
+
+<h2>Curriculum slot mapping</h2>
+<p>Every scheduled session in <a href="../../curriculum/coursebook/week-2/README.md">week-2/README.md</a>, and where it landed:</p>
+<table>
+  <tr><th>Scheduled slot</th><th>Lands in</th></tr>
+  <tr><td>Day 1, 09:00–11:00 — Intro to Functions</td><td>2-1 (first half of the deck)</td></tr>
+  <tr><td>Day 1, 11:00–11:30 — Intro to NPM</td><td>2-2</td></tr>
+  <tr><td>Day 1, 11:30–12:00 — Introduction to testing and TDD</td><td>2-3</td></tr>
+  <tr><td>Day 1, 13:00–15:00 — Jest (TDD) workshop (fizzbuzz)</td><td>2-4</td></tr>
+  <tr><td>Day 1, 15:00–17:00 — Roman numerals TDD code-along</td><td>2-5</td></tr>
+  <tr><td>Day 2, 09:00–10:30 — ES6 morning challenge</td><td>2-6 (compressed to a refresh + the ES6→ES5 challenge)</td></tr>
+  <tr><td>Day 2, 10:30–13:00 — Intro to Functions (second sitting)</td><td>2-7 (second half of the deck)</td></tr>
+  <tr><td>Day 2, 14:00–16:00 — Pure functions workshop</td><td>2-8</td></tr>
+  <tr><td>Day 2, 16:00–16:30 — Video: "What the heck is the event loop anyway?"</td><td>2-7 (moved earlier)</td></tr>
+  <tr><td>Day 2, 16:30–17:00 — Intro To Project</td><td>2-10 (moved later, becomes its opening)</td></tr>
+  <tr><td>Day 3, 09:00–10:00 — Traffic Light Callbacks</td><td>2-9</td></tr>
+  <tr><td>Day 3, 10:00–11:00 — Computer Science Session</td><td>— not applicable solo</td></tr>
+  <tr><td>Day 3 11:00 → Day 4 17:00 — Projects</td><td>2-10</td></tr>
+  <tr><td>Day 5, 09:00–10:00 — Code review</td><td>2-10 closing phase (agent-as-pair review)</td></tr>
+  <tr><td>Day 5, 10:00–11:00 — Respond to issues and plan presentations</td><td>2-10 closing phase</td></tr>
+  <tr><td>Day 5, 11:00–13:00 — Projects Presentation</td><td>2-10, as a solo README/demo writeup</td></tr>
+  <tr><td>Day 5, 14:00–17:00 — External Workshops</td><td>— not applicable solo</td></tr>
+  <tr><td>Unscheduled — <a href="../../curriculum/coursebook/week-2/research-afternoon.md">research topics</a></td><td>distributed: 2-3, 2-4, 2-10 (see sequencing note 6)</td></tr>
+</table>
+
+<h2>Not applicable solo</h2>
+<ul>
+  <li><strong>Day 3, 10:00–11:00 — Computer Science Session:</strong> no linked content in the coursebook, so there is nothing to adapt.</li>
+  <li><strong>Day 5, 14:00–17:00 — External Workshops:</strong> a cohort-only event (visiting facilitators), dropped.</li>
+  <li><strong>Day 5, 11:00–13:00 — live Projects Presentation:</strong> not held as an event; adapted into a solo README and demo writeup inside 2-10.</li>
+</ul>
+
+<h2>Sequencing notes</h2>
+<p>Deviations from the <a href="../../curriculum/coursebook/week-2/README.md">week-2 schedule</a> order, with reasons — the scream register:</p>
+<ol>
+  <li><strong>SPLIT, in place:</strong> "Intro to Functions" is <em>one</em> slide deck scheduled twice (Day 1 09:00 and Day 2 10:30). Rather than merge the two sittings into one lesson, it splits along the deck's own halves: <strong>2-1</strong> takes the first half (function anatomy, first-class functions, callbacks, higher-order functions) in the Day 1 slot; <strong>2-7</strong> takes the second half (funception, the call stack, nested callbacks, sync vs async, <code>setTimeout</code>) in the Day 2 slot. Merging would put roughly fourteen new items into a single lesson, violating <a href="../STYLE.md">STYLE.md</a> rule 2. <strong>2-7</strong> is also the one lesson in the track with <em>three</em> idea sections rather than the skeleton's 1–2: the deck's second half is genuinely three concepts (funception/nesting, the call stack, sync vs async + the event loop), and splitting it a third time would strand the event-loop video from the code that assumes it. Each section still carries its own collapsed examples block and read-more line.</li>
+  <li><strong>MOVED EARLIER:</strong> the event-loop video (Day 2, 16:00 — scheduled <em>after</em> the pure-functions workshop) is folded into <strong>2-7</strong>, in the Day 2 10:30 slot. The functions deck's async half explicitly assumes the video has already been watched, and a solo learner gains nothing from the cohort's split viewing time.</li>
+  <li><strong>MOVED LATER:</strong> "Intro To Project" (Day 2, 16:30) becomes the opening of the project lesson <strong>2-10</strong>, after Day 3's traffic-lights challenge. Solo, there is no cohort logistics reason to preview the brief a day before starting it, and nothing in the Day 3 morning challenge depends on having seen it.</li>
+  <li><strong>COMPRESSED:</strong> the ES6 morning challenge (Day 2, 09:00) becomes a refresh-with-skip-checkpoint lesson, following the 1-7 pattern. Week 1 already taught <code>const</code>/<code>let</code> (1-7), arrow functions (1-8) and template literals (1-10); the checkpoint probes all nine features, and the body teaches only the genuinely new ones — default parameters, spread, destructuring, <code>Set</code>, <code>class</code> — plus their ES5 equivalents, which the challenge itself requires.</li>
+  <li><strong>ADAPTED:</strong> Day 5's cohort events (code review, respond to issues, presentations) fold into <strong>2-10</strong>'s closing phase: the agent reviews the project as your pair following the etiquette in <a href="../../curriculum/coursebook/week-1/codereviewintro.md">codereviewintro.md</a>, you respond to the review issues, and the presentation becomes a solo README/demo writeup.</li>
+  <li><strong>NO SLOT IN SCHEDULE:</strong> the week's <a href="../../curriculum/coursebook/week-2/research-afternoon.md">research topics</a> have no scheduled session, so they are distributed as pointers instead — unit vs integration vs e2e and the testing-framework comparisons from <strong>2-3</strong>, test coverage / Istanbul / nyc from <strong>2-4</strong>, and web storage taught for real inside <strong>2-10</strong>, because the project's localStorage requirement makes it required material (STYLE.md rule 4), not optional research.</li>
+  <li><strong>DROPPED:</strong> Day 3's Computer Science Session (no linked content) and the Day 5 PM External Workshops — both cohort-only; see "Not applicable solo" above.</li>
+</ol>
+
+<h2>How feedback works this week</h2>
+<p>Every lesson footer asks two questions (followability 1–5, stuck-points); tell your answers to your teacher (the agent), which records them in <code>feedback/week-2.md</code>. A score ≤3 or any stuck-point rewrites the lesson before the next student sees it.</p>
+
+<div class="footer-nav">
+References: <a href="../../reference/npm-jest-tdd-cheatsheet.html">npm, Jest &amp; TDD</a> · <a href="../../reference/javascript-cheatsheet.html">JavaScript</a> · <a href="../../reference/terminal-cheatsheet.html">terminal</a> · <a href="../../reference/git-branch-pr-cheatsheet.html">git</a> · <a href="../../reference/html-flexbox-cheatsheet.html">HTML &amp; flexbox</a><br>
+Previous week: <a href="../week-1/index.html">Week 1 index</a><br>
+Start here: <a href="1-functions-and-callbacks.html">2-1 Functions, First-Class</a><br>
+<a href="../config.html">Display settings</a> (page width)
+</div>

@@ -1,0 +1,94 @@
+<meta charset="utf-8">
+<title>npm, Jest &amp; TDD Cheat Sheet</title>
+<link rel="stylesheet" href="../assets/course.css">
+<script src="../assets/layout.js"></script>
+
+<h1>npm, Jest &amp; TDD Cheat Sheet</h1>
+<p class="subtitle">Everything week 2 asks you to type, in one page. Look it up — don't memorize it.</p>
+
+<h2>Node &amp; npm setup</h2>
+<table>
+<tr><th>Command</th><th>What it does</th></tr>
+<tr><td><code>node -v</code></td><td>prints the installed Node version — no output / "command not found" means Node isn't installed</td></tr>
+<tr><td><code>npm -v</code></td><td>prints the npm version (npm ships with Node)</td></tr>
+<tr><td><code>sudo pacman -S nodejs npm</code></td><td>install both on Arch Linux (other distros / <a href="https://github.com/nvm-sh/nvm">nvm</a> differ)</td></tr>
+<tr><td><code>node</code></td><td>opens the Node REPL — prompt is <code>&gt;</code>, type JS, exit with <code>.exit</code> or <kbd>Ctrl-D</kbd></td></tr>
+<tr><td><code>node file.js</code></td><td>runs a JavaScript file outside the browser</td></tr>
+<tr><td><code>npm init -y</code></td><td>creates <code>package.json</code> accepting all defaults (drop <code>-y</code> to answer prompts)</td></tr>
+</table>
+<p><code>package.json</code> is the project's ID card: its name and version, its <code>scripts</code>, and the list of packages it depends on. It is committed to git.</p>
+
+<h2>Installing packages</h2>
+<table>
+<tr><th>Command</th><th>What it does</th></tr>
+<tr><td><code>npm install &lt;pkg&gt;</code></td><td>install a package the finished program needs (<code>dependencies</code>)</td></tr>
+<tr><td><code>npm install -D &lt;pkg&gt;</code></td><td>install a dev-only package — testing tools, build tools (<code>devDependencies</code>). <code>-D</code> = <code>--save-dev</code></td></tr>
+<tr><td><code>npm install</code></td><td>with no package name: reads <code>package.json</code> and downloads everything it lists — what you run after cloning a project (clone: lesson 1-5)</td></tr>
+<tr><td><code>npm uninstall &lt;pkg&gt;</code></td><td>remove it and drop it from <code>package.json</code></td></tr>
+</table>
+<p><code>node_modules/</code> is <strong>generated</strong>, huge, and never committed — put it in <code>.gitignore</code>. <code>package-lock.json</code> records the exact versions installed and <em>is</em> committed.</p>
+
+<h2>npm scripts</h2>
+<pre><code>"scripts": {
+  "test": "jest",              // npm test
+  "start": "node index.js"     // npm start
+}</code></pre>
+<table>
+<tr><th>Command</th><th>What it does</th></tr>
+<tr><td><code>npm test</code></td><td>runs the <code>test</code> script (built-in shortcut; <code>start</code> too)</td></tr>
+<tr><td><code>npm run &lt;name&gt;</code></td><td>runs any other script by name</td></tr>
+<tr><td><code>npm run</code></td><td>lists the scripts this project defines</td></tr>
+</table>
+<p>Why scripts work when typing <code>jest</code> in the shell doesn't: npm puts <code>node_modules/.bin</code> on the PATH while a script runs, so locally-installed tools are found without a global install.</p>
+
+<h2>Jest</h2>
+<pre><code>const add = require("./add");        // import the function under test
+
+test("adds two numbers", () =&gt; {     // name answers "what should it do?"
+  expect(add(2, 2)).toBe(4);         // actual, then the matcher, then expected
+});</code></pre>
+<table>
+<tr><th>Matcher</th><th>Passes when</th><th>Use for</th></tr>
+<tr><td><code>expect(x).toBe(y)</code></td><td><code>x === y</code> — same value <em>or the same object</em></td><td>numbers, strings, booleans</td></tr>
+<tr><td><code>expect(x).toEqual(y)</code></td><td>contents match, walked deeply</td><td>arrays, objects — two separately-built objects are never <code>===</code> (reference comparison, lesson 1-7)</td></tr>
+<tr><td><code>expect(x).toBeNull()</code></td><td><code>x</code> is literally <code>null</code></td><td>"deliberately nothing" return values</td></tr>
+<tr><td><code>expect(fn).toThrow()</code></td><td>calling <code>fn</code> throws an error</td><td>error paths (<a href="https://jestjs.io/docs/expect">full matcher list</a>)</td></tr>
+</table>
+<table>
+<tr><th>Running</th><th>What it does</th></tr>
+<tr><td><code>npm test</code></td><td>runs every test file once</td></tr>
+<tr><td><code>npm test -- --watch</code></td><td>watch mode: reruns on save. The bare <code>--</code> passes the flag through to Jest. Quit with <code>q</code></td></tr>
+<tr><td><code>npm test -- add</code></td><td>runs only test files whose path matches "add"</td></tr>
+</table>
+<p>Jest finds tests by name — any <code>*.test.js</code> file, or anything inside a <code>__tests__/</code> folder. No config needed.</p>
+<p>Failure shapes worth recognizing: <code>Cannot find module './add'</code> = the file or its export is missing; <code>Expected: … / Received: …</code> = the file loaded and the logic is wrong.</p>
+
+<h2>module.exports / require</h2>
+<p>A function must leave its file before a test can call it. Node's built-in pairing:</p>
+<pre><code>// add.js — the implementation
+const add = (a, b) =&gt; a + b;
+module.exports = add;                    // export one thing
+
+// add.test.js — the test
+const add = require("./add");            // "./" means "file next to me"; .js optional</code></pre>
+<pre><code>// exporting several functions from one file
+module.exports = { add, subtract };
+
+// and unpacking them on the other side
+const { add, subtract } = require("./maths");</code></pre>
+
+<h2>TDD</h2>
+<table>
+<tr><th>Beat</th><th>Do</th></tr>
+<tr><td><strong>Red</strong></td><td>Write one failing test and <em>run it</em> — seeing it fail proves it can</td></tr>
+<tr><td><strong>Green</strong></td><td>Write the simplest code that makes it pass. Nothing extra</td></tr>
+<tr><td><strong>Refactor</strong></td><td>Tidy the code with the tests green; rerun after every change</td></tr>
+</table>
+<p><strong>Ping-pong pairing:</strong> A writes a failing test, B makes it pass and writes the next failing test, swap — repeat.</p>
+<p><strong>Coverage:</strong> <code>npx jest --coverage</code> reports which lines your tests actually executed (Jest uses <em>Istanbul</em> under the hood; <em>nyc</em> is Istanbul's standalone command-line tool). 100% coverage means every line ran, <strong>not</strong> that every behavior is correct.</p>
+
+<div class="footer-nav">
+Sources: <a href="https://docs.npmjs.com/cli/v10/commands">npm CLI docs</a> · <a href="https://jestjs.io/docs/getting-started">Jest docs</a> ·
+Curriculum: <a href="https://github.com/bootcamp-we-have-at-home/testing-tdd-intro">testing-tdd-intro</a>, <code>curriculum/coursebook/week-2/research-afternoon.md</code><br>
+Lesson: <a href="../lessons/week-2/3-testing-and-tdd.html">2-3 — Testing &amp; TDD: Your First Jest Test</a>
+</div>

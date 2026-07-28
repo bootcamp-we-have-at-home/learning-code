@@ -1,15 +1,16 @@
 # Lesson Design Standard
 
-Contract for every generated lesson. Written after the student reported the first three lessons "too hard to follow" — lessons 1–2 were attempted and failed in practice; a 4-reviewer audit found the root causes recorded in `learning-records/0003-lesson-redesign.md`. Every rule below traces to one of them.
+Contract for every generated lesson. Written after the student reported the first three lessons "too hard to follow" — lessons 1–2 were attempted and failed in practice. A 4-reviewer audit (3 medium lenses: beginner simulation, sequencing, cognitive load; 1 xhigh holistic) converged on four root causes, and every rule below traces to one of them: **sequencing inversion** (git taught before the terminal skills it required, against the curriculum's own day order), **concept density without structure** (21–42 new items per lesson vs a 5–9 retention benchmark), **step bundling + untaught requirements** (4–11 actions per step, exercises/checks needing things never taught), and **broken/hardcoded references** (deleted paths, hardcoded home dirs). Ruled out: quiz/playground JS breakage and student capability. Rules 9–11 were added after the first cohort finished week 1 (`feedback/week-1.md`, week-overall, 2026-07-27 — same pass also added lesson `1-9-git-conflicts` restoring the Day-3 conflict workshop to the required path, restored the drifted 1-11 project brief, and made save-before-refresh/editor-targeting steps explicit across the week). Rule 12 was added after the first week-2 feedback reported dense openings (`feedback/week-2.md`, 2-2, confirmed week-wide); rules 2 and 12 are distinct checks — a lesson can pass one and fail the other.
 
 ## File layout & naming
 
 ```
-lessons/<week>-index.html            # week map: outcomes, prerequisites, lesson order, sequencing notes, project brief link
-lessons/<week>-<lesson>-<title>.html # e.g. lessons/1-4-terminal.html
+lessons/index.html                # track hub: links every week index, the reference sheets, and display settings
+lessons/week-<n>/index.html       # week map: outcomes, prerequisites, lesson order, sequencing notes, project brief link
+lessons/week-<n>/<k>-<title>.html # e.g. lessons/week-1/4-terminal.html — lesson "1-4" in prose
 ```
 
-- Flat under `lessons/` — no per-week subdirectories. Assets are linked as `../assets/…`, references as `../reference/…`.
+- One directory per week under `lessons/`. From inside a week directory: assets are `../../assets/…`, references `../../reference/…`, curriculum `../../curriculum/…`, same-week lessons plain filenames, cross-week lessons `../week-<m>/…`, display settings `../config.html`. A new week adds its row to `lessons/index.html`. Lesson numbering in prose stays `<week>-<k>` ("lesson 1-4") even though filenames carry only `<k>`.
 - Lesson order inside a week MUST follow `curriculum/coursebook/week-<n>/README.md` schedule order. Deviations are only allowed when the curriculum's own ordering is broken for a solo learner — and every deviation MUST be listed in the week index under a "Sequencing notes" section with the reason (the scream register).
 - Cohort-only slots (ice-breakers, welcome talks, pastoral care) are dropped, listed once in the index as "not applicable solo".
 - Pair/cohort workshops are adapted to solo + agent-as-pair. The agent-pair instructions live in HTML comments (`<!-- agent-pair: ... -->`) so they never distract a solo reader; the lesson shows only a subtle footer line pointing at them.
@@ -30,6 +31,11 @@ lessons/<week>-<lesson>-<title>.html # e.g. lessons/1-4-terminal.html
 6. **Interactive commands get their interaction described** (what the prompt looks like, what to type, how to exit) in the body before the student runs them: `git add -p`, `man`, `less`, REPLs. Tooltips cover terms; prompt transcripts stay in the body.
 7. **Destructive commands** (`rm`, `>` redirect over existing files, force flags) are always preceded by a safety line and a verification step (`ls` / `cat` first), and the safer alternative is taught alongside (`gio trash`).
 8. **Code lives in blocks, never woven into prose.** Anything the student must type gets its own `<pre><code>` block inside the step — one command per line, with an aligned `//` or `#` comment saying what it does or what it returns. Inline `<code>` is only for *referring* to names, files, and values. A step's prose is at most one framing sentence before the block and one success check after it. A step whose commands wrap across multiple prose lines is a defect.
+9. **Extra worked examples, collapsed.** Each idea section carries at least one worked example beyond the minimum teaching path, inside `<details class="examples"><summary>More examples (optional)</summary>…</details>` so it is skippable and the required reading stays short. Nothing the steps or checks depend on may live inside a collapsed block (students reported wanting more examples without more required reading).
+10. **Cite what you assume.** Strengthens rule 1: it is not enough that a skill was taught earlier — its first use in a lesson *names the source inline* ("the F12 console from lesson 1-1"). Knowledge from outside the track (prerequisites included) gets a link to where it is explained (freeCodeCamp section, MDN page), or a one-line explanation in place. A bare "as you know" is a defect (students reported unexplained assumed knowledge).
+11. **Every idea section ends with a "Read more" line** — `<p class="read-more">` with 1–3 optional links to adjacent topics the section opens a door to but doesn't cover (e.g. media queries → mobile-first design). Chosen per section, clearly optional, never required by any step or check, and never a substitute for teaching in the body.
+
+12. **Pace the prose for a first-time programmer.** Required-reading paragraphs are 2–3 sentences at most and introduce at most ONE new concept each — a second new concept starts a new paragraph. A load-bearing claim ("Node runs the same JavaScript you already know") stands alone as its own short paragraph, never as a clause buried mid-paragraph. Every idea section eases in: its first 1–2 sentences anchor in something the student has already done before the first new term appears. Supporting detail that isn't needed to proceed moves to the collapsed examples block (rule 9) or a tooltip — not into a longer paragraph. A 5–6-line paragraph opening a new topic is a defect (students reported week-2 openings jumping straight into comparisons with no ease-in).
 
 ## Check yourself: active over passive
 
@@ -45,7 +51,7 @@ The curriculum is a fixed sequence but its snippets may be dated. Update code, k
 
 ## Lesson skeleton
 
-Every lesson file: shared `../assets/course.css`, then in order — title, subtitle (time estimate + curriculum slot), "why this matters" (≤ 2 sentences, tied to the mission/week project), 1–2 idea sections, "do it for real" steps (rules 3–7), a Check Yourself section (active format preferred), "go deeper" primary source, footer nav (cheat sheet, previous/next lesson, "ask your teacher" prompt, subtle agent-pair pointer where relevant).
+Every lesson file: shared `../assets/course.css`, then in order — title, subtitle (time estimate + curriculum slot), "why this matters" (≤ 2 sentences, tied to the mission/week project), 1–2 idea sections (each with a collapsed extra-examples block, rule 9, and closing with a read-more line, rule 11), "do it for real" steps (rules 3–7), a Check Yourself section (active format preferred), "go deeper" primary source, footer nav (cheat sheet, previous/next lesson, "ask your teacher" prompt, subtle agent-pair pointer where relevant).
 
 ## Student feedback protocol
 

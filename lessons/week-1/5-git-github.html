@@ -1,17 +1,37 @@
 <meta charset="utf-8">
 <title>1-5 — Git &amp; GitHub</title>
-<link rel="stylesheet" href="../assets/course.css">
+<link rel="stylesheet" href="../../assets/course.css">
+<script src="../../assets/layout.js"></script>
 
 <h1>1-5 — Git &amp; GitHub</h1>
-<p class="subtitle">~90 minutes · Week 1, Day 2 · Source: curriculum <a href="../curriculum/coursebook/week-1/git-and-github-ws/README.md">git &amp; GitHub workshop</a> (exercises 1–3)</p>
+<p class="subtitle">~90 minutes · Week 1, Day 2 · Source: curriculum <a href="../../curriculum/coursebook/week-1/git-and-github-ws/README.md">git &amp; GitHub workshop</a> (exercises 1–3)</p>
 
 <p><strong>Why this matters:</strong> in any developer job, code reaches production through commits, branches, and pull requests. This lesson makes that loop real, three small exercises at a time — and from today, everything you build in this course is committed.</p>
 
 <h2>Idea 1 — Git takes snapshots; GitHub hosts them</h2>
-<p><strong>Git</strong> is a <span class="term" data-tip="A system that records the history of your files as snapshots you can compare, restore, and merge.">version control system</span> that runs on your machine: it records <span class="term" data-tip="An annotated snapshot of your project at one point in time, with a message saying what changed and why.">commits</span> — snapshots of your project with a message. <strong>GitHub</strong> is a website that hosts a copy of your git history (a <span class="term" data-tip="A folder git watches; contains all project files plus the .git history folder.">repository</span>) so it's backed up, shareable, and reviewable. Git = local; GitHub = remote.</p>
+<p><strong>Git</strong> is a <span class="term" data-tip="A system that records the history of your files as snapshots you can compare, restore, and merge.">version control system</span> that runs on your machine: it records <span class="term" data-tip="An annotated snapshot of your project at one point in time, with a message saying what changed and why.">commits</span> — snapshots of your project with a message. <strong>GitHub</strong> is a website that hosts a copy of your git history (a <span class="term" data-tip="A folder git watches; contains all project files plus the .git history folder.">repository</span>) so it's backed up, shareable, and reviewable. Git = local; GitHub = remote. (Everything here runs in the terminal — the navigation and file skills from lesson 1-4.)</p>
+<details class="examples"><summary>More examples (optional)</summary>
+<p>What owning your history buys you, in scenarios you'll hit this very week:</p>
+<ol>
+  <li><strong>"It worked an hour ago."</strong> <code>git log</code> shows the snapshots; <code>git diff</code> shows exactly what changed since the last one. No more guessing which edit broke the page.</li>
+  <li><strong>"I want to try something risky."</strong> Commit first, experiment freely — the committed snapshot is always restorable, so deleting half your CSS to test a theory costs nothing.</li>
+  <li><strong>"My laptop died."</strong> The GitHub copy has every commit. <code>git clone</code> on any machine and you've lost nothing but uncommitted work — which is why you commit small and often.</li>
+</ol>
+</details>
+<p class="read-more"><strong>Read more:</strong> <a href="https://git-scm.com/book/en/v2/Getting-Started-About-Version-Control">Pro Git — about version control</a> · <a href="https://cbea.ms/git-commit/">How to write a git commit message</a> (the classic — why "fix stuff" hurts future-you)</p>
 
 <h2>Idea 2 — main is sacred</h2>
 <p>The <code>main</code> branch always works; you never commit to it directly. Work happens on a <span class="term" data-tip="A parallel line of history where you can commit safely without touching main. Cheap to create, deleted after merging.">branch</span>, which reaches <code>main</code> only through a <span class="term" data-tip="GitHub's review checkpoint: shows the diff a branch proposes and hosts the discussion before merging.">pull request</span>. Everything else in the workflow is detail around that rule.</p>
+<details class="examples"><summary>More examples (optional)</summary>
+<p>Why the rule survives contact with reality — a normal Tuesday on a two-person team:</p>
+<ol>
+  <li>You're halfway through a <code>projects-section</code> branch when a typo is reported on the live site. No problem: <code>git switch main</code> (which still works, because only reviewed code lands there), branch off <code>fix-typo</code>, fix, PR, merge. Your half-finished work sits untouched on its own branch.</li>
+  <li>Your teammate reviews the typo PR and spots that it breaks a link. The mistake dies in review instead of in production — that's the checkpoint doing its job.</li>
+  <li>Back on <code>projects-section</code>, you continue as if nothing happened.</li>
+</ol>
+<p>Committing straight to main makes step 1 impossible: main would contain your half-finished work, and there'd be nowhere clean to fix from.</p>
+</details>
+<p class="read-more"><strong>Read more:</strong> <a href="https://docs.github.com/en/get-started/using-github/github-flow">GitHub Flow</a> (this exact loop, as GitHub documents it) · <a href="https://learngitbranching.js.org/">Learn Git Branching</a> (visual sandbox for branch intuition)</p>
 
 <h2>Exercise 0 — Introduce yourself to git (once ever, ~5 min)</h2>
 <ol class="steps">
@@ -78,7 +98,7 @@ ls                            # shows README.md</code></pre>
   <li>Create and switch to a branch:
 <pre><code>git switch -c add-hello-page</code></pre>
   <em>You should see</em> "Switched to a new branch". <span class="term" data-tip="The coursebook (and much of the internet) writes git checkout -b — the older command for the same thing. git switch -c is today's clearer form.">Coursebook note</span>: the workshop writes <code>git checkout -b</code>; same effect, legacy spelling.</li>
-  <li>Create <code>hello.html</code> containing <code>&lt;h1&gt;Hello world&lt;/h1&gt;</code> (editor or <code>echo</code> — your choice now). Stage and commit it:
+  <li>Create <code>hello.html</code> containing <code>&lt;h1&gt;Hello world&lt;/h1&gt;</code> (the heading tag from lesson 1-2; your editor — open the <code>~/code/workflow-practice</code> folder in it first, and save — or <code>echo</code> with <code>&gt;</code> from lesson 1-4). Stage and commit it:
 <pre><code>git add hello.html
 git commit -m "Add hello page"</code></pre></li>
   <li>Publish the branch:
@@ -91,7 +111,7 @@ git commit -m "Add hello page"</code></pre></li>
 git pull
 git branch -d add-hello-page</code></pre>
   <em>You should see</em> <code>hello.html</code> arrive. <em>Success check:</em> <code>git log --oneline</code> shows the merge on main, and <code>git branch</code> lists only <code>main</code>.</li>
-  <li>The workshop says: redo the loop once more, styling the page — branch, edit, commit, push, PR, merge, sync, delete both branches. Do it from memory; peek at the <a href="../reference/git-branch-pr-cheatsheet.html">cheat sheet</a> only when stuck. <em>Success check:</em> a second merged PR on GitHub, and <code>git branch</code> again lists only <code>main</code>.</li>
+  <li>The workshop says: redo the loop once more, styling the page — branch, edit, commit, push, PR, merge, sync, delete both branches. Do it from memory; peek at the <a href="../../reference/git-branch-pr-cheatsheet.html">cheat sheet</a> only when stuck. <em>Success check:</em> a second merged PR on GitHub, and <code>git branch</code> again lists only <code>main</code>.</li>
 </ol>
 
 <h2>Check yourself</h2>
@@ -112,21 +132,20 @@ git branch -d add-hello-page</code></pre>
   data-why="Red = changed but not staged. The staging area (git add) is where you compose exactly what the next snapshot contains."></div>
 
 <h2>Go deeper</h2>
-<p><strong>Primary sources:</strong> the workshop's <a href="../curriculum/coursebook/week-1/git-and-github-ws/exercises/glossary.md">glossary</a> (every term above, defined) and <a href="https://git-scm.com/book/en/v2/Git-Branching-Branches-in-a-Nutshell">Pro Git ch. 3.1</a> — with your CS background, seeing that a branch is just a pointer to a commit makes merges stop feeling like magic.</p>
+<p><strong>Primary sources:</strong> the workshop's <a href="../../curriculum/coursebook/week-1/git-and-github-ws/exercises/glossary.md">glossary</a> (every term above, defined) and <a href="https://git-scm.com/book/en/v2/Git-Branching-Branches-in-a-Nutshell">Pro Git ch. 3.1</a> — with your CS background, seeing that a branch is just a pointer to a commit makes merges stop feeling like magic.</p>
 
-<!-- agent-pair: Day 3 of the curriculum schedules https://github.com/GSG-CA/git-workflow-workshop-for-two.
-     Solo adaptation: the agent plays partner Two. Student creates a repo, adds the agent-visible file,
-     then alternates: student opens PR, agent reviews with one comment the student must address before
-     merging; then swap — agent pushes a branch (via its tools) with a deliberate small mistake, student
-     reviews and comments. Two rounds each. Goal: experience BOTH sides of review before week's end. -->
+<!-- agent-pair: the Day 3 git-workflow-workshop-for-two now has its own lesson, 9-git-conflicts.html
+     (promoted after first-cohort feedback) — full pair instructions live there. If the student asks to
+     pair during THIS lesson, keep it light: review their exercise-3 PR with one comment they must
+     address before merging, per codereviewintro.md etiquette. Save conflict work for 1-9. -->
 
 <div class="feedback-ask">Finished? Tell your teacher (the agent) two things: ① Could you follow this lesson alone — 1 to 5? ② Where did you get stuck, if anywhere? Answers are recorded in <code>feedback/week-1.md</code> and improve the lesson for the next student. <em>Working with the agent as a pair partner? It has extra instructions hidden in this page's source.</em></div>
 
 <div class="footer-nav">
-Reference: <a href="../reference/git-branch-pr-cheatsheet.html">Git branch &amp; PR cheat sheet</a> · Week map: <a href="1-index.html">Week 1 index</a><br>
-Previous: <a href="1-4-terminal.html">1-4 Terminal</a> · Next: <a href="1-6-responsive-design.html">1-6 Responsive Design</a><br>
-Stuck or curious? Ask your teacher (the agent). "What actually happens during a merge conflict?" is a great follow-up.
+Reference: <a href="../../reference/git-branch-pr-cheatsheet.html">Git branch &amp; PR cheat sheet</a> · Week map: <a href="index.html">Week 1 index</a><br>
+Previous: <a href="4-terminal.html">1-4 Terminal</a> · Next: <a href="6-responsive-design.html">1-6 Responsive Design</a><br>
+Stuck or curious? Ask your teacher (the agent). "What actually happens during a merge conflict?" is a great follow-up — and lesson 1-9 will make you cause one on purpose.
 </div>
 
-<script src="../assets/quiz.js"></script>
-<script src="../assets/tooltip.js"></script>
+<script src="../../assets/quiz.js"></script>
+<script src="../../assets/tooltip.js"></script>

@@ -1,0 +1,244 @@
+<meta charset="utf-8">
+<title>2-4 — FizzBuzz: TDD Workshop (Ping-Pong)</title>
+<link rel="stylesheet" href="../../assets/course.css">
+<script src="../../assets/layout.js"></script>
+
+<h1>2-4 — FizzBuzz: TDD Workshop (Ping-Pong)</h1>
+<p class="subtitle">~60–90 minutes · Week 2, Day 1, 13:00–15:00 · Source: curriculum workshop <a href="https://github.com/bootcamp-we-have-at-home/fizzbuzz">bootcamp-we-have-at-home/fizzbuzz</a>, adapted solo</p>
+
+<p><strong>Why this matters:</strong> lesson 2-3 taught you what a Jest test looks like. This is the first time you build a whole function without ever writing implementation code before a failing test demands it.</p>
+<p>That reflex is what makes the week project (2-10) testable instead of hopeful.</p>
+
+<h2>Idea 1 — Ping-pong: two hats, never worn at once</h2>
+<p>In lesson 2-3 you ran the red-green-refactor cycle alone: you wrote the failing test, then you wrote the code that passed it. Ping-pong is that same cycle, split between two people.</p>
+<p>Partner A writes <em>one</em> failing test and hands the keyboard over.</p>
+<p>Partner B writes the <strong>minimum</strong> code that makes it pass — deliberately literal, even silly — then writes the next failing test and hands back.</p>
+<p>The point isn't politeness: B's "cheating" implementation is a bug report against A's test.</p>
+<p>If <code>return 1</code> passes your whole suite, your suite is too small — and you found that out in ten seconds instead of in production.</p>
+<h3>Solo adaptation — you wear both hats, one at a time</h3>
+<p>Say the hat out loud before each move. Physically change something too (sit back, move to the other file, switch terminal tab) so the switch is real:</p>
+<ul>
+  <li><strong>Tester hat:</strong> open <code>test.js</code> only. Write one <code>test(...)</code> block. Say what failure you expect (<em>"this will fail: expected 1, received undefined"</em>). Run it. You must be wrong-free about the failure <em>before</em> you fix it.</li>
+  <li><strong>Implementer hat:</strong> open <code>index.js</code> only. Write the laziest code that turns the suite green. Hard-coding is not just allowed, it's the discipline — it proves what the next test has to cover.</li>
+</ul>
+<p>The one rule that makes this work: <strong>never write implementation while wearing the tester hat.</strong></p>
+<p>If you catch yourself typing <code>if (n % 3 === 0)</code> inside <code>test.js</code>, you've slipped.</p>
+<details class="examples"><summary>More examples (optional)</summary>
+<p>A ping-pong exchange on a different kata — <code>add(a, b)</code>:</p>
+<pre><code>// Tester hat — test.js
+test("adds 2 and 2", () =&gt; {
+  expect(add(2, 2)).toBe(4);     // fails: add is not defined
+});
+
+// Implementer hat — index.js  (laziest thing that passes)
+const add = () =&gt; 4;             // green. yes, really.
+
+// Tester hat — the lazy version is now a bug report: write the test that kills it
+test("adds 2 and 5", () =&gt; {
+  expect(add(2, 5)).toBe(7);     // fails: got 4
+});
+
+// Implementer hat — now the shortcut is impossible
+const add = (a, b) =&gt; a + b;     // green, and honestly general</code></pre>
+<p>Notice the shape: the second test exists <em>because</em> the first implementation was lazy. That's ping-pong doing your test design for you.</p>
+</details>
+<p class="read-more"><strong>Read more:</strong> <a href="https://martinfowler.com/bliki/TestDrivenDevelopment.html">Martin Fowler — Test Driven Development</a> · <a href="https://github.com/bootcamp-we-have-at-home/testing-tdd-intro">the curriculum's TDD intro repo</a> · <a href="https://tddmanifesto.com/exercises/">more katas to ping-pong later</a></p>
+
+<h2>Idea 2 — Refactoring under green</h2>
+<p>At the end of lesson 2-3 you changed <code>add.js</code> on purpose and a second test caught the change. That is the same safety net this idea is built on.</p>
+<p><span class="term" data-tip="Changing how code is written — its shape, its names, its structure — while every input still produces the same output.">Refactor</span> means: change how the code is written without changing what it does.</p>
+<p>The reason TDD makes it safe is timing — you only refactor when <em>every test passes</em>.</p>
+<p>The suite is your undo detector: change the shape, re-run, and if a test goes red you broke behavior and you know it within seconds.</p>
+<p>Refactoring on red is guessing; refactoring on green is engineering.</p>
+<p>In this workshop the refactor moment is small and specific. In iteration 5, once every test is green, three near-identical <code>if</code> blocks collapse into one ordered chain — a behavior-preserving edit you make with a green suite watching.</p>
+<p>Earlier edits — like generalising <code>() =&gt; 1</code> into <code>(n) =&gt; n</code> — look similar but are <em>not</em> refactors: they happen on red and add behavior a new test demanded.</p>
+<div class="aside">The coursebook's snippets use <code>function fizzbuzz(n) { … }</code> and <code>module.exports</code>; today we write <code>const fizzbuzz = (n) =&gt; { … }</code> with arrow functions (lesson 1-8) — same behavior, and the export line stays exactly as the repo ships it.</div>
+<details class="examples"><summary>More examples (optional)</summary>
+<p>A behavior-preserving refactor, with the suite green before and after:</p>
+<pre><code>// green — but repetitive
+const label = (n) =&gt; {
+  if (n === 0) { return "none"; }
+  if (n === 1) { return "one"; }
+  return "many";
+};
+
+// refactored — same outputs for every input, fewer branches
+const NAMES = ["none", "one"];
+const label = (n) =&gt; NAMES[n] ?? "many";</code></pre>
+<p>How you know it's a refactor and not a rewrite: you did not touch <code>test.js</code>. The moment a "refactor" needs a test changed, it's a behavior change wearing a disguise.</p>
+</details>
+<p class="read-more"><strong>Read more:</strong> <a href="https://refactoring.com/">refactoring.com — the catalog of named refactorings</a> · <a href="https://jestjs.io/docs/expect#tobevalue">Jest — <code>toBe</code> vs the other matchers</a></p>
+
+<h2>Do it for real (~60 min)</h2>
+<p>You'll build FizzBuzz from nothing but tests, in the curriculum's own repo.</p>
+<p>The spec, from the <a href="https://github.com/bootcamp-we-have-at-home/fizzbuzz">workshop README</a> — <code>fizzbuzz(n)</code> returns:</p>
+<ul>
+  <li><strong>the number itself</strong> for most inputs</li>
+  <li><strong>"Fizz"</strong> for multiples of 3</li>
+  <li><strong>"Buzz"</strong> for multiples of 5</li>
+  <li><strong>"FizzBuzz"</strong> for multiples of both</li>
+</ul>
+<p>Don't read ahead to the finished algorithm — the exercise is the order.</p>
+<ol class="steps">
+  <li>Clone the workshop into your workspace (<code>git clone</code> is from lesson 1-5; it creates a folder named after the repo):
+<pre><code>cd ~/code                                          # the workspace from lesson 1-4
+git clone https://github.com/bootcamp-we-have-at-home/fizzbuzz.git   # creates ~/code/fizzbuzz
+cd fizzbuzz
+ls                                                 # index.js  test.js  package.json  ...</code></pre>
+  <em>You should see</em> <code>index.js</code>, <code>test.js</code> and <code>package.json</code> listed.</li>
+
+  <li>Install the project's declared dependencies — Jest is listed in <code>package.json</code>, not yet on disk (lesson 2-2: <code>npm install</code> with no package name installs what the project already declares):
+<pre><code>npm install       # reads package.json, downloads Jest into node_modules/
+                  # audit summary at the end: expected, see the 2-3 note; never --force it</code></pre>
+  <em>Success check:</em> npm prints an "added N packages" line and <code>ls</code> now shows a <code>node_modules</code> folder and <code>package-lock.json</code>.</li>
+
+  <li>See the starting state before you change anything (the look-first ritual from lesson 1-4):
+<pre><code>npm test          # runs the "test" script from package.json → jest</code></pre>
+  <em>You should see</em> one green test called <code>Testing Jest is working</code> — the placeholder the repo ships, which asserts <code>2 + 2 === 4</code> and proves the runner works. That is your baseline; the repo's <code>index.js</code> holds an empty <code>fizzbuzz</code> that returns nothing yet. Now open the folder in your editor: <strong>File → Open Folder → <code>~/code/fizzbuzz</code></strong> (it probably still shows a week-1 project). Autosave is off — every step below means <em>save the file</em> before running anything.</li>
+
+  <li>Start the workshop rhythm: <span class="term" data-tip="Jest stays running and re-runs your tests automatically each time you save a file. Quit it with q.">watch mode</span>. Open a <strong>second terminal tab</strong> and leave the watcher running in it for the rest of the lesson. A new tab always starts in your home folder, so the first thing it needs is the <code>cd</code> from 1-4 — otherwise npm looks for a <code>package.json</code> that isn't there and errors with <code>ENOENT: no such file or directory, open '…/package.json'</code>:
+<pre><code>cd ~/code/fizzbuzz      # the new tab starts in ~, not in the repo
+npm test -- --watch     # the -- passes --watch through npm to jest</code></pre>
+  Jest runs once, then parks on an interactive menu: <code>Press a to run all tests</code>, <code>f</code> to run only failed ones, <code>p</code> to filter by filename, <code>q</code> to quit, <code>Enter</code> to re-run now. It re-runs by itself every time you save. <em>You should see</em> the results redraw within a second of saving a file; press <code>q</code> to exit whenever you're done. <div class="aside"><code>--watch</code> uses git to decide which files changed; if it complains about that, use <code>npm test -- --watchAll</code> instead.</div></li>
+
+  <li><strong>Iteration 1 — red.</strong> Tester hat: <code>test.js</code> only. Replace its contents with:
+<pre><code>const fizzbuzz = require("./index.js");   // pulls in the implementation file
+
+test("returns the number for 1", () =&gt; {
+  expect(fizzbuzz(1)).toBe(1);
+});</code></pre>
+  Save. <em>You should see</em> watch mode go red with <code>Expected: 1 / Received: undefined</code> — the shipped <code>fizzbuzz</code> exists but its body is empty, so it returns <code>undefined</code> (the second failure shape from 2-3). Say the failure out loud before moving on; a test that fails for the reason you predicted is a working test.</li>
+
+  <li><strong>Iteration 1 — green.</strong> Implementer hat: <code>index.js</code> only, and write the laziest code that passes. Literally this:
+<pre><code>const fizzbuzz = () =&gt; 1;    // yes, hard-coded. it's the minimum.
+
+module.exports = fizzbuzz;</code></pre>
+  Save. <em>Success check:</em> watch mode flips to green, 1 test passing. You now have a deliberately stupid function — that's the setup for the next test.</li>
+
+  <li><strong>Iteration 2 — red, then green.</strong> Tester hat: add a second test to <code>test.js</code> (keep the first):
+<pre><code>test("returns the number for 2", () =&gt; {
+  expect(fizzbuzz(2)).toBe(2);       // fails: received 1
+});</code></pre>
+  Save; <em>you should see</em> 1 passing, 1 failing. Implementer hat: the hard-code is now impossible, so generalise in <code>index.js</code>:
+<pre><code>const fizzbuzz = (n) =&gt; n;   // red → green: the second test forced a general shape</code></pre>
+  <em>Success check:</em> 2 tests passing. Note what that edit was and wasn't: it went red → green by <em>adding</em> the behavior the new test demanded, so it is the green step, not a refactor. Your first real refactor-under-green — reshaping code while the suite is already all-green — comes in iteration 5.</li>
+
+  <li><strong>Iteration 3 — multiples of 3 → "Fizz".</strong> Tester hat first, always:
+<pre><code>test("returns Fizz for multiples of 3", () =&gt; {
+  expect(fizzbuzz(3)).toBe("Fizz");
+  expect(fizzbuzz(9)).toBe("Fizz");   // a second multiple keeps you honest
+});</code></pre>
+  Save and watch it go red (<code>received 3</code>). Implementer hat: add the minimum branch to <code>index.js</code> — one <code>if</code>, using the remainder operator <code>%</code> from lesson 1-7 (<code>n % 3 === 0</code> means "3 divides n exactly"). <em>Success check:</em> 3 tests green, and tests 1–2 still pass — never let an old test go red to make a new one pass.</li>
+
+  <li><strong>Iteration 4 — multiples of 5 → "Buzz".</strong> Same rep, your turn to write both halves unaided: a red test for <code>fizzbuzz(5)</code> and <code>fizzbuzz(10)</code>, then the minimum branch in <code>index.js</code>.
+<pre><code>expect(fizzbuzz(5)).toBe("Buzz");    // the assertion your new test needs</code></pre>
+  <em>Success check:</em> 4 tests green.</li>
+
+  <li><strong>Iteration 5 — multiples of both → "FizzBuzz".</strong> Tester hat:
+<pre><code>test("returns FizzBuzz for multiples of 3 and 5", () =&gt; {
+  expect(fizzbuzz(15)).toBe("FizzBuzz");
+  expect(fizzbuzz(30)).toBe("FizzBuzz");
+});</code></pre>
+  Save. <em>You should see</em> it fail with <code>received "Fizz"</code> — because 15 hits your <code>%3</code> branch first. Implementer hat: fix it, then <strong>refactor under green</strong> — with the whole suite passing, tidy the branches into one readable ordered chain and re-run. <em>Success check:</em> 5 tests green both before and after the refactor; <code>test.js</code> untouched by the refactor.</li>
+
+  <li><strong>Challenge — negative numbers.</strong> The README's stretch: decide the spec first (is <code>fizzbuzz(-3)</code> <code>"Fizz"</code>, or should negatives be rejected?), write it down in one sentence, then drive it with tests:
+<pre><code>expect(fizzbuzz(-3)).toBe("Fizz");   // or whatever your written spec says
+expect(fizzbuzz(-1)).toBe(-1);</code></pre>
+  <em>Success check:</em> the suite is green and your <code>index.js</code> matches the sentence you wrote — not the other way round.</li>
+
+  <li>Commit the work on a branch, the loop from lesson 1-5 (press <code>q</code> in the watch tab first, or switch back to your first tab — it is already sitting in <code>~/code/fizzbuzz</code>):
+<pre><code>git switch -c tdd-fizzbuzz
+git status                       # node_modules is NOT listed (.gitignore handles it),
+                                 # but package-lock.json IS: npm install wrote it and
+                                 # this repo doesn't ship one
+git add index.js test.js package-lock.json
+git commit -m "Build fizzbuzz test-first through five iterations"
+git status                       # verify</code></pre>
+  <em>Success check:</em> the second <code>git status</code> says <code>nothing to commit, working tree clean</code>, and <code>git log --oneline -1</code> shows your commit. (This repo is the course's, not yours, so you can't push to it — pushing needs your own fork; skip it unless you want the extra rep.)</li>
+</ol>
+
+<h2>Check yourself — which tests catch which implementation?</h2>
+<p>Here are three candidate implementations and a test list. For each implementation, say which tests pass and which fail — reason it out before revealing.</p>
+<pre><code>// tests
+expect(fizzbuzz(2)).toBe(2);            // T1
+expect(fizzbuzz(3)).toBe("Fizz");       // T2
+expect(fizzbuzz(5)).toBe("Buzz");       // T3
+expect(fizzbuzz(15)).toBe("FizzBuzz");  // T4
+
+// A
+const fizzbuzz = (n) =&gt; {
+  if (n % 3 === 0) return "Fizz";
+  if (n % 5 === 0) return "Buzz";
+  if (n % 15 === 0) return "FizzBuzz";
+  return n;
+};
+
+// B
+const fizzbuzz = (n) =&gt; {
+  if (n === 3) return "Fizz";
+  if (n === 5) return "Buzz";
+  if (n === 15) return "FizzBuzz";
+  return n;
+};
+
+// C
+const fizzbuzz = (n) =&gt; {
+  if (n % 15 === 0) return "FizzBuzz";
+  if (n % 3 === 0) return "Fizz";
+  if (n % 5 === 0) return "Buzz";
+  return n;
+};</code></pre>
+<details class="reveal"><summary>Reveal</summary>
+<p><strong>A</strong> — T1, T2, T3 pass; <strong>T4 fails</strong> (returns <code>"Fizz"</code>: 15 is a multiple of 3, so the first branch wins and the <code>%15</code> line is unreachable). Order matters.</p>
+<p><strong>B</strong> — all four <em>pass</em>, and the function is still wrong: <code>fizzbuzz(6)</code> returns 6, <code>fizzbuzz(9)</code> returns 9. This is exactly the lazy-implementer move from Idea 1 — a green suite proves your tests, not your code. Adding a second multiple per rule (9, 10, 30) is what kills it.</p>
+<p><strong>C</strong> — all four pass, and it generalises: the most specific rule is checked first. This is the shape your iteration-5 refactor should land on.</p>
+</details>
+
+<div class="quiz"
+  data-q="Your new test for fizzbuzz(15) is red. The fastest way to green is to delete the earlier fizzbuzz(3) test that's getting in the way. What's wrong with that?"
+  data-opts='["Nothing, as long as you write it again after the refactor",
+              "Deleting a passing test to pass a new one throws away the behavior it protected — green must mean ALL tests pass",
+              "Nothing — tests are scaffolding and can be removed once the code works"]'
+  data-answer="1"
+  data-why="The green step is 'make the new test pass WITHOUT breaking existing ones'. A suite you edit to fit the code is no longer a check on the code."></div>
+
+<div class="quiz"
+  data-q="Wearing the implementer hat, the minimal code that passes your only test is a hard-coded `return 1`. What should you do?"
+  data-opts='["Skip ahead and write the full algorithm; hard-coding wastes time",
+              "Change the test so hard-coding cannot pass, then implement",
+              "Write it — then, as tester, write the test that makes hard-coding impossible"]'
+  data-answer="2"
+  data-why="Ping-pong deliberately writes the lazy version: it exposes the gap in the test suite. You close the gap with the NEXT test, not by pre-empting it with untested code."></div>
+
+<h2>Go deeper</h2>
+<p><strong>Primary source:</strong> the workshop repo itself — <a href="https://github.com/bootcamp-we-have-at-home/fizzbuzz">bootcamp-we-have-at-home/fizzbuzz</a> (its iteration list is what you just ran) and the curriculum's <a href="https://github.com/bootcamp-we-have-at-home/testing-tdd-intro">testing-tdd-intro</a> for the red-green-refactor write-up behind lesson 2-3.</p>
+<p><strong>Optional stretch — measure your coverage.</strong> The curriculum's research afternoon (<a href="../../curriculum/coursebook/week-2/research-afternoon.md">research-afternoon.md</a>) asks you to calculate code coverage for this workshop. Jest ships Istanbul built in:</p>
+<pre><code>npm test -- --coverage    # prints a table: % of lines/branches your tests execute</code></pre>
+<p>Aim to explain the <em>branch</em> column, and to answer the research question it sets up: does 100% coverage mean everything is tested correctly? (Implementation B above is the counter-example.)</p>
+
+<!-- agent-pair: true ping-pong, alternating turns, agent as the partner.
+     Turn order: student writes test 1 → AGENT writes the implementation, deliberately minimal and
+     literal (hard-coded `return 1`, then `n === 3`), never generalising ahead of the tests →
+     AGENT writes test 2 (a red one that kills its own shortcut) → student implements → alternate
+     through iterations 3, 4, 5 and the negative-number challenge.
+     Agent duties while pairing:
+       - police the "minimum code to pass" rule in both directions: if the student generalises before
+         a test demands it, say so and ask which test forced that line;
+       - refuse to write implementation while it is the tester, and call the same slip on the student;
+       - prompt the refactor explicitly at each green ("suite is green — anything to tidy before we go red again?");
+       - require a second example per rule (9, 10, 30) so `n === 3`-style cheats die.
+     Close with a code review of the final index.js + test.js per
+     curriculum/coursebook/week-1/codereviewintro.md etiquette: questions not commands, exact lines,
+     one main point. Extra rep if asked: agent proposes a wrong-order implementation (candidate A)
+     and asks the student to find the test that exposes it. -->
+
+<div class="feedback-ask">Finished? Tell your teacher (the agent) two things: ① Could you follow this lesson alone — 1 to 5? ② Where did you get stuck, if anywhere? Answers are recorded in <code>feedback/week-2.md</code> and improve the lesson for the next student. <em>Want a real ping-pong partner writing every other test? The agent has pair instructions hidden in this page's source.</em></div>
+
+<div class="footer-nav">
+Reference: <a href="../../reference/git-branch-pr-cheatsheet.html">Git branch &amp; PR cheat sheet</a> · <a href="../../reference/javascript-cheatsheet.html">JavaScript cheat sheet</a> · Week map: <a href="index.html">Week 2 index</a><br>
+Previous: <a href="3-testing-and-tdd.html">2-3 Testing &amp; TDD</a> · Next: <a href="5-roman-numerals-tdd.html">2-5 Roman Numerals: TDD Code-Along</a><br>
+Same cycle, harder kata next: Roman numerals. Stuck or curious? Ask your teacher (the agent). "How small is too small for a test?" is a great follow-up.
+</div>
+
+<script src="../../assets/quiz.js"></script>
+<script src="../../assets/tooltip.js"></script>

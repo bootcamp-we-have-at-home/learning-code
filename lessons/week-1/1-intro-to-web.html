@@ -1,9 +1,10 @@
 <meta charset="utf-8">
 <title>1-1 — How the Web Works</title>
-<link rel="stylesheet" href="../assets/course.css">
+<link rel="stylesheet" href="../../assets/course.css">
+<script src="../../assets/layout.js"></script>
 
 <h1>1-1 — How the Web Works</h1>
-<p class="subtitle">~30 minutes · Week 1, Day 1 · Source: curriculum <a href="../curriculum/coursebook/week-1/intro-to-web.md">intro-to-web.md</a></p>
+<p class="subtitle">~30 minutes · Week 1, Day 1 · Source: curriculum <a href="../../curriculum/coursebook/week-1/intro-to-web.md">intro-to-web.md</a></p>
 
 <p><strong>Why this matters:</strong> every project in this course is a website. Thirty minutes of shared vocabulary now — front end, back end, static, dynamic — makes every later lesson read faster.</p>
 
@@ -15,9 +16,30 @@
   <tr><th>Static</th><td>Pages stored ready-made on the server, sent as-is. Pure HTML + CSS. Your week-1 pages are static.</td></tr>
   <tr><th>Dynamic</th><td>Pages generated at request time by code (JavaScript, Python, PHP…), usually from a <span class="term" data-tip="Organized storage for data — you'll meet PostgreSQL in a later week.">database</span>. Amazon's product pages are dynamic.</td></tr>
 </table>
+<details class="examples"><summary>More examples (optional)</summary>
+<p>Classify these — cover the right column and guess first:</p>
+<table>
+  <tr><td>A restaurant's menu-and-hours site</td><td>Static — same page for every visitor, updated by editing the files.</td></tr>
+  <tr><td>Your webmail inbox</td><td>Dynamic — built per request from <em>your</em> messages in a database.</td></tr>
+  <tr><td>This lesson page</td><td>Static — an HTML file sent (or opened) as-is.</td></tr>
+  <tr><td>Google search results</td><td>Dynamic — generated for each query; no ready-made page exists for it.</td></tr>
+</table>
+<p>Handy test: if two people can see different content at the same URL at the same moment, it's dynamic.</p>
+</details>
+<p class="read-more"><strong>Read more:</strong> <a href="https://developer.mozilla.org/en-US/docs/Learn/Getting_started_with_the_web/How_the_Web_works">MDN — how the web works</a> · <a href="https://howdns.works/">How DNS works</a> (comic-style: how a name like google.com becomes a server address)</p>
 
 <h2>Idea 2 — Front end, back end, full stack</h2>
 <p>The <strong>front end</strong> is everything the browser shows: HTML structure, CSS appearance, JavaScript behavior. The <strong>back end</strong> is the code and data on the server that feeds it. A <strong>full-stack</strong> developer works on both — that is where this course is headed (HTML/CSS → JS → Node/Express → PostgreSQL → React).</p>
+<details class="examples"><summary>More examples (optional)</summary>
+<p>One click, both halves. You press "Add to cart" on a shop:</p>
+<ol>
+  <li><strong>Front end:</strong> the button's look (CSS), its position in the page (HTML), and the click handler that fires (JS in the browser).</li>
+  <li><strong>Back end:</strong> a server receives "user X wants product Y", checks stock in the database, saves the cart, and answers.</li>
+  <li><strong>Front end again:</strong> the little cart icon updates to "1" without reloading the page.</li>
+</ol>
+<p>Same split on this course's timeline: weeks 1–3 live entirely in step 1; Node/Express and PostgreSQL weeks add steps 2–3.</p>
+</details>
+<p class="read-more"><strong>Read more:</strong> <a href="https://developer.mozilla.org/en-US/docs/Learn/Common_questions/Web_mechanics/What_is_a_web_server">MDN — what is a web server?</a> · <a href="https://web.dev/articles/howbrowserswork">How browsers work</a> (deep but skimmable — how HTML becomes pixels)</p>
 
 <h2>Do it for real (~10 min)</h2>
 <ol class="steps">
@@ -46,14 +68,14 @@
   data-why="HTML, CSS, and in-browser JavaScript are the front end. The back end feeds it data."></div>
 
 <h2>Go deeper</h2>
-<p><strong>Primary source:</strong> the curriculum's <a href="../curriculum/coursebook/week-1/intro-to-web.md">Introduction to Web Development</a>, and The Odin Project's <a href="https://www.theodinproject.com/lessons/foundations-introduction-to-web-development">intro lesson</a> it draws from.</p>
+<p><strong>Primary source:</strong> the curriculum's <a href="../../curriculum/coursebook/week-1/intro-to-web.md">Introduction to Web Development</a>, and The Odin Project's <a href="https://www.theodinproject.com/lessons/foundations-introduction-to-web-development">intro lesson</a> it draws from.</p>
 
 <div class="feedback-ask">Finished? Tell your teacher (the agent) two things: ① Could you follow this lesson alone — 1 to 5? ② Where did you get stuck, if anywhere? Answers are recorded in <code>feedback/week-1.md</code> and improve the lesson for the next student.</div>
 
 <div class="footer-nav">
-Week map: <a href="1-index.html">Week 1 index</a> · Next: <a href="1-2-semantic-html.html">1-2 Semantic HTML &amp; Accessibility</a><br>
+Week map: <a href="index.html">Week 1 index</a> · Next: <a href="2-semantic-html.html">1-2 Semantic HTML &amp; Accessibility</a><br>
 Stuck or curious? Ask your teacher (the agent). "What exactly happens between typing a URL and seeing a page?" is a great follow-up.
 </div>
 
-<script src="../assets/quiz.js"></script>
-<script src="../assets/tooltip.js"></script>
+<script src="../../assets/quiz.js"></script>
+<script src="../../assets/tooltip.js"></script>
